@@ -1,5 +1,6 @@
 package com.erigir.lamark.teacher;
 
+import com.erigir.lamark.EFitnessType;
 import com.erigir.lamark.IFitnessFunction;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.configure.LamarkConfig;
@@ -81,9 +82,9 @@ public class DynamicFitness implements IFitnessFunction
         }
     }
 
-    public FitnessTypeEnum fitnessType()
+    public EFitnessType fitnessType()
     {
-        return FitnessTypeEnum.MAXIMUM_BEST;
+        return EFitnessType.MAXIMUM_BEST;
     }
 
 }

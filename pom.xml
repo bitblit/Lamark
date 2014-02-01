@@ -34,16 +34,19 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.6.1</version>
+            <version>1.7.5</version>
         </dependency>
 	</dependencies>
 	<modules>
         <module>lamark-core</module>
+	</modules>
+    <!--
         <module>lamark-teacher</module>
         <module>lamark-web</module>
         <module>lamark-music</module>
         <module>lamark-js</module>
-	</modules>
+    -->
+
     <build>
         <pluginManagement>
             <plugins>
