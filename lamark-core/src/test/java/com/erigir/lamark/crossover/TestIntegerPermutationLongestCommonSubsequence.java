@@ -2,10 +2,13 @@ package com.erigir.lamark.crossover;
 
 import org.junit.Test;
 
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.*;
+import static org.hamcrest.core.Is.is;
 
 
 public class TestIntegerPermutationLongestCommonSubsequence {
@@ -33,6 +36,7 @@ public class TestIntegerPermutationLongestCommonSubsequence {
         l2.add(6);
 
         List<Integer> rval = IntegerPermutationLongestCommonSubsequence.computeLongestCommonSubsequence(l1, l2);
-        System.out.println(rval);
+        List<Integer> expected = Arrays.asList(2,3,7,8);
+        assertThat(rval, is(expected));
     }
 }

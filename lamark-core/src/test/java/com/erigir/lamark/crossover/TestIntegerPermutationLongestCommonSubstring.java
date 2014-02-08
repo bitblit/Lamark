@@ -3,8 +3,10 @@ package com.erigir.lamark.crossover;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
 
 public class TestIntegerPermutationLongestCommonSubstring {
@@ -27,6 +29,7 @@ public class TestIntegerPermutationLongestCommonSubstring {
         l2.add(3);
 
         List<Integer> rval = IntegerPermutationLongestCommonSubstring.lcs(l1, l2);
-        System.out.println(rval);
+        List<Integer> expected = Arrays.asList(1,2,3);
+        assertThat(rval, is(expected));
     }
 }

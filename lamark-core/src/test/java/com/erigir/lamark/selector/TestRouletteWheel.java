@@ -6,20 +6,23 @@ import com.erigir.lamark.Lamark;
 import com.erigir.lamark.example.simple.AllOnes;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+
 import static org.junit.Assert.*;
 
 public class TestRouletteWheel {
+    private static final Logger LOG = LoggerFactory.getLogger(TestRouletteWheel.class);
     List<Individual<?>> source = new ArrayList<Individual<?>>(5);
     double sumFit;
 
     @Before
     public void setUp() {
-        System.out.println("setup");
         sumFit = 10;
         for (int i = 0; i < 5; i++) {
             Individual next = new Individual(new Integer(i + 1));
@@ -31,7 +34,6 @@ public class TestRouletteWheel {
 
     @Test
     public void testIncreasing() {
-        System.out.println("Max");
         RouletteWheel rw = new RouletteWheel();
         rw.setLamark(new Lamark());
         rw.getLamark().setFitnessFunction(new AllOnes());
@@ -44,7 +46,7 @@ public class TestRouletteWheel {
             double current = i.getFitness();
             int expected = (int) ((current / sum) * 100);
             int var = expected - i.getSelectedCount();
-            System.out.println(i.getGenome() + " Expected " + expected + " got " + i.getSelectedCount() + " v=" + var);
+            LOG.debug(i.getGenome() + "{} Expected {} got {} v= {}", new Object[]{i.getGenome(),  expected , i.getSelectedCount() , var });
             if (var > 10) {
                 fail("Unexpectedly large variance:" + var);
             }
@@ -53,7 +55,6 @@ public class TestRouletteWheel {
 
     @Test
     public void testDecreasing() {
-        System.out.println("Min");
         RouletteWheel rw = new RouletteWheel();
         rw.setLamark(new Lamark());
         rw.getLamark().setFitnessFunction(new AllOnes());
@@ -71,7 +72,7 @@ public class TestRouletteWheel {
             double current = i.getFitness();
             int expected = (int) (((max - current) / newSum) * 100);
             int var = expected - i.getSelectedCount();
-            System.out.println(i.getGenome() + " Expected " + expected + " got " + i.getSelectedCount() + " v=" + var);
+            LOG.debug("{} Expected {} got {} v={}" + new Object[]{i.getGenome(),expected , i.getSelectedCount() , var});
             if (false) {
                 fail("Unexpectedly large variance:" + var);
             }
