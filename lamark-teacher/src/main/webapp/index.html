@@ -1,193 +1,193 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<title>JAG - Java Genetic Algorithm Processor</title>
-<style type="text/css" media="all">@import url("layout.css");</style>
+    <title>JAG - Java Genetic Algorithm Processor</title>
+    <style type="text/css" media="all">@import url("layout.css");</style>
 
 
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<meta name="MSSmartTagsPreventParsing" content="TRUE" />
-<meta http-equiv="expires" content="-1" />
-<meta http-equiv= "pragma" content="no-cache" />
-<meta name="robots" content="all" />
-<meta name="author" content="Christopher Weiss" />
-<meta name="description" content="JAG - Java Genetic Algorithm Processor" />
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="MSSmartTagsPreventParsing" content="TRUE"/>
+    <meta http-equiv="expires" content="-1"/>
+    <meta http-equiv="pragma" content="no-cache"/>
+    <meta name="robots" content="all"/>
+    <meta name="author" content="Christopher Weiss"/>
+    <meta name="description" content="JAG - Java Genetic Algorithm Processor"/>
 
 </head>
 <body>
 
 <SCRIPT language="Javascript">
-  var javawsInstalled = 0;
-  isIE = "false";
+    var javawsInstalled = 0;
+    isIE = "false";
 
-  if (navigator.mimeTypes && navigator.mimeTypes.length) {
-	 x = navigator.mimeTypes['application/x-java-jnlp-file'];
-	 if (x) javawsInstalled = 1;
-  } else {
-	 isIE = "true";
-  }
+    if (navigator.mimeTypes && navigator.mimeTypes.length) {
+        x = navigator.mimeTypes['application/x-java-jnlp-file'];
+        if (x) javawsInstalled = 1;
+    } else {
+        isIE = "true";
+    }
 </SCRIPT>
 
 <SCRIPT LANGUAGE="VBScript">
-	on error resume next
-	If isIE = "true" Then
-	  If Not(IsObject(CreateObject("JavaWebStart.IsInstalled"))) Then
-			javawsInstalled = 0
-	  Else
-			javawsInstalled = 1
-	  End If
-	End If
+    on error resume next
+    If isIE = "true" Then
+    If Not(IsObject(CreateObject("JavaWebStart.IsInstalled"))) Then
+    javawsInstalled = 0
+    Else
+    javawsInstalled = 1
+    End If
+    End If
 </SCRIPT>
 
 <div id="navAlpha">
-<h2>Things to do</h2>
-<p>
-  <a class="block" href="http://www.necessityschild.com" title="Personal">Necessity's Child</a>
-  <a class="block" href="http://www.lexikos.biz" title="Business">Lexikos, Inc.</a>
-</p>
-<p>
-  <a class="block" href="http://www.lexikos.biz/JAG/artifact/javancss_metrics.html" title="Metrics">Metrics</a>
-  <a class="block" href="http://www.lexikos.biz/JAG/artifact/jdepend.html" title="JDepend">JDepend Report</a>
-  <a class="block" href="http://www.lexikos.biz/JAG/artifact/pmd_report.html" title="PMD">PMD Report</a>
-  <a class="block" href="http://www.lexikos.biz/JAG/artifact/docs/api" title="API">Javadocs</a>
-  <a class="block" href="http://www.lexikos.biz/JAG/artifact/asHtml" title="HTML">Browse Source</a>
-  <a class="block" href="http://www.lexikos.biz/JAG/artifact/checkstyle" title="HTML">Checkstyle Report</a>
-  <a class="block" href="http://www.lexikos.biz/JAG/artifact/JAG-1.2.0_api.pdf" title="HTML">Doc PDF</a>
-  <a class="block" href="http://www.lexikos.biz/JAG/artifact/JAG-source.zip" title="Source ZIP">Source Files (ZIP Format)</a>
-</p>
+    <h2>Things to do</h2>
+
+    <p>
+        <a class="block" href="http://www.necessityschild.com" title="Personal">Necessity's Child</a>
+        <a class="block" href="http://www.lexikos.biz" title="Business">Lexikos, Inc.</a>
+    </p>
+
+    <p>
+        <a class="block" href="http://www.lexikos.biz/JAG/artifact/javancss_metrics.html" title="Metrics">Metrics</a>
+        <a class="block" href="http://www.lexikos.biz/JAG/artifact/jdepend.html" title="JDepend">JDepend Report</a>
+        <a class="block" href="http://www.lexikos.biz/JAG/artifact/pmd_report.html" title="PMD">PMD Report</a>
+        <a class="block" href="http://www.lexikos.biz/JAG/artifact/docs/api" title="API">Javadocs</a>
+        <a class="block" href="http://www.lexikos.biz/JAG/artifact/asHtml" title="HTML">Browse Source</a>
+        <a class="block" href="http://www.lexikos.biz/JAG/artifact/checkstyle" title="HTML">Checkstyle Report</a>
+        <a class="block" href="http://www.lexikos.biz/JAG/artifact/JAG-1.2.0_api.pdf" title="HTML">Doc PDF</a>
+        <a class="block" href="http://www.lexikos.biz/JAG/artifact/JAG-source.zip" title="Source ZIP">Source Files (ZIP
+            Format)</a>
+    </p>
 </div>
 
 <div class="content" id="ALL">
-<h1>JAG - Java Genetic Algorithm Processor</h1>
-<p>
-JAG is a program and a library for the rapid development of Genetic
-Algorithms in the Java programming language.  It does <em>not</em> relieve
-you of the knowledge necessary to write a good fitness function or crossover,
-but it does allow you to focus on those issues and not on the plumbing of a
-good GA. Please follow the directions below to install JAG to your computer.
-</p>
-<p>
-JAG was last modified April 21st, 2005 (12:05 PM).  Current version is 1.2.0
-</p>
+    <h1>JAG - Java Genetic Algorithm Processor</h1>
+
+    <p>
+        JAG is a program and a library for the rapid development of Genetic
+        Algorithms in the Java programming language. It does <em>not</em> relieve
+        you of the knowledge necessary to write a good fitness function or crossover,
+        but it does allow you to focus on those issues and not on the plumbing of a
+        good GA. Please follow the directions below to install JAG to your computer.
+    </p>
+
+    <p>
+        JAG was last modified April 21st, 2005 (12:05 PM). Current version is 1.2.0
+    </p>
 </div>
 
 <div class="content" id="PRESENT" style="display: none;">
-<p>
-Using the link below you should be able to install <em>JAG - Java Genetic Algorithm Processor</em>
-to your personal machine.  Once downloaded and installed, JAG can work whether your
-computer is connected to the internet or not.  If your computer is connected to the
-internet when you start JAG, it will check this website to see if there is
-an updated version of the software and automatically install it, so that you do
-not have to worry about keeping the software up to date.
-</p>
-<p>
-JAG will ask for all permissions on your machine.  Mainly this is for write permissions to 
-store generated pictures of CA if you use it for such.
-</p>
-<p>
-NOTE - JAG is approximately 600 Kilobytes in size.  It may take some time to download
-to your computer if you are using a slow (for instance, dialup) connection.
-</p>
-<p>
-<strong>JAG may pop up BEHIND this window after installing.  Once you have
-run the program, please check your task bar to see if JAG is now running.  If
-so, minimize this window to see it!</strong>
-</p>
-<p>
-<a href="JAG.jnlp">Install 'JAG - Java Genetic Algorithms' to my computer</a>
-</p>
+    <p>
+        Using the link below you should be able to install <em>JAG - Java Genetic Algorithm Processor</em>
+        to your personal machine. Once downloaded and installed, JAG can work whether your
+        computer is connected to the internet or not. If your computer is connected to the
+        internet when you start JAG, it will check this website to see if there is
+        an updated version of the software and automatically install it, so that you do
+        not have to worry about keeping the software up to date.
+    </p>
+
+    <p>
+        JAG will ask for all permissions on your machine. Mainly this is for write permissions to
+        store generated pictures of CA if you use it for such.
+    </p>
+
+    <p>
+        NOTE - JAG is approximately 600 Kilobytes in size. It may take some time to download
+        to your computer if you are using a slow (for instance, dialup) connection.
+    </p>
+
+    <p>
+        <strong>JAG may pop up BEHIND this window after installing. Once you have
+            run the program, please check your task bar to see if JAG is now running. If
+            so, minimize this window to see it!</strong>
+    </p>
+
+    <p>
+        <a href="JAG.jnlp">Install 'JAG - Java Genetic Algorithms' to my computer</a>
+    </p>
 </div>
 
 <div class="content" id="MISSING" style="display: none;">
-<p>
-Before you can install JAG, your computer must have a <em>Java Runtime
-Environment</em>.  We have detected that you do not have this software installed.
-To install it, please click the link below, and when your browser asks, select that
-you wish to OPEN the file (not SAVE it).  After you have finished with that process,
-return to this page and hit "REFRESH" on your browser, and you should have new
-instructions on how to finish installing Numbers.
-</p>
-<p>
-NOTE - The JRE is approximately 15 Megabytes.  It may take some time to download.  Also,
-the JRE listed here is for Windows machines only.  Please contact me if you need help
-with other machines.  You may have to restart your machine and return to this page after
-the JRE is installed to finish installing JAG.
-</p>
-<p>
-<a href="http://www.lexikos.biz/jre/j2re-1_4_2_05-windows-i586-p.exe">Install the JRE on my Windows computer</a>
-</p>
+    <p>
+        Before you can install JAG, your computer must have a <em>Java Runtime
+        Environment</em>. We have detected that you do not have this software installed.
+        To install it, please click the link below, and when your browser asks, select that
+        you wish to OPEN the file (not SAVE it). After you have finished with that process,
+        return to this page and hit "REFRESH" on your browser, and you should have new
+        instructions on how to finish installing Numbers.
+    </p>
+
+    <p>
+        NOTE - The JRE is approximately 15 Megabytes. It may take some time to download. Also,
+        the JRE listed here is for Windows machines only. Please contact me if you need help
+        with other machines. You may have to restart your machine and return to this page after
+        the JRE is installed to finish installing JAG.
+    </p>
+
+    <p>
+        <a href="http://www.lexikos.biz/jre/j2re-1_4_2_05-windows-i586-p.exe">Install the JRE on my Windows computer</a>
+    </p>
 </div>
 
 
-
 <div id="navBeta">
-<h3>Why install the JRE?</h3>
-<p>
-Java is a special programming language that allows software to be
-written once, and then run on various platforms (such as Windows, Linux,
-and Macintosh machines).  All Lexikos software is written in Java, so once
-you have the JRE installed, you will be able to run any future Lexikos
-tools developed here without having to download it again!
-</p>
+    <h3>Why install the JRE?</h3>
+
+    <p>
+        Java is a special programming language that allows software to be
+        written once, and then run on various platforms (such as Windows, Linux,
+        and Macintosh machines). All Lexikos software is written in Java, so once
+        you have the JRE installed, you will be able to run any future Lexikos
+        tools developed here without having to download it again!
+    </p>
 </div>
 
 <!-- Here we'll put the code to autodetect the JRE -->
 <SCRIPT LANGUAGE="Javascript">
-  function showPresent()
-  {
-	  // DOM3 = IE5, NS6
-	  if (document.getElementById)
-	  {
-		document.getElementById('PRESENT').style.display = 'block';
-	  }
-	  else
-	  {
-	  	// Netscape 4
-		  if (document.layers)
-		  {
-			document.PRESENT.display = 'block';
-		  }
-		  else
-		  {
-		  // IE 4
-			document.all.PRESENT.style.display = 'block';
-		  }
-	  }
-  }
+    function showPresent() {
+        // DOM3 = IE5, NS6
+        if (document.getElementById) {
+            document.getElementById('PRESENT').style.display = 'block';
+        }
+        else {
+            // Netscape 4
+            if (document.layers) {
+                document.PRESENT.display = 'block';
+            }
+            else {
+                // IE 4
+                document.all.PRESENT.style.display = 'block';
+            }
+        }
+    }
 
-  function showMissing()
-  {
-  	if (document.getElementById)
-  	{
-  		// DOM3 = IE5, NS6
-  		document.getElementById('MISSING').style.display = 'block';
-  	}
-  	else
-  	{
-  		if (document.layers)
-  		{
-  			// Netscape 4
-  			document.MISSING.display = 'block';
-  		}
-  		else
-  		{
-  			// IE 4
-  			document.all.MISSING.style.display = 'block';
-  		}
-  	}
-  }
+    function showMissing() {
+        if (document.getElementById) {
+            // DOM3 = IE5, NS6
+            document.getElementById('MISSING').style.display = 'block';
+        }
+        else {
+            if (document.layers) {
+                // Netscape 4
+                document.MISSING.display = 'block';
+            }
+            else {
+                // IE 4
+                document.all.MISSING.style.display = 'block';
+            }
+        }
+    }
 
 </SCRIPT>
 
 <SCRIPT language="Javascript">
-  if (javawsInstalled)
-  {
-  	showPresent();
-  }
-  else
-  {
-  	showMissing();
-  }
+    if (javawsInstalled) {
+        showPresent();
+    }
+    else {
+        showMissing();
+    }
 </SCRIPT>
 
 </body>

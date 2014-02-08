@@ -8,20 +8,20 @@ import com.erigir.lamark.example.tsp.TSPFitness;
 
 /**
  * Thin wrapper around the TSPFitness class, forcing the Germany TSP.
- * 
+ *
  * @author cweiss
  * @since 04/2005
  */
-public class GermanyTSPFitness extends TSPFitness
-{
-    /** Define the best solution **/
-	public static int BEST_SOLUTION=1573084;
+public class GermanyTSPFitness extends TSPFitness {
+    /**
+     * Define the best solution *
+     */
+    public static int BEST_SOLUTION = 1573084;
 
     /**
-     * Default constructor. 
+     * Default constructor.
      */
-    public GermanyTSPFitness()
-    {
+    public GermanyTSPFitness() {
         super();
         this.setTspFile("d15112.tsp");
         this.setBestKnown(BEST_SOLUTION);
@@ -30,8 +30,7 @@ public class GermanyTSPFitness extends TSPFitness
     /**
      * @see com.erigir.lamark.example.tsp.TSPFitness#getBestKnown()
      */
-    public Integer getBestKnown()
-    {
+    public Integer getBestKnown() {
         return BEST_SOLUTION;
     }
 

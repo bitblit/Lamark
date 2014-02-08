@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jnlp
-  spec="1.0+"
-  codebase="$$codebase"
-  href="$$codebase$$name">
-  <information>
-    <title>Jag</title>
-    <vendor>Lexikos, Inc.</vendor>
-    <description>Jag - Genetic Algorithms</description>
-  </information>
-  <security />
-  <resources>
-    <j2se version="1.5+"/>
-    <jar href="jag.jar"/>
-    <jar href="janino.jar"/>
-  </resources>
-  <application-desc />
+        spec="1.0+"
+        codebase="$$codebase"
+        href="$$codebase$$name">
+    <information>
+        <title>Jag</title>
+        <vendor>Lexikos, Inc.</vendor>
+        <description>Jag - Genetic Algorithms</description>
+    </information>
+    <security/>
+    <resources>
+        <j2se version="1.5+"/>
+        <jar href="jag.jar"/>
+        <jar href="janino.jar"/>
+    </resources>
+    <application-desc/>
 </jnlp>

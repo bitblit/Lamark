@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- NOTE: This file not currently used 11/11/07 -->
 <jnlp
-  spec="1.0+"
-  codebase="$$codebase"
-  href="$$codebase$$name">
-  <information>
-    <title>Lamark</title>
-    <vendor>Erigir, Inc.</vendor>
-    <description>Lamark - Genetic Algorithm Processor</description>
-	<!-- icon href="" -->
-	<!-- icon kind="splash" href="" -->
-	<offline-allowed />
-  </information>
-  <security />
-  <resources>
-    <j2se version="1.5+"/>
-    <jar href="Lamark.jar"/>
-  </resources>
-  <application-desc main-class="com.erigir.lamark.LamarkApplication"/>
+        spec="1.0+"
+        codebase="$$codebase"
+        href="$$codebase$$name">
+    <information>
+        <title>Lamark</title>
+        <vendor>Erigir, Inc.</vendor>
+        <description>Lamark - Genetic Algorithm Processor</description>
+        <!-- icon href="" -->
+        <!-- icon kind="splash" href="" -->
+        <offline-allowed/>
+    </information>
+    <security/>
+    <resources>
+        <j2se version="1.5+"/>
+        <jar href="Lamark.jar"/>
+    </resources>
+    <application-desc main-class="com.erigir.lamark.LamarkApplication"/>
 </jnlp>
 

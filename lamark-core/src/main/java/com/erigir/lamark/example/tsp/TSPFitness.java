@@ -3,6 +3,14 @@
  */
 package com.erigir.lamark.example.tsp;
 
+import com.erigir.lamark.AbstractLamarkComponent;
+import com.erigir.lamark.EConfigResult;
+import com.erigir.lamark.EFitnessType;
+import com.erigir.lamark.IConfigurable;
+import com.erigir.lamark.IFitnessFunction;
+import com.erigir.lamark.IValidatable;
+import com.erigir.lamark.Individual;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,328 +24,295 @@ import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.EConfigResult;
-import com.erigir.lamark.EFitnessType;
-import com.erigir.lamark.IConfigurable;
-import com.erigir.lamark.IFitnessFunction;
-import com.erigir.lamark.IValidatable;
-import com.erigir.lamark.Individual;
-
 /**
  * A fitness function for TSPs, where the fitness value is the length of the path.
- * 
+ * <p/>
  * This class implements the IFitnessFunction interface for TSPs, when passed a
  * TSP to solve, and a given solution, returns the length of that path as the
- * fitness value for the individual.  Note that this class cannot be used for 
+ * fitness value for the individual.  Note that this class cannot be used for
  * non-symmetrical TSPs.
- * 
+ *
  * @author cweiss
  * @since 04/2005
  */
-public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunction<List<Integer>>, IValidatable, IConfigurable
-{
-    /** String handle to the original tsp file read **/
+public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunction<List<Integer>>, IValidatable, IConfigurable {
+    /**
+     * String handle to the original tsp file read *
+     */
     private String tspFile;
-    /** If the solution for this tsp is known, it can be set here **/
+    /**
+     * If the solution for this tsp is known, it can be set here *
+     */
     private Integer bestKnown = null; // not known for arbitrary TSP
-    /** Set of points in the tsp **/
-	private List<MyPoint> points;
-    /** Left edge of the tsp **/
-	private double minX=Double.MAX_VALUE;
-    /** Right edge of the tsp **/
-	private double maxX=Double.MIN_VALUE;
-    /** Top edge of the tsp **/
-	private double minY=Double.MAX_VALUE;
-    /** Bottow edge of the tsp **/
-	private double maxY=Double.MIN_VALUE;
-    
-	/**
+    /**
+     * Set of points in the tsp *
+     */
+    private List<MyPoint> points;
+    /**
+     * Left edge of the tsp *
+     */
+    private double minX = Double.MAX_VALUE;
+    /**
+     * Right edge of the tsp *
+     */
+    private double maxX = Double.MIN_VALUE;
+    /**
+     * Top edge of the tsp *
+     */
+    private double minY = Double.MAX_VALUE;
+    /**
+     * Bottow edge of the tsp *
+     */
+    private double maxY = Double.MIN_VALUE;
+
+    /**
      * Accessor method.
-	 * @return Integer containing the property
-	 */
-	public Integer getBestKnown()
-    {
+     *
+     * @return Integer containing the property
+     */
+    public Integer getBestKnown() {
         return bestKnown;
     }
 
 
-    
     /**
      * Mutator method
+     *
      * @param bestKnown Integer containing the new value
      */
-    public void setBestKnown(Integer bestKnown)
-    {
+    public void setBestKnown(Integer bestKnown) {
         this.bestKnown = bestKnown;
     }
 
     /**
      * Mutator method.
      * NOTE: Calling this method will reset all cache values.
+     *
      * @param filename String containing the new value
      */
-    public void setTspFile(String filename) 
-    {
-        if (filename!=null)
-        {
-            if (!filename.equals(tspFile))
-            {
+    public void setTspFile(String filename) {
+        if (filename != null) {
+            if (!filename.equals(tspFile)) {
                 tspFile = filename;
                 points = null;
-                minX=Double.MAX_VALUE;
-                maxX=Double.MIN_VALUE;
-                minY=Double.MAX_VALUE;
-                maxY=Double.MIN_VALUE;
+                minX = Double.MAX_VALUE;
+                maxX = Double.MIN_VALUE;
+                minY = Double.MAX_VALUE;
+                maxY = Double.MIN_VALUE;
             }
-        }
-        else
-        {
+        } else {
             tspFile = null;
         }
-        
-        
+
+
     }
-    
+
     /**
      * If tspFile is set, this function loads the file into memory and creates
      * the point set.
      */
-    private void loadPoints() 
-    {
-        try
-        {
-		if (tspFile != null)
-		{
-				InputStream is = getClass().getResourceAsStream(tspFile);
-				if (is == null)
-				{
-                    getLamark().logFiner("Couldnt find resource:"+tspFile+" ... trying as file");
+    private void loadPoints() {
+        try {
+            if (tspFile != null) {
+                InputStream is = getClass().getResourceAsStream(tspFile);
+                if (is == null) {
+                    getLamark().logFiner("Couldnt find resource:" + tspFile + " ... trying as file");
                     is = new FileInputStream(new File(tspFile));
                 }
-                if (is!=null)
-                {
+                if (is != null) {
                     InputStreamReader isr = new InputStreamReader(is);
                     initFromTSPReader(isr);
+                } else {
+                    getLamark().logSevere("Unable to load tsp as resource or file:" + tspFile);
                 }
-                else
-                {
-                    getLamark().logSevere("Unable to load tsp as resource or file:"+tspFile);
-				}
-		}
-        }
-        catch (Exception e)
-        {
+            }
+        } catch (Exception e) {
             e.printStackTrace();
-            getLamark().logSevere("Error loading tspFile:"+e);
+            getLamark().logSevere("Error loading tspFile:" + e);
         }
-	}
-	
-    
-	/**
+    }
+
+
+    /**
      * Calculates the length of a given permutation.
-	 * @param permutation int[] containing the permutation to calculate
-	 * @return double containing the length of the perm on this tsp.
-	 */
-	public double permutationDistance(int[] permutation)
-	{
-		double rval = 0;
+     *
+     * @param permutation int[] containing the permutation to calculate
+     * @return double containing the length of the perm on this tsp.
+     */
+    public double permutationDistance(int[] permutation) {
+        double rval = 0;
 
-		if (permutation.length != points.size())
-		{
-			throw new IllegalArgumentException("Not a permutation.  There are "
-				+ points.size() + " points and " + permutation.length
-				+ " indexes");
-		}
-		for (int i = 0; i < permutation.length; i++)
-		{
-			rval += distance(permutation[i],
-				permutation[((i + 1) % permutation.length)]);
-		}
-		return rval;
-	}
+        if (permutation.length != points.size()) {
+            throw new IllegalArgumentException("Not a permutation.  There are "
+                    + points.size() + " points and " + permutation.length
+                    + " indexes");
+        }
+        for (int i = 0; i < permutation.length; i++) {
+            rval += distance(permutation[i],
+                    permutation[((i + 1) % permutation.length)]);
+        }
+        return rval;
+    }
 
-	/**
+    /**
      * Converts Integer objects to ints to call the other permDistance function.
-	 * @param permutation Integer[] containing the permutation
-	 * @return double containing the permutation length
-	 */
-	public double permutationDistance(Integer[] permutation)
-	{
-		getLamark().logFiner("in perm distance, perm = " + Arrays.asList(permutation));
-		double rval = 0;
+     *
+     * @param permutation Integer[] containing the permutation
+     * @return double containing the permutation length
+     */
+    public double permutationDistance(Integer[] permutation) {
+        getLamark().logFiner("in perm distance, perm = " + Arrays.asList(permutation));
+        double rval = 0;
 
-		if (permutation.length != points.size())
-		{
-			throw new IllegalArgumentException("Not a permutation.  There are "
-				+ points.size() + " points and " + permutation.length
-				+ " indexes");
-		}
-		for (int i = 0; i < permutation.length; i++)
-		{
-			rval += distance(permutation[i].intValue(),
-				permutation[((i + 1) % permutation.length)].intValue());
-		}
+        if (permutation.length != points.size()) {
+            throw new IllegalArgumentException("Not a permutation.  There are "
+                    + points.size() + " points and " + permutation.length
+                    + " indexes");
+        }
+        for (int i = 0; i < permutation.length; i++) {
+            rval += distance(permutation[i].intValue(),
+                    permutation[((i + 1) % permutation.length)].intValue());
+        }
         getLamark().logFiner("returning " + rval);
-		return rval;
-	}
+        return rval;
+    }
 
-    
-	/**
+
+    /**
      * Calculates the distance between points at the two indexes.
-	 * @param idx1 int containing the first index
-	 * @param idx2 int containing the second index
-	 * @return double containing the distance between the points.
-	 */
-	public double distance(int idx1, int idx2)
-	{
-		MyPoint p1 = (MyPoint) points.get(idx1);
-		MyPoint p2 = (MyPoint) points.get(idx2);
-		return p1.distance(p2);
-	}
+     *
+     * @param idx1 int containing the first index
+     * @param idx2 int containing the second index
+     * @return double containing the distance between the points.
+     */
+    public double distance(int idx1, int idx2) {
+        MyPoint p1 = (MyPoint) points.get(idx1);
+        MyPoint p2 = (MyPoint) points.get(idx2);
+        return p1.distance(p2);
+    }
 
 
-	/**
+    /**
      * Loads the TSP from the supplied Reader.
-	 * @param data Reader object containing the TSP
-	 */
-	private void initFromTSPReader(Reader data)
-	{
-		try
-		{
-			points = new ArrayList<MyPoint>();
+     *
+     * @param data Reader object containing the TSP
+     */
+    private void initFromTSPReader(Reader data) {
+        try {
+            points = new ArrayList<MyPoint>();
 
-			BufferedReader br = new BufferedReader(data);
-			String next = br.readLine();
+            BufferedReader br = new BufferedReader(data);
+            String next = br.readLine();
 
-			// Skip the header
-			while (next != null && !next.startsWith("NODE_COORD_SECTION"))
-			{
-				next = br.readLine();
-			}
-			
-			next = br.readLine(); // Move next line
-			// Read the points
-			while (next != null)
-			{
-				addPoint(pointFromLine(next));
-				next = br.readLine();
-				if (next.startsWith("EOF") || next.trim().endsWith("EOF"))
-				{
-					next = null;
-				}
-			}
+            // Skip the header
+            while (next != null && !next.startsWith("NODE_COORD_SECTION")) {
+                next = br.readLine();
+            }
+
+            next = br.readLine(); // Move next line
+            // Read the points
+            while (next != null) {
+                addPoint(pointFromLine(next));
+                next = br.readLine();
+                if (next.startsWith("EOF") || next.trim().endsWith("EOF")) {
+                    next = null;
+                }
+            }
 
             getLamark().logInfo("Finished processing read.  Found " + points.size()
-				+ " points");
-		}
-		catch (IOException ioe)
-		{
-			throw new RuntimeException("Error reading TSP Stream: " + ioe);
-		}
-	}
-	
+                    + " points");
+        } catch (IOException ioe) {
+            throw new RuntimeException("Error reading TSP Stream: " + ioe);
+        }
+    }
+
     /**
      * Adds a point to the TSP
+     *
      * @param point MyPoint to add to the tsp.
      */
-    private void addPoint(MyPoint point)
-	{
-		if (point != null)
-		{
-			if (point.x<minX)
-			{
-				minX=point.x;
-			}
-			if (point.y<minY)
-			{
-				minY=point.y;
-			}
-			if (point.x>maxX)
-			{
-				maxX=point.x;
-			}
-			if (point.y>maxY)
-			{
-				maxY=point.y;
-			}
-			points.add(point);
-		}
-	}
-	
-	/**
+    private void addPoint(MyPoint point) {
+        if (point != null) {
+            if (point.x < minX) {
+                minX = point.x;
+            }
+            if (point.y < minY) {
+                minY = point.y;
+            }
+            if (point.x > maxX) {
+                maxX = point.x;
+            }
+            if (point.y > maxY) {
+                maxY = point.y;
+            }
+            points.add(point);
+        }
+    }
+
+    /**
      * Given a line in TSP file format, create a point from it.
-	 * @param line String containing the line.
-	 * @return MyPoint object from that line.
-	 */
-	private MyPoint pointFromLine(String line)
-	{
+     *
+     * @param line String containing the line.
+     * @return MyPoint object from that line.
+     */
+    private MyPoint pointFromLine(String line) {
         getLamark().logInfo("Parsing point from '" + line + "'");
-		Double x = null;
-		Double y = null;
-		Integer point = null;
+        Double x = null;
+        Double y = null;
+        Integer point = null;
 
-		StringTokenizer st = new StringTokenizer(line, " \t");
+        StringTokenizer st = new StringTokenizer(line, " \t");
 
-		while (st.hasMoreTokens())
-		{
-			String next = st.nextToken().trim();
-			if (next.length() > 0)
-			{
-				if (point == null)
-				{
-					point = new Integer(Integer.parseInt(next));
-				}
-				else
-					if (x == null)
-					{
-						x = new Double(Double.parseDouble(next));
-					}
-					else
-					{
-						y = new Double(Double.parseDouble(next));
-					}
-			}
-		}
+        while (st.hasMoreTokens()) {
+            String next = st.nextToken().trim();
+            if (next.length() > 0) {
+                if (point == null) {
+                    point = new Integer(Integer.parseInt(next));
+                } else if (x == null) {
+                    x = new Double(Double.parseDouble(next));
+                } else {
+                    y = new Double(Double.parseDouble(next));
+                }
+            }
+        }
 
-		MyPoint rval = new MyPoint(x.doubleValue(), y.doubleValue());
+        MyPoint rval = new MyPoint(x.doubleValue(), y.doubleValue());
         getLamark().logInfo("returning " + rval);
-		return rval;
-	}
+        return rval;
+    }
 
 
-	/**
-	 * @see com.erigir.lamark.IFitnessFunction#fitnessType()
-	 */
-	public EFitnessType fitnessType() {
-		return EFitnessType.MINIMUM_BEST;
-	}
+    /**
+     * @see com.erigir.lamark.IFitnessFunction#fitnessType()
+     */
+    public EFitnessType fitnessType() {
+        return EFitnessType.MINIMUM_BEST;
+    }
 
-	/**
-	 * @see com.erigir.lamark.IFitnessFunction#fitnessValue(com.erigir.lamark.Individual)
-	 */
-	public double fitnessValue(Individual i) {
-		List<?> l = (List<?>)i.getGenome();
-		Integer[] arr = l.toArray(new Integer[0]);
-		i.setAttribute("POINTS",points);
-		i.setAttribute("MINX",minX);
-		i.setAttribute("MINY",minY);
-		i.setAttribute("MAXX",maxX);
-		i.setAttribute("MAXY",maxY);
-		i.setAttribute("BESTKNOWN",getBestKnown());
-		return permutationDistance(arr);
-	}
-    
+    /**
+     * @see com.erigir.lamark.IFitnessFunction#fitnessValue(com.erigir.lamark.Individual)
+     */
+    public double fitnessValue(Individual i) {
+        List<?> l = (List<?>) i.getGenome();
+        Integer[] arr = l.toArray(new Integer[0]);
+        i.setAttribute("POINTS", points);
+        i.setAttribute("MINX", minX);
+        i.setAttribute("MINY", minY);
+        i.setAttribute("MAXX", maxX);
+        i.setAttribute("MAXY", maxY);
+        i.setAttribute("BESTKNOWN", getBestKnown());
+        return permutationDistance(arr);
+    }
+
     /**
      * Guarantees that a set of points can be loaded.
+     *
      * @see com.erigir.lamark.IValidatable#validate(java.util.List)
      */
-    public void validate(List < String > errors)
-    {
+    public void validate(List<String> errors) {
         // try to load points
         loadPoints();
-        if (points==null)
-        {
+        if (points == null) {
             errors.add("No TSP file loaded.  Set tspFile property to a filename or one of the included resources.");
         }
     }
@@ -346,15 +321,12 @@ public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunct
     /**
      * @see com.erigir.lamark.IConfigurable#getProperties()
      */
-    public Properties getProperties()
-    {
+    public Properties getProperties() {
         Properties rval = new Properties();
-        if (bestKnown!=null)
-        {
+        if (bestKnown != null) {
             rval.setProperty("bestKnown", bestKnown.toString());
         }
-        if (tspFile!=null)
-        {
+        if (tspFile != null) {
             rval.setProperty("tspFile", tspFile);
         }
         return rval;
@@ -362,27 +334,19 @@ public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunct
 
     /**
      * Can set bestKnown and points.
+     *
      * @see com.erigir.lamark.IConfigurable#setProperty(java.lang.String, java.lang.String)
      */
-    public EConfigResult setProperty(String name, String value)
-    {
-        if (name.equalsIgnoreCase("bestKnown"))
-        {
-            try
-            {
+    public EConfigResult setProperty(String name, String value) {
+        if (name.equalsIgnoreCase("bestKnown")) {
+            try {
                 setBestKnown(new Integer(value));
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 return EConfigResult.INVALID_VALUE;
             }
-        }
-        else if (name.equalsIgnoreCase("tspFile"))
-        {
+        } else if (name.equalsIgnoreCase("tspFile")) {
             setTspFile(value);
-        }
-        else
-        {
+        } else {
             return EConfigResult.NO_SUCH_PROPERTY;
         }
         return EConfigResult.OK;

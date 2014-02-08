@@ -10,27 +10,26 @@ import com.erigir.lamark.Population;
  * if an object is registered for both this event and the
  * PopulationCompleteEvent, it will receive notifications
  * for BOTH, not just this one.
- * 
+ *
  * @author cweiss
  * @since 11/2006
- *
  */
 public class UniformPopulationEvent extends PopulationCompleteEvent {
 
     /**
      * Default constructor
+     *
      * @param pLamark Lamark object that generated the exception
-     * @param pPop Population object that was uniform
+     * @param pPop    Population object that was uniform
      */
-	public UniformPopulationEvent(Lamark pLamark,Population pPop)
-	{
-		super(pLamark,pPop);
-	}
+    public UniformPopulationEvent(Lamark pLamark, Population pPop) {
+        super(pLamark, pPop);
+    }
+
     /**
      * @see java.lang.Object#toString()
      */
-    public String toString()
-    {
-        return "Population Uniform.  Population #"+getPopulation().getNumber();
+    public String toString() {
+        return "Population Uniform.  Population #" + getPopulation().getNumber();
     }
 }

@@ -8,30 +8,29 @@ import com.erigir.lamark.example.tsp.TSPFitness;
 
 /**
  * Thin wrapper around the TSPFitness class, forcing the Ulysses TSP.
- * 
+ *
  * @author cweiss
  * @since 04/2005
  */
-public class UlyssesTSPFitness extends TSPFitness
-{
-    /** Define the best solution **/
-	public static int BEST_SOLUTION=6859;
+public class UlyssesTSPFitness extends TSPFitness {
+    /**
+     * Define the best solution *
+     */
+    public static int BEST_SOLUTION = 6859;
 
     /**
-     * Default constructor. 
+     * Default constructor.
      */
-    public UlyssesTSPFitness()
-    {
+    public UlyssesTSPFitness() {
         super();
         this.setTspFile("ulysses16.tsp");
         this.setBestKnown(BEST_SOLUTION);
     }
-    
+
     /**
      * @see com.erigir.lamark.example.tsp.TSPFitness#getBestKnown()
      */
-    public Integer getBestKnown()
-    {
+    public Integer getBestKnown() {
         return BEST_SOLUTION;
     }
 

@@ -1,8 +1,8 @@
 package com.erigir.lamark.gui;
 
-import java.awt.Component;
-
 import com.erigir.lamark.events.LamarkEventListener;
+
+import java.awt.*;
 
 
 /**
@@ -13,13 +13,13 @@ import com.erigir.lamark.events.LamarkEventListener;
  * a new window, but would need a handle to the parent component
  * to open said window.  This parent would
  * be provided by the system here.
- * @author cweiss
  *
+ * @author cweiss
  */
-public interface GUIEventListener extends LamarkEventListener
-{
+public interface GUIEventListener extends LamarkEventListener {
     /**
      * Called by LamarkGUI to give the listener a handle to the parent window.
+     *
      * @param parent Component reference to the parent window
      */
     void setParentComponent(Component parent);
