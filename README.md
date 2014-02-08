@@ -22,3 +22,14 @@ that, if you are actually doing research, you may wanna look at these competitor
 * [ECJ](http://cs.gmu.edu/~eclab/projects/ecj/)
 * [Apache Math/Genetic Algos](http://commons.apache.org/proper/commons-math/userguide/genetics.html)
 
+The main thing I'm trying to accomplish, though, is allow you to add Lamark to your project by using Maven - so
+you'll know I've hit my goal when you see the Maven import listed below:
+
+> Nope!
+> It is simply
+> Not here yet
+> But I'm working on it!
+
+Best,
+
+Chris
