@@ -2,8 +2,8 @@ package com.erigir.lamark.music;
 
 import com.erigir.lamark.ICrossover;
 import com.erigir.lamark.Individual;
+import com.erigir.lamark.Lamark;
 import com.erigir.lamark.Util;
-import com.erigir.lamark.configure.LamarkConfig;
 import jm.music.data.Part;
 import jm.music.data.Phrase;
 import jm.music.data.Score;
@@ -12,10 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-public class MozartCrossover implements ICrossover {
+public class MozartCrossover implements ICrossover<Score> {
     private double pCrossover;
+    private Lamark lamark;
 
-    public List<Individual> crossover(List<Individual> arg0) {
+    public Individual<Score> crossover(List<Individual<Score>> arg0) {
         ArrayList<Individual> rval = new ArrayList<Individual>(2);
 
         Individual p1 = arg0.get(0);
@@ -23,7 +24,7 @@ public class MozartCrossover implements ICrossover {
 
         Score s1 = (Score) p1.getGenome();
         Score s2 = (Score) p2.getGenome();
-        if (Util.flip(pCrossover)) {
+        if (lamark.crossoverFlip()) {
             Part part1 = s1.getPart(0);
             Part part2 = s2.getPart(0);
 
@@ -88,7 +89,9 @@ public class MozartCrossover implements ICrossover {
         return Score.class;
     }
 
-    public void setLamarkConfig(LamarkConfig ignored) {
+    public void setLamark(Lamark lamark) {
+        this.lamark = lamark;
     }
+
 
 }

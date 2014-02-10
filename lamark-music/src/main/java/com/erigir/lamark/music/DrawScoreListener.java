@@ -29,13 +29,7 @@ public class DrawScoreListener implements GUIEventListener {
                 newPhrase.add(n);
             }
             Score newS = new Score(new Part(newPhrase));
-
-            if (null == scoreFrame) {
-                scoreFrame = new Notate(newS, 0, 100);
-            } else {
-                scoreFrame.setNewScore(newS);
-            }
-
+            scoreFrame = new Notate(newS, 0, 100);
 
             //scoreFrame = new Notate(s,50,50);
 
