@@ -1,4 +1,4 @@
-package com.erigir.mozart;
+package com.erigir.lamark.music;
 
 import com.erigir.lamark.IMutator;
 import com.erigir.lamark.Individual;

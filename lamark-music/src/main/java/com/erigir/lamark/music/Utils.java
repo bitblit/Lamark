@@ -1,4 +1,4 @@
-package com.erigir.mozart;
+package com.erigir.lamark.music;
 
 public class Utils {
     public static void main(String[] args) {

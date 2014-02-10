@@ -1,9 +1,9 @@
-package com.erigir.mozart;
+package com.erigir.lamark.music;
 
-import com.erigir.lamark.GUIEventListener;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.events.BetterIndividualFoundEvent;
 import com.erigir.lamark.events.LamarkEvent;
+import com.erigir.lamark.gui.GUIEventListener;
 import jm.gui.cpn.Notate;
 import jm.music.data.Note;
 import jm.music.data.Part;
@@ -11,6 +11,7 @@ import jm.music.data.Phrase;
 import jm.music.data.Score;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class DrawScoreListener implements GUIEventListener {
     private Notate scoreFrame;
@@ -45,7 +46,10 @@ public class DrawScoreListener implements GUIEventListener {
         }
     }
 
-    public void setFrame(JFrame ignored) {
+    @Override
+    public void setParentComponent(Component parent) {
+        //To change body of implemented methods use File | Settings | File Templates.
     }
+
 
 }

@@ -1,4 +1,4 @@
-package com.erigir.mozart;
+package com.erigir.lamark.music;
 
 import java.util.ArrayList;
 import java.util.Comparator;

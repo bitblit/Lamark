@@ -22,8 +22,8 @@ import java.util.logging.Level;
  * <ol>
  * <li>Create a lamark instance</li>
  * <li>Instantiate a copy of each of the 4 main components</li>
- * <li>Set any applicable parameters on each of the compoenents</li>
- * <li>Set the component into lamark using the appropriate set method</li>
+ * <li>Set any applicable parameters on each of the components</li>
+ * <li>Set the component into Lamark using the appropriate set method</li>
  * <li>Optionally set the 5th component (selector) if this is useful for you</li>
  * <li>Optionally instantiate and set a custom individual formatter</li>
  * <li>Set the size of the population</li>

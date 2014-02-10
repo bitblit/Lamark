@@ -1,6 +1,6 @@
-package com.erigir.mozart.algorithm;
+package com.erigir.lamark.music.algorithm;
 
-import com.erigir.mozart.NoteDurationEnum;
+import com.erigir.lamark.music.NoteDurationEnum;
 import jm.gui.cpn.Notate;
 import jm.music.data.Note;
 import jm.music.data.Part;
