@@ -6,6 +6,7 @@ import jm.music.data.Note;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public enum NoteDurationEnum {
     THIRTYSECOND_NOTE_TRIPLET,
@@ -299,48 +300,14 @@ public enum NoteDurationEnum {
         }
     }
 
-    public static NoteDurationEnum fromThirtySeconds(int value) {
-        switch (value) {
-            case 1:
-                return THIRTYSECOND_NOTE;
-            case 2:
-                return SIXTEENTH_NOTE;
-            case 3:
-                return DOTTED_SIXTEENTH_NOTE;
-            case 4:
-                return EIGHTH_NOTE;
-            case 6:
-                return DOTTED_EIGHTH_NOTE;
-            case 7:
-                return DOUBLE_DOTTED_EIGHTH_NOTE;
-            case 8:
-                return QUARTER_NOTE;
-            case 12:
-                return DOTTED_QUARTER_NOTE;
-            case 14:
-                return DOUBLE_DOTTED_QUARTER_NOTE;
-            case 16:
-                return HALF_NOTE;
-            case 24:
-                return DOTTED_HALF_NOTE;
-            case 28:
-                return DOUBLE_DOTTED_HALF_NOTE;
-            case 32:
-                return WHOLE_NOTE;
-            default:
-                throw new IllegalStateException("Not a valid value:" + value);
-        }
-    }
-
-
-    public static NoteDurationEnum newNoteValue(int upperBoundIn32s) {
+    public static NoteDurationEnum newNoteValue(int upperBoundIn32s, Random rand) {
         initializeNotesLessList();
         List<NoteDurationEnum> list = notesLessThanOrEqualTo.get(upperBoundIn32s);
-        return list.get(Util.RAND.nextInt(list.size()));
+        return list.get(rand.nextInt(list.size()));
     }
 
-    public static NoteDurationEnum randomDuration() {
+    public static NoteDurationEnum randomDuration(Random rand) {
         NoteDurationEnum[] vals = values();
-        return vals[Util.RAND.nextInt(vals.length)];
+        return vals[rand.nextInt(vals.length)];
     }
 }

@@ -2,8 +2,8 @@ package com.erigir.lamark.music;
 
 import com.erigir.lamark.ICreator;
 import com.erigir.lamark.Individual;
-import com.erigir.lamark.configure.LamarkConfig;
-import com.erigir.mozart.phrase.PhrasePool;
+import com.erigir.lamark.Lamark;
+import com.erigir.lamark.music.phrase.PhrasePool;
 import jm.music.data.Part;
 import jm.music.data.Score;
 import jm.music.data.Tempo;
@@ -19,6 +19,7 @@ public class MozartCreator implements ICreator {
     private Integer lowerBound;
     private Integer upperBound;
     private boolean validated = false;
+    private Lamark lamark;
 
     public Properties getProperties() {
         return properties;
@@ -31,7 +32,7 @@ public class MozartCreator implements ICreator {
             s.setNumerator(signature.numerator());
         }
         if (null != scale) {
-            s.setKeySignature(scale.sharpOrFlatCount());
+            s.setKeySignature(scale.getSharpOrFlatCount());
         }
         s.setTempo(Tempo.ANDANTE);
         Part p = new Part();
@@ -86,7 +87,7 @@ public class MozartCreator implements ICreator {
                 upperBound = 128;
             }
             pool = PhrasePool.instance;
-            pool.initialize(signature, scale, lowerBound, upperBound);
+            pool.initialize(lamark.getRandom(),signature, scale, lowerBound, upperBound);
 
             validated = true;
         }
@@ -105,7 +106,48 @@ public class MozartCreator implements ICreator {
         validate();
     }
 
-    public void setLamarkConfig(LamarkConfig ignored) {
+    public Lamark getLamark() {
+        return lamark;
     }
 
+    public void setLamark(Lamark lamark) {
+        this.lamark = lamark;
+    }
+
+
+    public int getSize() {
+        return size;
+    }
+
+    public TimeSignatureEnum getSignature() {
+        return signature;
+    }
+
+    public void setSignature(TimeSignatureEnum signature) {
+        this.signature = signature;
+    }
+
+    public ScaleEnum getScale() {
+        return scale;
+    }
+
+    public void setScale(ScaleEnum scale) {
+        this.scale = scale;
+    }
+
+    public Integer getLowerBound() {
+        return lowerBound;
+    }
+
+    public void setLowerBound(Integer lowerBound) {
+        this.lowerBound = lowerBound;
+    }
+
+    public Integer getUpperBound() {
+        return upperBound;
+    }
+
+    public void setUpperBound(Integer upperBound) {
+        this.upperBound = upperBound;
+    }
 }

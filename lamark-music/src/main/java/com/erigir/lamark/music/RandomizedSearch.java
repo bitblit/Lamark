@@ -2,17 +2,16 @@ package com.erigir.lamark.music;
 
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.Util;
-import com.erigir.lamark.configure.Const;
-import com.erigir.lamark.configure.LamarkConfig;
-import com.erigir.lamark.configure.PropertyDescriptor;
-import com.erigir.mozart.phrase.PhrasePool;
-import com.erigir.mozart.traits.TraitWrapper;
+import com.erigir.lamark.music.phrase.PhrasePool;
+import com.erigir.lamark.music.traits.TraitWrapper;
 import jm.gui.cpn.Notate;
 import jm.music.data.Note;
 import jm.music.data.Part;
 import jm.music.data.Phrase;
 import jm.music.data.Score;
 import jm.music.data.Tempo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,8 +20,10 @@ import java.awt.event.ActionListener;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
+import java.util.Random;
 
 public class RandomizedSearch implements Runnable, ActionListener {
+    private static final Logger LOG = LoggerFactory.getLogger(RandomizedSearch.class);
 
     private JFrame frame;
     private JButton start;
@@ -107,13 +108,14 @@ public class RandomizedSearch implements Runnable, ActionListener {
 
 
     static class musicThread implements Runnable {
+        private Random random = new Random();
+
         private boolean running = true;
         private static final int SONG_LENGTH = 8;
         private static final double SCORE_DELTA = 5;
         private static final int MOVE_RANGE = 1;
         private int cycle = 0;
         private MozartFitness fitness;
-        private LamarkConfig config;
         private Score currentScore;
         private int currentFitness;
         private int lastUpdate;
@@ -121,11 +123,12 @@ public class RandomizedSearch implements Runnable, ActionListener {
         private int cyclesWithoutChange = 0;
 
         public musicThread() {
-            config = new LamarkConfig();
-            PropertyDescriptor size = config.descriptor(Const.INDIVIDUAL_SIZE_KEY);
-            size.value = new BigDecimal(SONG_LENGTH);
+            //config = new LamarkConfig();
+            //PropertyDescriptor size = config.descriptor(Const.INDIVIDUAL_SIZE_KEY);
+            //size.value = new BigDecimal(SONG_LENGTH);
             fitness = new ScoreFitness();
-            fitness.setLamarkConfig(config);
+
+            //fitness.setLamarkConfig(config);
             currentScore = randomScore();
             currentFitness = fitness(currentScore);
             lastUpdate = 0;
@@ -165,7 +168,7 @@ public class RandomizedSearch implements Runnable, ActionListener {
                     }
 
                     if (cyclesWithoutChange == 200) {
-                        System.out.print("200 without change");
+                        LOG.info("200 without change");
                         currentFitness = fitness(currentScore);
                         updateScreen();
                         cyclesWithoutChange = 0;
@@ -182,11 +185,7 @@ public class RandomizedSearch implements Runnable, ActionListener {
         }
 
         private void updateScreen() {
-            if (null == musicFrame) {
-                musicFrame = new Notate(collapsePhrase(currentScore), 0, 100);
-            } else {
-                musicFrame.setNewScore(collapsePhrase(currentScore));
-            }
+            musicFrame = new Notate(collapsePhrase(currentScore), 0, 100);
             musicFrame.setTitle("Cycle:" + cycle + "  Fitness:" + Util.format(currentFitness));
             lastUpdate = currentFitness;
         }
@@ -375,7 +374,7 @@ public class RandomizedSearch implements Runnable, ActionListener {
             ScaleEnum scale = ScaleEnum.C;
             TimeSignatureEnum signature = TimeSignatureEnum.FOUR_FOUR;
 
-            pp.initialize(signature, scale, 40, 81);
+            pp.initialize(random,signature, scale, 40, 81);
 
             Phrase[] song = new Phrase[SONG_LENGTH];
             for (int i = 0; i < song.length; i++) {
@@ -386,7 +385,7 @@ public class RandomizedSearch implements Runnable, ActionListener {
             rval.setTempo(Tempo.ANDANTE);
             rval.setDenominator(signature.denominator());
             rval.setNumerator(signature.numerator());
-            rval.setKeySignature(scale.sharpOrFlatCount());
+            rval.setKeySignature(scale.getSharpOrFlatCount());
 
             return rval;
         }

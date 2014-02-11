@@ -1,14 +1,11 @@
 package com.erigir.lamark.music;
 
 import com.erigir.lamark.Lamark;
+import com.erigir.lamark.LamarkFactory;
 import com.erigir.lamark.Util;
-import com.erigir.lamark.configure.Const;
-import com.erigir.lamark.configure.LamarkConfig;
-import com.erigir.lamark.configure.PropertyDescriptor;
 import com.erigir.lamark.events.AbortedEvent;
 import com.erigir.lamark.events.BetterIndividualFoundEvent;
 import com.erigir.lamark.events.ExceptionEvent;
-import com.erigir.lamark.events.InitializationComplete;
 import com.erigir.lamark.events.LamarkEvent;
 import com.erigir.lamark.events.LamarkEventListener;
 import com.erigir.lamark.events.LastPopulationCompleteEvent;
@@ -22,10 +19,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.logging.Logger;
 
 public class Mozart implements ActionListener, LamarkEventListener, Runnable {
@@ -128,7 +123,7 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
             }
         } else if (e.getSource() == start) {
             // Start the engine
-            currentRunner = new Lamark(config());
+            currentRunner = mozartInstance();
             currentRunner.addGenericListener(this);
             currentRunner.addBetterIndividualFoundListener(new DrawScoreListener());
 
@@ -148,24 +143,36 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
 
     }
 
-    private LamarkConfig config() {
-        try {
-            LamarkConfig lc = new LamarkConfig();
-            lc.load(getClass().getResourceAsStream("/mozart.properties"));
+    private Lamark mozartInstance()
+    {
+        return mozartInstance((String) keySelect.getSelectedItem()
+                , (String)signatureSelect.getSelectedItem()
+        , "ALL".equals(rangeSelect.getSelectedItem()),
+            Integer.valueOf(barCountEntry.getText()));
+    }
 
-            Properties p = lc.propertiesValue(Const.CREATOR_PROPERTIES_KEY);
-            p.setProperty("key", (String) keySelect.getSelectedItem());
-            p.setProperty("signature", (String) signatureSelect.getSelectedItem());
-            if (rangeSelect.getSelectedItem().equals("ALL")) {
-                p.setProperty("range.bottom", "0");
-                p.setProperty("range.top", "127");
+
+    public static Lamark mozartInstance(String keyS, String timeSigS, boolean fullRange, int barCount) {
+        try {
+            Lamark rval = LamarkFactory.createFromPropertiesResource("/music.properties");
+            MozartCreator creator = (MozartCreator)rval.getCreator();
+
+            if (!keyS.equals("ANY")) {
+                creator.setScale(ScaleEnum.valueOf(keyS));
+                       }
+
+            creator.setSignature(TimeSignatureEnum.valueOf(timeSigS));
+
+            if (fullRange) {
+                creator.setLowerBound(0);
+                creator.setUpperBound(127);
             } else {
-                p.setProperty("range.bottom", "40");
-                p.setProperty("range.top", "81");
+                creator.setLowerBound(40);
+                creator.setUpperBound(81);
             }
-            PropertyDescriptor pd = lc.descriptor(Const.INDIVIDUAL_SIZE_KEY);
-            pd.value = new BigDecimal(barCountEntry.getText());
-            return lc;
+            creator.setSize(barCount);
+            return rval;
+
         } catch (Exception e) {
             IllegalArgumentException e2 = new IllegalArgumentException("Couldnt load defaults");
             e2.initCause(e);
@@ -250,17 +257,6 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
         } else if (BetterIndividualFoundEvent.class.isAssignableFrom(je.getClass())) {
             output.insert(je.toString() + "\n", 0);
             bestScore.setText("Best: " + Util.format(((BetterIndividualFoundEvent) je).getNewBest().getFitness()));
-        } else if (InitializationComplete.class.isAssignableFrom(je.getClass())) {
-            Lamark l = je.getLamark();
-            LamarkConfig lc = l.getConfig();
-            output.append("\n" + je.toString());
-            output.append("\nUsing Creator      : " + l.getCreator() + " (" + lc.propertiesValue(Const.CREATOR_PROPERTIES_KEY).size() + " properties)");
-            output.append("\nUsing Selector     : " + l.getSelector() + " (" + lc.propertiesValue(Const.SELECTOR_PROPERTIES_KEY).size() + " properties)");
-            output.append("\nUsing Fitness      : " + l.getFitnessFunction() + " (" + lc.propertiesValue(Const.FITNESS_PROPERTIES_KEY).size() + " properties)");
-            output.append("\nUsing Crossover    : " + l.getCrossover() + " (" + lc.propertiesValue(Const.CROSSOVER_PROPERTIES_KEY).size() + " properties)");
-            output.append("\nUsing Mutator      : " + l.getMutator() + " (" + lc.propertiesValue(Const.MUTATOR_PROPERTIES_KEY).size() + " properties)");
-
-            output.append("\nBest possible score:" + Util.format(((ScoreFitness) l.getFitnessFunction()).maximumScore()));
         } else if (LastPopulationCompleteEvent.class.isAssignableFrom(je.getClass())) {
             output.insert(je.toString() + "\n", 0);
             start.setEnabled(true);

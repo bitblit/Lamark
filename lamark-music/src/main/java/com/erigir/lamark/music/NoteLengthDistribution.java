@@ -1,12 +1,16 @@
 package com.erigir.lamark.music;
 
 import jm.music.data.Note;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class NoteLengthDistribution {
+    private static final Logger LOG = LoggerFactory.getLogger(NoteLengthDistribution.class);
+
     private Map<NoteDurationEnum, Double> counts;
     private double totalNotes;
 
@@ -48,12 +52,13 @@ public class NoteLengthDistribution {
             double OmE2 = OmE * OmE;
             double OmE2dE = OmE2 / E;
             runSum += OmE2dE;
-            System.out.println(nd + " e=" + E + " o=" + O + " ome=" + OmE + " OmE2dE=" + OmE2dE + " Ome2=" + OmE2);
+            LOG.trace("{} e= {} o= {} ome={} OmE2dE={} Ome2={}", new Object[]{ nd , E , O , OmE , OmE2dE , OmE2});
             sumE += E;
             sumO += O;
         }
-        System.out.println("SE=" + sumE + "  SO=" + sumO);
-        System.out.println("rval:" + runSum);
+
+        LOG.trace("SE= {} SO={}" + sumE , sumO);
+        LOG.debug("rval= {}" , runSum);
         return runSum;
     }
 

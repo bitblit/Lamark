@@ -16,15 +16,16 @@ public class MozartCrossover implements ICrossover<Score> {
     private double pCrossover;
     private Lamark lamark;
 
+
     public Individual<Score> crossover(List<Individual<Score>> arg0) {
-        ArrayList<Individual> rval = new ArrayList<Individual>(2);
+        //ArrayList<Individual> rval = new ArrayList<Individual>(2);
+        Individual<Score> rval = null;
 
-        Individual p1 = arg0.get(0);
-        Individual p2 = arg0.get(1);
+        Individual<Score> p1 = arg0.get(0);
+        Individual<Score> p2 = arg0.get(1);
 
-        Score s1 = (Score) p1.getGenome();
-        Score s2 = (Score) p2.getGenome();
-        if (lamark.crossoverFlip()) {
+        Score s1 = p1.getGenome();
+        Score s2 = p2.getGenome();
             Part part1 = s1.getPart(0);
             Part part2 = s2.getPart(0);
 
@@ -35,8 +36,8 @@ public class MozartCrossover implements ICrossover<Score> {
                 throw new IllegalStateException("Scores have different number of bars, 1=" + ph1a.length + " 2=" + ph2a.length);
             }
 
-            int split1 = Util.RAND.nextInt(ph1a.length - 1);
-            int split2 = (split1 + 1) + Util.RAND.nextInt(ph1a.length - (split1 + 1));
+            int split1 = lamark.getRandom().nextInt(ph1a.length - 1);
+            int split2 = (split1 + 1) + lamark.getRandom().nextInt(ph1a.length - (split1 + 1));
 
             Phrase[] np1 = new Phrase[ph1a.length];
             Phrase[] np2 = new Phrase[ph1a.length];
@@ -61,12 +62,10 @@ public class MozartCrossover implements ICrossover<Score> {
             new1.add(newPart1);
             new2.add(newPart2);
 
-            rval.add(new Individual(new1));
-            rval.add(new Individual(new2));
-        } else {
-            rval.add(new Individual(s1));
-            rval.add(new Individual(s2));
-        }
+            rval = new Individual<Score>(new1);
+            //rval.add(new Individual(new1));
+            //rval.add(new Individual(new2));
+        // Returning a single child (could do the other)
         return rval;
     }
 
@@ -89,9 +88,12 @@ public class MozartCrossover implements ICrossover<Score> {
         return Score.class;
     }
 
+    public Lamark getLamark() {
+        return lamark;
+    }
+
     public void setLamark(Lamark lamark) {
         this.lamark = lamark;
     }
-
 
 }

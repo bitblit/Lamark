@@ -9,40 +9,44 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 public enum ScaleEnum {
-    A, As, B, C, Cs, D, Ds, E, F, Fs, G, Gs;
+    A(3),
+    As(-2),
+    B(5),
+    C(0),
+    Cs(7),
+    D(2),
+    Ds(-3),
+    E(4),
+    F(-1),
+    Fs(6),
+    G(1),
+    Gs(-4);
+
+    private int sharpOrFlatCount;
+
+    ScaleEnum(int sharpOrFlatCount)
+    {
+        this.sharpOrFlatCount = sharpOrFlatCount;
+    }
 
     private SortedSet<Integer> cacheScale;
     private SortedSet<Integer> cacheBigFiveScale;
 
-    public int sharpOrFlatCount() {
-        switch (this) {
-            case C:
-                return 0;
-            case Cs:
-                return 7;
-            case D:
-                return 2;
-            case Ds:
-                return -3;
-            case E:
-                return 4;
-            case F:
-                return -1;
-            case Fs:
-                return 6;
-            case G:
-                return 1;
-            case Gs:
-                return -4;
-            case A:
-                return 3;
-            case As:
-                return -2;
-            case B:
-                return 5;
-            default:
-                throw new IllegalStateException("Cant happen : Unknown item :" + this);
+    public int getSharpOrFlatCount() {
+        return sharpOrFlatCount;
+    }
+
+    public static ScaleEnum fromSharpOrFlatCount(int sharpOrFlatCount)
+    {
+        ScaleEnum rval = null;
+        for (ScaleEnum e:values())
+        {
+            if (e.sharpOrFlatCount==sharpOrFlatCount)
+            {
+                rval = e;
+            }
         }
+        return rval;
     }
 
     public SortedSet<Integer> scale() {

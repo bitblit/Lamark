@@ -2,12 +2,26 @@ package com.erigir.lamark.music;
 
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.Util;
-import com.erigir.mozart.control.ControlSongs;
-import com.erigir.mozart.traits.*;
+import com.erigir.lamark.music.control.ControlSongs;
+import com.erigir.lamark.music.traits.CenterInTrebleCleffTrait;
+import com.erigir.lamark.music.traits.IMusicTrait;
+import com.erigir.lamark.music.traits.MinimizeDirectionChangesTrait;
+import com.erigir.lamark.music.traits.PenalizeLargeJumpsTrait;
+import com.erigir.lamark.music.traits.PenalizeTooManyRepeatsTrait;
+import com.erigir.lamark.music.traits.PercentInScaleBigFiveTrait;
+import com.erigir.lamark.music.traits.ReduceStandardDeviationTrait;
+import com.erigir.lamark.music.traits.RepeatingThemeTrait;
+import com.erigir.lamark.music.traits.StandardTimingTrait;
+import com.erigir.lamark.music.traits.TimingStepsTrait;
+import com.erigir.lamark.music.traits.TraitWrapper;
+import com.erigir.lamark.music.traits.WithinStandardDeviationTrait;
 import jm.music.data.Score;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -18,6 +32,7 @@ import java.util.List;
  * @author cweiss
  */
 public class WeightFinder {
+    private static final Logger LOG = LoggerFactory.getLogger(WeightFinder.class);
     public static double MINIMUM_WEIGHT = 1.0;
     public static double MAXIMUM_WEIGHT = 3.0;
     public static double STEP_VALUE = 1.0;
@@ -42,10 +57,10 @@ public class WeightFinder {
         //traits.add(new GoodEndingTrait());
         traits.add(new TimingStepsTrait()); //2.0
         double[] best = calculateBest(traits);
-        System.out.println("Best found=" + array(best));
+        LOG.info("Best found=" + Arrays.asList(best));
 
         // double[] tester = new double[]{3,3,3,3,3,3,3,1,3,1,3,1,1,3,3,1};
-        //  System.out.println("Tester="+percentScoreForWeights(traits,tester));
+        //  LOG.info("Tester="+percentScoreForWeights(traits,tester));
 
     }
 
@@ -82,12 +97,12 @@ public class WeightFinder {
                 scores[i][j] = test.get(j).getFitness();
                 songAverageScore[j] += scores[i][j];
             }
-            System.out.println("For song " + songs[i].getTitle() + " scores are " + array(scores[i]));
+            LOG.info("For song {} scores was {}" ,songs[i].getTitle() , Arrays.asList(scores[i]));
         }
         for (int i = 0; i < test.size(); i++) {
             songAverageScore[i] /= (double) songs.length;
         }
-        System.out.println("Song average score:" + array(songAverageScore));
+        LOG.info("Song average score: {}" + Arrays.asList(songAverageScore));
         return songAverageScore;
     }
 
@@ -113,7 +128,7 @@ public class WeightFinder {
         double currentPercent;
         double stepsPerIndex = ((MAXIMUM_WEIGHT - MINIMUM_WEIGHT) + 1) / STEP_VALUE;
         double iterationCount = Math.pow(stepsPerIndex, weights.length);
-        System.out.println("Trying " + stepsPerIndex + " per index, " + weights.length + " indexes, total of " + iterationCount + " iterations");
+        LOG.info("Trying {} per index, {} indexs, total of {} iterations" , new Object[]{ stepsPerIndex , weights.length , iterationCount });
 
         double iteration = 0;
         long startTime = System.currentTimeMillis();
@@ -128,18 +143,18 @@ public class WeightFinder {
                         System.in.read();
                     }
 
-                    System.out.println("Iteration #" + iteration);
+                    LOG.info("Iteration #" + iteration);
                     double pctDone = iteration / iterationCount;
-                    System.out.println(Util.format(pctDone) + " percent done");
+                    LOG.info(Util.format(pctDone) + " percent done");
                     long runtime = System.currentTimeMillis() - startTime;
                     long perIt = (long) ((iteration * 1000.0) / (double) runtime);
-                    System.out.println(perIt + " iterations per second");
-                    System.out.println("Trying " + array(weights));
-                    System.out.println("Current runtime:" + Util.formatISO(runtime));
+                    LOG.info(perIt + " iterations per second");
+                    LOG.info("Trying " + Arrays.asList(weights));
+                    LOG.info("Current runtime:" + Util.formatISO(runtime));
                     long estTime = (long) (runtime / pctDone);
-                    System.out.println("Est total time:" + Util.formatISO(estTime));
-                    System.out.println("Est rem time:" + Util.formatISO(estTime - runtime));
-                    System.out.println("\n\n");
+                    LOG.info("Est total time:" + Util.formatISO(estTime));
+                    LOG.info("Est rem time:" + Util.formatISO(estTime - runtime));
+                    LOG.info("\n\n");
                 }
 
                 sumFit = 0;
@@ -151,12 +166,12 @@ public class WeightFinder {
 
                 currentPercent = sumFit / maxFit;
 
-                //System.out.println("Trying "+array(weights)+" pct = "+Util.format(currentPercent*100));
+                //LOG.info("Trying "+Arrays.asList(weights)+" pct = "+Util.format(currentPercent*100));
 
                 if (currentPercent > bestPercentage) {
                     bestPercentage = currentPercent;
-                    System.out.println("New Best found %=" + bestPercentage);
-                    System.out.println("Weights:" + array(weights));
+                    LOG.info("New Best found %=" + bestPercentage);
+                    LOG.info("Weights:" + Arrays.asList(weights));
                     System.arraycopy(weights, 0, rval, 0, weights.length);
                 }
 
@@ -169,11 +184,11 @@ public class WeightFinder {
                 // Now back up one
                 lastMax--;
 
-                //System.out.println("w="+array(weights)+" lm="+lastMax);
+                //LOG.info("w="+Arrays.asList(weights)+" lm="+lastMax);
 
                 if (lastMax == (weights.length - 1)) {
                     // The whole thing is at max
-                    System.out.println("len=" + weights.length + " lastmax=" + lastMax);
+                    LOG.info("len=" + weights.length + " lastmax=" + lastMax);
                     allWeightsMaximum = true;
                 } else {
                     // Increment the one after the last max
@@ -189,19 +204,11 @@ public class WeightFinder {
             ioe.printStackTrace();
         }
 
-        System.out.println("Last tried:" + array(weights));
+        LOG.info("Last tried: {}" , Arrays.asList(weights));
 
         return rval;
     }
 
-    public static String array(double[] weights) {
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < weights.length; i++) {
-            sb.append(Util.format(weights[i]));
-            sb.append(" ");
-        }
-        return sb.toString();
-    }
 
 
 }

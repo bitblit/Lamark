@@ -1,21 +1,21 @@
 package com.erigir.lamark.music;
 
-import com.erigir.lamark.FitnessTypeEnum;
+import com.erigir.lamark.EFitnessType;
 import com.erigir.lamark.IFitnessFunction;
 import com.erigir.lamark.Individual;
+import com.erigir.lamark.Lamark;
 import com.erigir.lamark.Util;
-import com.erigir.lamark.configure.LamarkConfig;
-import com.erigir.mozart.traits.TraitWrapper;
+import com.erigir.lamark.music.traits.TraitWrapper;
 import jm.music.data.Score;
 
 import java.util.Collection;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-public class MozartFitness implements IFitnessFunction {
+public class MozartFitness implements IFitnessFunction<Score> {
     private static Logger LOG = Logger.getLogger(MozartFitness.class.getName());
     private Collection<TraitWrapper> traits;
-    private LamarkConfig config;
+    private Lamark lamark;
 
     public void initTraits(Collection<TraitWrapper> pTraits) {
         traits = pTraits;
@@ -35,13 +35,13 @@ public class MozartFitness implements IFitnessFunction {
         return rval;
     }
 
-    public double fitnessValue(Individual arg0) {
+    public double fitnessValue(Individual<Score> arg0) {
         if (null == traits) {
             throw new IllegalStateException("Traits must be set before calculating");
         }
         long start = System.currentTimeMillis();
         double fullScore = 0.0;
-        Score theScore = (Score) arg0.getGenome();
+        Score theScore = arg0.getGenome();
         ScoreAnalysis sa = new ScoreAnalysis(theScore);
 
         StringBuffer fitnessVals = new StringBuffer();
@@ -59,8 +59,8 @@ public class MozartFitness implements IFitnessFunction {
         return fullScore;
     }
 
-    public FitnessTypeEnum fitnessType() {
-        return FitnessTypeEnum.MAXIMUM_BEST;
+    public EFitnessType fitnessType() {
+        return EFitnessType.MAXIMUM_BEST;
     }
 
     public Class worksOn() {
@@ -70,8 +70,12 @@ public class MozartFitness implements IFitnessFunction {
     public void configure(Properties ignored) {
     }
 
-    public void setLamarkConfig(LamarkConfig pConfig) {
-        config = pConfig;
+    public Lamark getLamark() {
+        return lamark;
+    }
+
+    public void setLamark(Lamark lamark) {
+        this.lamark = lamark;
     }
 
 

@@ -29,7 +29,9 @@ public class DrawScoreListener implements GUIEventListener {
                 newPhrase.add(n);
             }
             Score newS = new Score(new Part(newPhrase));
+
             scoreFrame = new Notate(newS, 0, 100);
+
 
             //scoreFrame = new Notate(s,50,50);
 
@@ -40,10 +42,7 @@ public class DrawScoreListener implements GUIEventListener {
         }
     }
 
-    @Override
-    public void setParentComponent(Component parent) {
-        //To change body of implemented methods use File | Settings | File Templates.
+    public void setParentComponent(Component ignored) {
     }
-
 
 }
