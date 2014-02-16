@@ -17,6 +17,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -154,7 +155,7 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
 
     public static Lamark mozartInstance(String keyS, String timeSigS, boolean fullRange, int barCount) {
         try {
-            Lamark rval = LamarkFactory.createFromPropertiesResource("/music.properties");
+            Lamark rval = LamarkFactory.createFromPropertiesResource("/mozart.properties", Mozart.class);
             MozartCreator creator = (MozartCreator)rval.getCreator();
 
             if (!keyS.equals("ANY")) {

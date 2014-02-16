@@ -5,8 +5,10 @@ package com.erigir.lamark.gui;
 
 import com.erigir.lamark.IPreloadableCreator;
 import com.erigir.lamark.Lamark;
+import com.erigir.lamark.LamarkConfigurationFailedException;
 import com.erigir.lamark.LamarkFactory;
 import com.erigir.lamark.Util;
+import com.erigir.lamark.config.LamarkGUIConfig;
 import com.erigir.lamark.events.BetterIndividualFoundEvent;
 import com.erigir.lamark.events.ExceptionEvent;
 import com.erigir.lamark.events.LamarkEvent;
@@ -107,7 +109,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
     /**
      * Handle to the current configuration of Lamark *
      */
-    private Properties currentProperties = LamarkFactory.defaultProperties();
+    private LamarkGUIConfig currentConfig;
     /**
      * Handle to the current classloader, if not default *
      */
@@ -212,8 +214,8 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
      *
      * @return Proeprties object containing the contents
      */
-    public Properties getConfigPanelProperties() {
-        return configPanel.toProperties();
+    public LamarkGUIConfig getConfigPanelProperties() {
+        return configPanel.toGUIConfigObject();
     }
 
     /**
@@ -245,10 +247,9 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
         }
         try {
             clearCurrent();
-            currentProperties = new Properties();
-            currentProperties.load(is);
+            currentConfig = configPanel.getLamarkFactory().jsonToGUIConfig(is);
             is.close();
-            configPanel.fromProperties(currentProperties);
+            configPanel.fromGUIConfig(currentConfig);
             output.append("\n\nLamark loaded from properties");
             return true;
         } catch (Exception e) {
@@ -281,9 +282,8 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
                 InputStream is = ucl.getResourceAsStream("lamark.properties");
 
                 if (null != is) {
-                    currentProperties = new Properties();
-                    currentProperties.load(is);
-                    configPanel.fromProperties(currentProperties);
+                    currentConfig = configPanel.getLamarkFactory().jsonToGUIConfig(is);
+                    configPanel.fromGUIConfig(currentConfig);
                     currentClassloader = ucl;
                     is.close();
                     updateClassLoaderLabel();
@@ -321,7 +321,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
     private void clearCurrent() {
         currentRunner = null;
         currentClassloader = null;
-        currentProperties = LamarkFactory.defaultProperties();
+        currentConfig = new LamarkGUIConfig();
         updateClassLoaderLabel();
     }
 
@@ -332,9 +332,10 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
         if (e.getSource() == start) {
             output.setText("Starting new Lamark instance...\n\n");
 
+            try
+            {
             // First, generate a new currentRunner
-
-            currentRunner = new Lamark();
+            currentRunner = configPanel.getLamarkFactory().createLamarkFromConfig(currentConfig);
 
             // Add this as a generic listener for timers
             currentRunner.addGenericListener(this);
@@ -369,19 +370,6 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
                 currentRunner.addUniformPopulationListener(ol);
             }
 
-            // Init the running
-            LamarkFactory.initLamarkFromProperties(currentRunner, configPanel.toProperties(), currentClassloader);
-
-            // Check for errors
-            List<String> errors = currentRunner.getConfigurationErrors();
-
-            if (errors.size() > 0) {
-                for (String s : errors) {
-                    output.append(s);
-                    output.append("\n");
-                }
-                output.append("\n\nStopping Lamark instance... errors found.\n");
-            } else {
                 // Create any custom listeners and attach them
                 List<LamarkEventListener> customList = configPanel.customListeners(currentClassloader, currentRunner);
                 for (LamarkEventListener l : customList) {
@@ -413,13 +401,19 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
                 configPanel.setEnabled(false);
                 new Thread(currentRunner).start();
             }
+                catch (LamarkConfigurationFailedException lcfe)
+                {
+                    for (String s : lcfe.getReasons()) {
+                        output.append(s);
+                        output.append("\n");
+                    }
+                    output.append("\n\nStopping Lamark instance... errors found.\n");
+                }
+
 
         } else if (e.getSource() == show) {
-            output.setText("Properties...\n\n");
-            Properties p = configPanel.toProperties();
-            for (Object key : p.keySet()) {
-                output.append(key + " = " + p.get(key) + "\n");
-            }
+            output.setText(configPanel.toGUIConfigString());
+
 
         } else if (e.getSource() == cancel) {
             if (JOptionPane.showConfirmDialog(this,
@@ -465,6 +459,12 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
 
     }
 
+    public String configJSON()
+    {
+        return configPanel.getLamarkFactory().guiConfigToJson(configPanel.toGUIConfigObject());
+    }
+
+
     /**
      * Builds the main panel of the gui.
      *
@@ -489,7 +489,8 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
             configPanel = new LamarkConfigPanel();
             currentRunner = new Lamark();
             // Init stuff to default lamark
-            configPanel.fromProperties(LamarkFactory.lamarkToProperties(currentRunner));
+            // TODO: reset?
+            //configPanel.fromGUIConfig(configPanel.getLamarkFactory().extractConfigFromLamark(currentRunner));
             // Init drop lists
             configPanel.initializeLists();
 
@@ -525,7 +526,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
     public void resetToNew() {
         abortIfRunning();
         clearCurrent();
-        configPanel.fromProperties(LamarkFactory.defaultProperties());
+        // TODO reset?
         configPanel.initializeLists();
     }
 

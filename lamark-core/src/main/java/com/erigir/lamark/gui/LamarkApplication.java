@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.net.URL;
 import java.util.logging.Logger;
 
@@ -160,8 +161,9 @@ public class LamarkApplication implements ActionListener {
                 if (rval == JFileChooser.APPROVE_OPTION) {
                     try {
                         File f = fc.getSelectedFile();
-                        FileOutputStream fos = new FileOutputStream(f);
-                        gui.getConfigPanelProperties().store(fos, null);
+                        FileWriter fos = new FileWriter(f);
+                        String json = gui.configJSON();
+                        fos.write(json);
                         fos.close();
                         lastFile = f;
                     } catch (Exception ioe) {

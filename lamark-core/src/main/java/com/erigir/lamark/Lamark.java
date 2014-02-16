@@ -5,6 +5,8 @@
  */
 package com.erigir.lamark;
 
+import com.erigir.lamark.config.LamarkConfig;
+import com.erigir.lamark.config.LamarkRuntimeParameters;
 import com.erigir.lamark.events.*;
 import com.erigir.lamark.selector.RouletteWheel;
 
@@ -38,6 +40,15 @@ import java.util.logging.Level;
  * @since 04/2006
  */
 public class Lamark implements Runnable {
+    /**
+     * Shared instance of the random class
+     */
+    private Random random = new Random();
+    /**
+     * Handle to the object will all the configurable settings for an instance
+     */
+    private LamarkRuntimeParameters runtimeParameters;
+
     // ---------------------------------------------------------
     // Configurable options
     // ---------------------------------------------------------
@@ -71,75 +82,6 @@ public class Lamark implements Runnable {
      * Handle to the individual formatter, used for printing individuals into messages *
      */
     private IIndividualFormatter formatter = new DefaultIndividualFormatter();
-
-    /**
-     * Maximum number of generations to run.  If null, won't terminate due to generation number *
-     */
-    private Integer maximumPopulations;
-
-    /**
-     * Number of individuals to have in a given generation.  REQUIRED PROPERTY *
-     */
-    private Integer populationSize;
-
-    /**
-     * Percentage of individuals (0.0 - 1.0) to retain each generation as upper elitism.  NOTE: this number is multiplied by populationSize and the result is truncated to an integer *
-     */
-    private Double upperElitism = 0.0;
-
-    /**
-     * Percentage of individuals (0.0 - 1.0) to replace each generation as lower elitism.  NOTE: this number is multiplied by populationSize and the result is truncated to an integer *
-     */
-    private Double lowerElitism = 0.0;
-
-    /**
-     * Likelihood (0.0 - 1.0) of an individual being generated via crossover.  If the check fails, the first parent is copied instead. *
-     */
-    private Double crossoverProbability = 1.0;
-
-    /**
-     * Likelihood (0.0 - 1.0) of an individual being mutated.  This is on an individual by individual basis, not a population-wide basis.  Individuals retained via upper elitism are
-     * immune to mutation. *
-     */
-    private Double mutationProbability = 0.005;
-
-    /**
-     * Number of threads to use to process work packages.  Defaults to 1. *
-     */
-    private Integer numberOfWorkerThreads = 1;
-
-    /**
-     * A score which, if reached, will cause the algorthim to terminate.  If null, the algorithm will never terminate due to score *
-     */
-    private Double targetScore;
-
-    /**
-     * Determines whether to track the parents of each individual.  Use with care, as turning this on will consume large amounts of memory in a short
-     * period of time *
-     */
-    private boolean trackParentage = false;
-
-    /**
-     * Determines whether the algorith should stop if it ever reaches the state of all the individuals being equals.  Defaults to true *
-     */
-    private boolean abortOnUniformPopulation = true;
-
-    /**
-     * Seed to use for the random number generator.  Defaults to system current time.  Set to a constant to generate reproducible runs.  NOTE: runs
-     * are only reproducible if this is a constant AND the number of worker threads is 1, since otherwise the order of processing is dependant on
-     * OS scheduling *
-     */
-    private Long randomSeed;
-
-    /**
-     * Handle to the random object used to generate new numbers *
-     */
-    private Random random = new Random();
-
-    /**
-     * Holds a list of individuals the user wishes to force insertion of, if any *
-     */
-    private List<Individual<?>> toBeInserted = Collections.synchronizedList(new LinkedList<Individual<?>>());
 
     // ----------------------------------------------------------------------------------------------------------------------------------
     /**
@@ -217,7 +159,7 @@ public class Lamark implements Runnable {
     /**
      * Handle to the executorservice that will process all work packages *
      */
-    private ExecutorService executor;
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
 
     // ----------------------------------------------------------------------------------------------------------------------------------
     /**
@@ -234,6 +176,12 @@ public class Lamark implements Runnable {
      * Holds the parentage of individuals, if parentage tracking is turned on *
      */
     private Map<Individual<?>, List<Individual<?>>> parentage = new HashMap<Individual<?>, List<Individual<?>>>();
+
+    /**
+     * List of individuals to be inserted at next opportunity
+     * This is used either for directed search, or for communication across 'worlds'
+     */
+    private List<Individual> toBeInserted = new LinkedList<Individual>();
 
     /**
      * Holds the list of events that happened prior to the start of the instance.
@@ -253,7 +201,7 @@ public class Lamark implements Runnable {
      * @param parents List of parents for the child
      */
     public void registerParentage(Individual<?> child, List<Individual<?>> parents) {
-        if (trackParentage && child != null && parents != null) {
+        if (runtimeParameters.isTrackParentage() && child != null && parents != null) {
             parentage.put(child, parents);
         }
     }
@@ -269,7 +217,7 @@ public class Lamark implements Runnable {
      * @return List of Individual parent objects
      */
     public List<Individual<?>> getParentage(Individual child) {
-        if (!trackParentage) {
+        if (!runtimeParameters.isTrackParentage()) {
             throw new IllegalStateException("Can't call 'getParentage' if trackParentage is off");
         }
         if (child == null) {
@@ -277,118 +225,6 @@ public class Lamark implements Runnable {
         } else {
             return parentage.get(child);
         }
-    }
-
-    /**
-     * Validates the given component, if it implements IValidatable.
-     *
-     * @param comp   Component to validate
-     * @param errors List of errors, which the component can then add to if there is an error
-     */
-    private void conditionalValidate(ILamarkComponent comp, List<String> errors) {
-        if (IValidatable.class.isInstance(comp)) {
-            ((IValidatable) comp).validate(errors);
-        }
-    }
-
-    /**
-     * Generate a list of any configuration problems that will prevent starting this instance.
-     *
-     * @return List of string errors
-     */
-    public List<String> getConfigurationErrors() {
-        List<String> errors = new LinkedList<String>();
-
-        if (fitnessFunction == null) {
-            errors.add("Fitness function undefined");
-        } else {
-            conditionalValidate(fitnessFunction, errors);
-        }
-        if (crossover == null) {
-            errors.add("Crossover undefined");
-        } else {
-            conditionalValidate(crossover, errors);
-        }
-
-        if (selector == null) {
-            errors.add("Selector undefined");
-        } else {
-            conditionalValidate(selector, errors);
-        }
-
-        if (creator == null) {
-            errors.add("Creator undefined");
-        } else {
-            conditionalValidate(creator, errors);
-        }
-
-        if (executor == null) {
-            errors.add("No pool size specified");
-        }
-        if (exceptionListeners.size() == 0) {
-            errors.add("No exception listeners attached");
-        }
-        if (populationSize == null) {
-            errors.add("No population size set");
-        }
-        if (upperElitism == null) {
-            errors.add("Upper elitism set to null (leave at 0.0, if that's what you want)");
-        }
-        if (lowerElitism == null) {
-            errors.add("Lower elitism set to null (leave at 0.0, if that's what you want)");
-        }
-        if (crossoverProbability == null) {
-            errors.add("Crossover probability set to null");
-        }
-        if (mutationProbability == null) {
-            errors.add("Mutation probability set to null (set to 0.0, if that's what you want)");
-        }
-        if (numberOfWorkerThreads == null) {
-            errors.add("Number of worker threads set to null (set to 1 for single-threading)");
-        }
-
-        // Null individual size is NOT an error (a given algorithm might not use it, and should mention it in its validate method if needed */
-        // Null mutator is NOT an error
-        // Null maximum populations is NOT an error
-        return errors;
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return double containing the property
-     */
-    public final double getCrossoverProbability() {
-        return crossoverProbability;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param crossoverProbability new value for the property
-     */
-    public final void setCrossoverProbability(double crossoverProbability) {
-        checkRunning();
-        this.crossoverProbability = crossoverProbability;
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return double containing the property
-     */
-    public final double getMutationProbability() {
-        return mutationProbability;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param mutationProbability new value
-     */
-    public final void setMutationProbability(double mutationProbability) {
-        checkRunning();
-        this.mutationProbability = mutationProbability;
     }
 
     /**
@@ -418,82 +254,6 @@ public class Lamark implements Runnable {
             throw new IllegalStateException(
                     "Cannot modify this property while Lamark is running.");
         }
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return double containing the property
-     */
-    public final double getLowerElitism() {
-        return lowerElitism;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param lowerElitism new value
-     */
-    public final void setLowerElitism(double lowerElitism) {
-        checkRunning();
-        this.lowerElitism = lowerElitism;
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return double containing the property
-     */
-    public final double getUpperElitism() {
-        return upperElitism;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param upperElitism new value
-     */
-    public final void setUpperElitism(double upperElitism) {
-        checkRunning();
-        this.upperElitism = upperElitism;
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return Integer containing the property
-     */
-    public final Integer getMaximumPopulations() {
-        return maximumPopulations;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param maximumPopulations new value
-     */
-    public final void setMaximumPopulations(Integer maximumPopulations) {
-        checkRunning();
-        this.maximumPopulations = maximumPopulations;
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return Integer containing the property
-     */
-    public final Integer getPopulationSize() {
-        return populationSize;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param populationSize new value
-     */
-    public final void setPopulationSize(Integer populationSize) {
-        checkRunning();
-        this.populationSize = populationSize;
     }
 
     /**
@@ -595,7 +355,7 @@ public class Lamark implements Runnable {
      * @return true if this is a last population
      */
     private boolean lastPopulation(Population p) {
-        return (maximumPopulations != null && p != null && p.getNumber() >= maximumPopulations);
+        return (runtimeParameters.getMaximumPopulations() != null && p != null && p.getNumber() >= runtimeParameters.getMaximumPopulations());
     }
 
     /**
@@ -604,20 +364,20 @@ public class Lamark implements Runnable {
      * @see java.lang.Runnable#run()
      */
     public final void run() {
+        // Calc exit type and notify listeners
+        LastPopulationCompleteEvent.Type exitType = LastPopulationCompleteEvent.Type.BY_POPULATION_NUMBER;
+
         startTime = new Long(System.currentTimeMillis());
         try {
-            if (getConfigurationErrors().size() != 0) {
-                throw new IllegalStateException("Errors:" + getConfigurationErrors());
-            }
 
             logInfo("top, ab=" + aborted);
 
             totalWaitTime = 0L;
             // Init the workpackage queue
-            WorkPackage.initializeQueue(populationSize);
+            WorkPackage.initializeQueue(runtimeParameters.getPopulationSize());
 
-            if (randomSeed != null) {
-                random.setSeed(randomSeed);
+            if (runtimeParameters.getRandomSeed() != null) {
+                random.setSeed(runtimeParameters.getRandomSeed());
             }
             logInfo("Started Lamark run at time " + new Date());
             running = true;
@@ -628,21 +388,21 @@ public class Lamark implements Runnable {
             // Clear the pre-start queue of events
             firePreStartEvents();
 
-            int lowerElitismCount = (int) Math.ceil(populationSize
-                    * lowerElitism);
-            logFine("Lower Elitism Percent=" + lowerElitism + " Size="
-                    + populationSize);
+            int lowerElitismCount = (int) Math.ceil(runtimeParameters.getPopulationSize()
+                    * runtimeParameters.getLowerElitism());
+            logFine("Lower Elitism Percent=" + runtimeParameters.getLowerElitism() + " Size="
+                    + runtimeParameters.getPopulationSize());
             logFine("Will replace the lower " + lowerElitismCount
                     + " individuals each generation");
 
-            int upperElitismCount = (int) Math.ceil(populationSize
-                    * upperElitism);
-            logFine("Upper Elitism Percent=" + upperElitism + " Size="
-                    + populationSize);
+            int upperElitismCount = (int) Math.ceil(runtimeParameters.getPopulationSize()
+                    * runtimeParameters.getUpperElitism());
+            logFine("Upper Elitism Percent=" + runtimeParameters.getUpperElitism() + " Size="
+                    + runtimeParameters.getPopulationSize());
             logFine("Will reserve the upper " + upperElitismCount
                     + " individuals each generation");
             logFine("Will generate "
-                    + (populationSize - (lowerElitismCount + upperElitismCount))
+                    + (runtimeParameters.getPopulationSize() - (lowerElitismCount + upperElitismCount))
                     + " individuals by crossover each generation");
 
             Population prev = null;
@@ -661,7 +421,7 @@ public class Lamark implements Runnable {
                 // Create the list of work packages
                 // Step 1 - Insert any population members in the to-be-inserted
                 // list, up to max size
-                int remaining = populationSize;
+                int remaining = runtimeParameters.getPopulationSize();
                 int toTake = Math.min(remaining, toBeInserted.size());
 
                 if (toTake > 0) {
@@ -757,7 +517,7 @@ public class Lamark implements Runnable {
                 // Check if the population is uniform
                 if (current != null && current.isUniform()) {
                     event(new UniformPopulationEvent(this, current));
-                    if (abortOnUniformPopulation) {
+                    if (runtimeParameters.isAbortOnUniformPopulation()) {
                         aborted = true;
                     }
                 }
@@ -771,8 +531,6 @@ public class Lamark implements Runnable {
                     event(new AbortedEvent(this));
                 }
             }
-            // Calc exit type and notify listeners
-            LastPopulationCompleteEvent.Type exitType = LastPopulationCompleteEvent.Type.BY_POPULATION_NUMBER;
             if (current != null && current.isUniform()) {
                 exitType = LastPopulationCompleteEvent.Type.UNIFORM;
             } else if (targetScoreFound()) {
@@ -781,8 +539,6 @@ public class Lamark implements Runnable {
                 exitType = LastPopulationCompleteEvent.Type.ABORTED;
             }
 
-            // Notify listeners of last population
-            event(new LastPopulationCompleteEvent(this, current, exitType));
         } catch (Throwable t) {
             event(new ExceptionEvent(this, t));
             aborted = true;
@@ -790,6 +546,10 @@ public class Lamark implements Runnable {
             running = false;
             totalRunTime = new Long(System.currentTimeMillis() - startTime);
             startTime = null;
+
+            // Notify listeners of last population
+            event(new LastPopulationCompleteEvent(this, current, exitType));
+
         }
     }
 
@@ -823,52 +583,17 @@ public class Lamark implements Runnable {
      * @return true if we have
      */
     public boolean targetScoreFound() {
-        if (currentBest != null && targetScore != null) {
+        if (currentBest != null && runtimeParameters.getTargetScore() != null) {
             if (fitnessFunction.fitnessType() == EFitnessType.MAXIMUM_BEST) {
-                return currentBest.getFitness().compareTo(targetScore) >= 0;
+                return currentBest.getFitness().compareTo(runtimeParameters.getTargetScore()) >= 0;
             } else // min best
             {
-                return currentBest.getFitness().compareTo(targetScore) <= 0;
+                return currentBest.getFitness().compareTo(runtimeParameters.getTargetScore()) <= 0;
             }
         } else {
             return false;
         }
     }
-
-    /**
-     * Called by LamarkFactory to pass custom properties into the components of an instance.
-     *
-     * @param comp  Component type to set the value on
-     * @param name  String containing the property name
-     * @param value String containing the property value
-     */
-    public void setComponentProperty(EComponent comp, String name, String value) {
-        IConfigurable conf = getComponentForConfig(comp);
-        if (conf != null) {
-            EConfigResult res = conf.setProperty(name, value);
-            event(new ConfigurationEvent(this, conf, name, value, res));
-        } else {
-            event(new ConfigurationEvent(this, null, name, value, EConfigResult.MISSING_OR_NOT_CONFIGURABLE));
-        }
-    }
-
-    /**
-     * Finds the appropriate object for configuration if it is set and implements the right interface
-     *
-     * @param comp Component type to lookup
-     * @return IConfigurable object of that type
-     */
-    private IConfigurable getComponentForConfig(EComponent comp) {
-        Object o = comp.getComponent(this);
-
-        if (o != null) {
-            if (IConfigurable.class.isInstance(o)) {
-                return ((IConfigurable) o);
-            }
-        }
-        return null;
-    }
-
 
     /**
      * Adds a listener for the specified type of events.
@@ -1112,12 +837,12 @@ public class Lamark implements Runnable {
      * @return long containing the estimated runtime
      */
     public final long estimatedRuntimeMS() {
-        if (running && null != startTime && null != current && null != maximumPopulations) {
+        if (running && null != startTime && null != current && null != runtimeParameters.getMaximumPopulations()) {
             long curTime = currentRuntimeMS();
             double pctDone = 0;
-            if (maximumPopulations != null) {
+            if (runtimeParameters.getMaximumPopulations() != null) {
                 pctDone = (double) getCurrentGenerationNumber()
-                        / (double) maximumPopulations;
+                        / (double) runtimeParameters.getMaximumPopulations();
             }
             double totalTime = curTime / pctDone;
             return (long) (totalTime - curTime);
@@ -1131,7 +856,7 @@ public class Lamark implements Runnable {
      * @return true if test succeeds, false otherwise.
      */
     public boolean mutationFlip() {
-        return random.nextDouble() < mutationProbability;
+        return random.nextDouble() < runtimeParameters.getMutationProbability();
     }
 
     /**
@@ -1140,7 +865,7 @@ public class Lamark implements Runnable {
      * @return true if test succeeds, false otherwise.
      */
     public boolean crossoverFlip() {
-        return random.nextDouble() < crossoverProbability;
+        return random.nextDouble() < runtimeParameters.getCrossoverProbability();
     }
 
     /**
@@ -1208,6 +933,14 @@ public class Lamark implements Runnable {
         return creator;
     }
 
+    private void updateBackPointer(ILamarkComponent component)
+    {
+        if (component!=null)
+        {
+            component.setLamark(this);
+        }
+    }
+
     /**
      * Mutator method
      *
@@ -1216,9 +949,7 @@ public class Lamark implements Runnable {
     public final void setCreator(ICreator pCreator) {
         checkRunning();
         this.creator = pCreator;
-        if (creator != null) {
-            creator.setLamark(this);
-        }
+        updateBackPointer(pCreator);
     }
 
     /**
@@ -1229,9 +960,7 @@ public class Lamark implements Runnable {
     public final void setCrossover(ICrossover pCrossover) {
         checkRunning();
         this.crossover = pCrossover;
-        if (crossover != null) {
-            crossover.setLamark(this);
-        }
+        updateBackPointer(pCrossover);
     }
 
     /**
@@ -1242,9 +971,7 @@ public class Lamark implements Runnable {
     public final void setFitnessFunction(IFitnessFunction pFitnessFunction) {
         checkRunning();
         this.fitnessFunction = pFitnessFunction;
-        if (fitnessFunction != null) {
-            fitnessFunction.setLamark(this);
-        }
+        updateBackPointer(pFitnessFunction);
     }
 
     /**
@@ -1255,9 +982,7 @@ public class Lamark implements Runnable {
     public final void setMutator(IMutator pMutator) {
         checkRunning();
         this.mutator = pMutator;
-        if (mutator != null) {
-            mutator.setLamark(this);
-        }
+        updateBackPointer(pMutator);
     }
 
     /**
@@ -1268,39 +993,7 @@ public class Lamark implements Runnable {
     public final void setSelector(ISelector pSelector) {
         checkRunning();
         this.selector = pSelector;
-        if (selector != null) {
-            selector.setLamark(this);
-        }
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return Integer containing the property
-     */
-    public Integer getNumberOfWorkerThreads() {
-        return numberOfWorkerThreads;
-    }
-
-    /**
-     * Mutator method
-     * NOTE: If this is less than 1, then an error occurs.  If exactly 1, then a
-     * single-threaded executor is used.  Otherwise, a thread-pool executor is
-     * used.
-     *
-     * @param numberOfWorkerThreads new value
-     */
-    public void setNumberOfWorkerThreads(Integer numberOfWorkerThreads) {
-        checkRunning();
-        this.numberOfWorkerThreads = numberOfWorkerThreads;
-        if (numberOfWorkerThreads < 1) {
-            throw new IllegalArgumentException(
-                    "Must have at least 1 worker thread");
-        } else if (numberOfWorkerThreads == 1) {
-            this.executor = Executors.newSingleThreadExecutor();
-        } else {
-            this.executor = Executors.newFixedThreadPool(numberOfWorkerThreads);
-        }
+        updateBackPointer(pSelector);
     }
 
     /**
@@ -1337,45 +1030,6 @@ public class Lamark implements Runnable {
         }
         return null;
     }
-
-    /**
-     * Accessor method
-     *
-     * @return Double containing the property
-     */
-    public Double getTargetScore() {
-        return targetScore;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param targetScore new value
-     */
-    public void setTargetScore(Double targetScore) {
-        checkRunning();
-        this.targetScore = targetScore;
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return Long containing the property
-     */
-    public Long getRandomSeed() {
-        return randomSeed;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param randomSeed new value
-     */
-    public void setRandomSeed(Long randomSeed) {
-        checkRunning();
-        this.randomSeed = randomSeed;
-    }
-
 
     /**
      * A little inner class to run and make sure the GA hasn't hung up somewhere.
@@ -1455,24 +1109,6 @@ public class Lamark implements Runnable {
     /**
      * Accessor method
      *
-     * @return boolean containing the property
-     */
-    public boolean isAbortOnUniformPopulation() {
-        return abortOnUniformPopulation;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param abortOnUniformPopulation new value for the property
-     */
-    public void setAbortOnUniformPopulation(boolean abortOnUniformPopulation) {
-        this.abortOnUniformPopulation = abortOnUniformPopulation;
-    }
-
-    /**
-     * Accessor method
-     *
      * @return Random containing the property
      */
     public Random getRandom() {
@@ -1501,10 +1137,49 @@ public class Lamark implements Runnable {
     /**
      * Mutator method
      *
-     * @param formatter new value
+     * @param pFormatter new value
      */
-    public void setFormatter(IIndividualFormatter formatter) {
-        this.formatter = formatter;
+    public void setFormatter(IIndividualFormatter pFormatter) {
+        checkRunning();
+        this.formatter = pFormatter;
     }
 
+
+    /**
+     * Accessor method
+     *
+     * @return LamarkRuntimeParameters containing the property
+     */
+    public LamarkRuntimeParameters getRuntimeParameters() {
+        return runtimeParameters;
+    }
+
+    /**
+     * Mutator method
+     *
+     * @param runtimeParameters new value
+     */
+    public void setRuntimeParameters(LamarkRuntimeParameters runtimeParameters) {
+        checkRunning();
+        this.runtimeParameters = runtimeParameters;
+    }
+
+    /**
+     * Accessor method
+     *
+     * @return LamarkConfig containing the property
+     */
+    public ExecutorService getExecutor() {
+        return executor;
+    }
+
+    /**
+     * Mutator method
+     *
+     * @param executor new value
+     */
+    public void setExecutor(ExecutorService executor) {
+        checkRunning();
+        this.executor = executor;
+    }
 }

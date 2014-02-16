@@ -88,7 +88,7 @@ public class Population<T> {
             number = previous.getNumber() + 1;
         }
         this.lamark = lamark;
-        this.targetSize = lamark.getPopulationSize();
+        this.targetSize = lamark.getRuntimeParameters().getPopulationSize();
         this.individuals = Collections.synchronizedList(new ArrayList<Individual<T>>(targetSize));
     }
 

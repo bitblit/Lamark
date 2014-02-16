@@ -1,9 +1,12 @@
 package com.erigir.lamark.gui;
 
-import com.erigir.lamark.EComponent;
+import com.erigir.lamark.ILamarkComponent;
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.LamarkFactory;
+import com.erigir.lamark.config.LamarkGUIConfig;
 import com.erigir.lamark.events.LamarkEventListener;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,8 +17,9 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
-import java.util.logging.Logger;
+import java.util.TreeMap;
 
 /**
  * A panel for holding and organizing the various properties controls for LamarkGUI.
@@ -30,7 +34,12 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     /**
      * Logging instance *
      */
-    private static final Logger LOG = Logger.getLogger(LamarkConfigPanel.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(LamarkConfigPanel.class.getName());
+
+    /**
+     * Factory is used for serialization
+     */
+    private LamarkFactory lamarkFactory = new LamarkFactory();
 
     /**
      * Custom properties for creator *
@@ -434,27 +443,25 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      */
     public void initializeLists() {
         try {
-            InputStream is = getClass().getResourceAsStream("/LamarkGuiConfig.properties");
+            InputStream is = getClass().getResourceAsStream("/LamarkGuiConfig.json");
             if (is == null) {
-                is = getClass().getResourceAsStream("DefaultLamarkGuiConfig.properties");
+                is = getClass().getResourceAsStream("DefaultLamarkGuiConfig.json");
             }
             if (is != null) {
-                Properties p = new Properties();
-                p.load(is);
+
+                LamarkGUIConfig p = lamarkFactory.jsonToGUIConfig(is);
 
                 // If any standard properties were specified, set them
-                fromProperties(p);
+                fromGUIConfig(p);
 
-                setComboBoxValues(selector, p, "selectorClass");
-                setComboBoxValues(creator, p, "creatorClass");
-                setComboBoxValues(crossover, p, "crossoverClass");
-                setComboBoxValues(fitness, p, "fitnessClass");
-                setComboBoxValues(mutator, p, "mutatorClass");
-
-
+                setComboBoxValues(selector, p.getSelectorClasses(), p.defaultSelector());
+                setComboBoxValues(creator, p.getCreatorClasses(), p.defaultCreator());
+                setComboBoxValues(crossover, p.getCrossoverClasses(), p.defaultCrossover());
+                setComboBoxValues(fitness, p.getFitnessFunctionClasses(), p.defaultFitnessFunction());
+                setComboBoxValues(mutator, p.getMutatorClasses(), p.defaultMutator());
             }
         } catch (Exception e) {
-            LOG.warning("Error while trying to read config panel properties:" + e);
+            LOG.warn("Error while trying to read config panel properties: {}", e);
         }
     }
 
@@ -463,23 +470,19 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * All properties whos key starts with the given prefix will be loaded as
      * options into the combo box.
      *
-     * @param box    JComboBox to load from the properties object
-     * @param p      Properties object to load from
-     * @param prefix String containing the prefix of properties to load into the combo box
+     * @param box     JComboBox to load from the properties object
+     * @param classes List of class objects to load from
+     * @param def     Class to default select
      */
-    private void setComboBoxValues(JComboBox box, Properties p, String prefix) {
+    private void setComboBoxValues(JComboBox box, List<? extends Class> classes, Class def) {
         box.setEditable(true);
 
         box.removeAllItems();
-        for (String s : loadStringsWithPrefix(p, prefix)) {
-            box.addItem(formatClassName(s));
+        for (Class c:classes) {
+            box.addItem(formatClassName(c));
         }
 
-
-        String def = p.getProperty(prefix + ".default");
-        if (def != null) {
-            box.setSelectedItem(formatClassName(def));
-        }
+        box.setSelectedItem(formatClassName(def));
     }
 
     /**
@@ -530,42 +533,43 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     /**
      * Sets all values in the panel from the properties object.
      *
-     * @param p Properties object to load from.
+     * @param lc Config object to load from.
      */
-    public void fromProperties(Properties p) {
-        creator.setSelectedItem(formatClassName(nie(p.getProperty(EComponent.CREATOR.getClassProperty()))));
-        crossover.setSelectedItem(formatClassName(nie(p.getProperty(EComponent.CROSSOVER.getClassProperty()))));
-        fitness.setSelectedItem(formatClassName(nie(p.getProperty(EComponent.FITNESSFUNCTION.getClassProperty()))));
-        mutator.setSelectedItem(formatClassName(nie(p.getProperty(EComponent.MUTATOR.getClassProperty()))));
-        selector.setSelectedItem(formatClassName(nie(p.getProperty(EComponent.SELECTOR.getClassProperty()))));
-        upperElitism.setText(doubleToPercent(nie(p.getProperty(LamarkFactory.UPPER_ELITISM_KEY))));
-        lowerElitism.setText(doubleToPercent(nie(p.getProperty(LamarkFactory.LOWER_ELITISM_KEY))));
-        maximumPopulations.setText(nie(p.getProperty(LamarkFactory.MAXIMUM_POPULATION_KEY)));
-        populationSize.setText(nie(p.getProperty(LamarkFactory.POPULATION_SIZE_KEY)));
-        crossoverProbability.setText(nie(p.getProperty(LamarkFactory.CROSSOVER_PROBABILITY_KEY)));
-        mutationProbability.setText(nie(p.getProperty(LamarkFactory.MUTATION_PROBABILITY_KEY)));
-        numberOfWorkerThreads.setText(nie(p.getProperty(LamarkFactory.NUMBER_OF_WORKER_THREADS_KEY)));
-        targetScore.setText(nie(p.getProperty(LamarkFactory.TARGET_SCORE_KEY)));
-        randomSeed.setText(nie(p.getProperty(LamarkFactory.RANDOM_SEED_KEY)));
+    public void fromGUIConfig(LamarkGUIConfig lc) {
+        creator.setSelectedItem(formatClassName(lc.defaultCreator()));
+        crossover.setSelectedItem(formatClassName(lc.defaultCrossover()));
+        fitness.setSelectedItem(formatClassName(lc.defaultFitnessFunction()));
+        mutator.setSelectedItem(formatClassName(lc.defaultMutator()));
+        selector.setSelectedItem(formatClassName(lc.defaultSelector()));
+        upperElitism.setText(doubleToPercent(lc.getUpperElitism()));
+        lowerElitism.setText(doubleToPercent(lc.getLowerElitism()));
+        maximumPopulations.setText(ein(lc.getMaximumPopulations()));
+        populationSize.setText(ein(lc.getPopulationSize()));
+        crossoverProbability.setText(ein(lc.getCrossoverProbability()));
+        mutationProbability.setText(ein(lc.getMutationProbability()));
+        numberOfWorkerThreads.setText(ein(lc.getNumberOfWorkerThreads()));
+        targetScore.setText(ein(lc.getTargetScore()));
+        randomSeed.setText(ein(lc.getRandomSeed()));
 
-        creatorProperties = EComponent.CREATOR.extractComponentProperties(p);
-        crossoverProperties = EComponent.CROSSOVER.extractComponentProperties(p);
-        fitnessProperties = EComponent.FITNESSFUNCTION.extractComponentProperties(p);
-        mutatorProperties = EComponent.MUTATOR.extractComponentProperties(p);
-        selectorProperties = EComponent.SELECTOR.extractComponentProperties(p);
+        creatorProperties =  mapToProperties(lc.getCreatorConfiguration());
+        crossoverProperties = mapToProperties(lc.getCrossoverConfiguration());
+        fitnessProperties = mapToProperties(lc.getFitnessFunctionConfiguration());
+        mutatorProperties = mapToProperties(lc.getMutatorConfiguration());
+        selectorProperties = mapToProperties(lc.getSelectorConfiguration());
 
+        preloads = new ArrayList<String>(lc.getPreCreatedIndividuals());
 
-        preloads = new ArrayList<String>();
         customListener = new ArrayList<String>();
-        for (Object key : p.keySet()) {
-            String k = (String) key;
-            if (k.startsWith(LamarkFactory.PRELOAD_PREFIX)) {
-                preloads.add(p.getProperty(k));
-            } else if (k.startsWith(LamarkFactory.CUSTOM_LISTENER_PREFIX)) {
-                customListener.add(p.getProperty(k));
-            }
+        for (Class c:lc.getCustomListeners())
+        {
+            customListener.add(c.getName());
         }
 
+    }
+
+    public String toGUIConfigString()
+    {
+        return lamarkFactory.cleanToJSONString(toGUIConfigObject());
     }
 
     /**
@@ -574,10 +578,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * @param value String to parse and convert.
      * @return String containing the percent value.
      */
-    private String doubleToPercent(String value) {
-        if (value == null || value.trim().length() == 0) {
-            return value;
-        }
+    private String doubleToPercent(Double value) {
         Double d = new Double(value);
         d *= 100;
         return NumberFormat.getIntegerInstance().format(d);
@@ -589,27 +590,55 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * @param value String containing the percent
      * @return String containing the double
      */
-    private String percentToDouble(String value) {
+    private Double percentToDouble(String value) {
         if (value == null || value.trim().length() == 0) {
-            return value;
+            return null;
         }
         Double d = new Double(value);
         d /= 100;
-        return d.toString();
+        return d;
+    }
+
+    private Double nsDouble(String value)
+    {
+        return (value==null)?null:new Double(value);
+    }
+
+    private Integer nsInteger(String value)
+    {
+        return (value==null)?null:new Integer(value);
+    }
+
+    private Long nsLong(String value)
+    {
+        return (value==null)?null:new Long(value);
+    }
+
+    private Class safeForName(String value)
+    {
+        Class rval = null;
+        try
+    {
+        rval = Class.forName(value);
+    }
+    catch (ClassNotFoundException cnf)
+    {
+        LOG.warn("Couldnt find class {} - returning null", value);
+        rval = null;
+    }
+        return rval;
     }
 
     /**
-     * Converts empty strings to null, otherwise does nothing.
+     * Converts null to empty string, otherwise does nothing.
      *
      * @param s String to convert.
      * @return String that was converted
      */
-    private String nie(String s) {
-        if (s == null) {
-            return "";
-        }
-        return s;
+    private String ein(Object s) {
+        return (s==null)?"":String.valueOf(s);
     }
+
 
     /**
      * If the value and key are non-empty and non-null, sets them in the properties object.
@@ -632,19 +661,25 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * @param cb ComboBox to read classname from
      * @return String containing the class name
      */
-    private String classFromCombo(JComboBox cb) {
+    private Class classFromCombo(JComboBox cb) {
         // First, try reading it as a class name.  If it works, use that
         try {
             String test = (String) cb.getSelectedItem();
-            Class.forName(test);
-            return test; // If we reached here, just use the name
+            return Class.forName(test);
         } catch (Exception e) {
             String start = (String) cb.getSelectedItem();
 
             int pi = start.indexOf("[");
             String classN = start.substring(0, pi);
             String packageN = start.substring(pi + 1, start.length() - 1);
-            return packageN + "." + classN;
+            try
+            {
+                return Class.forName(packageN + "." + classN);
+            }
+            catch (ClassNotFoundException cnf)
+            {
+                throw new IllegalArgumentException("Cant find class "+cb.getSelectedItem());
+            }
         }
 
     }
@@ -667,44 +702,52 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     }
 
     /**
+     * Converts a classname to combobox format (CLASS[PACKAGE])
+     *
+     * @param clazz Class to convert
+     * @return String containing name in combo format
+     */
+    private String formatClassName(Class clazz) {
+        return (clazz==null)?null:formatClassName(clazz.getName());
+    }
+
+    /**
      * Creates a properties object matching the state of the panel.
      *
      * @return Properties object matching the panel.
      */
-    public Properties toProperties() {
-        Properties p = new Properties();
+    public LamarkGUIConfig toGUIConfigObject() {
+        LamarkGUIConfig p = new LamarkGUIConfig();
+        p.setCreatorClass(classFromCombo(creator));
+        p.setCrossoverClass(classFromCombo(crossover));
+        p.setFitnessFunctionClass(classFromCombo(fitness));
+        p.setMutatorClass(classFromCombo(mutator));
+        p.setSelectorClass(classFromCombo(selector));
 
-        setIfNonEmpty(p, EComponent.CREATOR.getClassProperty(), classFromCombo(creator));
-        setIfNonEmpty(p, EComponent.CROSSOVER.getClassProperty(), classFromCombo(crossover));
-        setIfNonEmpty(p, EComponent.FITNESSFUNCTION.getClassProperty(), classFromCombo(fitness));
-        setIfNonEmpty(p, EComponent.MUTATOR.getClassProperty(), classFromCombo(mutator));
-        setIfNonEmpty(p, EComponent.SELECTOR.getClassProperty(), classFromCombo(selector));
-        setIfNonEmpty(p, LamarkFactory.UPPER_ELITISM_KEY, percentToDouble(upperElitism.getText()));
-        setIfNonEmpty(p, LamarkFactory.LOWER_ELITISM_KEY, percentToDouble(lowerElitism.getText()));
-        setIfNonEmpty(p, LamarkFactory.MAXIMUM_POPULATION_KEY, maximumPopulations.getText());
-        setIfNonEmpty(p, LamarkFactory.POPULATION_SIZE_KEY, populationSize.getText());
-        setIfNonEmpty(p, LamarkFactory.CROSSOVER_PROBABILITY_KEY, crossoverProbability.getText());
-        setIfNonEmpty(p, LamarkFactory.MUTATION_PROBABILITY_KEY, mutationProbability.getText());
-        setIfNonEmpty(p, LamarkFactory.NUMBER_OF_WORKER_THREADS_KEY, numberOfWorkerThreads.getText());
-        setIfNonEmpty(p, LamarkFactory.TARGET_SCORE_KEY, targetScore.getText());
-        setIfNonEmpty(p, LamarkFactory.RANDOM_SEED_KEY, randomSeed.getText());
+        p.setUpperElitism(percentToDouble(upperElitism.getText()));
+        p.setLowerElitism(percentToDouble(lowerElitism.getText()));
+        p.setMaximumPopulations(nsInteger(maximumPopulations.getText()));
+        p.setPopulationSize(nsInteger(populationSize.getText()));
+        p.setCrossoverProbability(nsDouble(crossoverProbability.getText()));
+        p.setMutationProbability(nsDouble(mutationProbability.getText()));
+        p.setNumberOfWorkerThreads(nsInteger(numberOfWorkerThreads.getText()));
+        p.setTargetScore(nsDouble(targetScore.getText()));
+        p.setRandomSeed(nsLong(randomSeed.getText()));
 
-        // now write all properties to props
-        addComponentProperties(EComponent.CREATOR.getPropertyPrefix(), creatorProperties, p);
-        addComponentProperties(EComponent.CROSSOVER.getPropertyPrefix(), crossoverProperties, p);
-        addComponentProperties(EComponent.FITNESSFUNCTION.getPropertyPrefix(), fitnessProperties, p);
-        addComponentProperties(EComponent.MUTATOR.getPropertyPrefix(), mutatorProperties, p);
-        addComponentProperties(EComponent.SELECTOR.getPropertyPrefix(), selectorProperties, p);
+        p.setCreatorConfiguration(propertiesToMap(creatorProperties));
+        p.setCrossoverConfiguration(propertiesToMap(crossoverProperties));
+        p.setFitnessFunctionConfiguration(propertiesToMap(fitnessProperties));
+        p.setMutatorConfiguration(propertiesToMap(mutatorProperties));
+        p.setSelectorConfiguration(propertiesToMap(selectorProperties));
 
-        int count = 0;
-        for (String s : preloads) {
-            p.setProperty(LamarkFactory.PRELOAD_PREFIX + count, s);
-            count++;
-        }
-        count = 0;
+        p.setPreCreatedIndividuals(new LinkedList<String>(preloads));
+
         for (String s : customListener) {
-            p.setProperty(LamarkFactory.CUSTOM_LISTENER_PREFIX + count, s);
-            count++;
+            Class c = safeForName(s);
+            if (c!=null)
+            {
+                p.getCustomListeners().add(c);
+            }
         }
 
         return p;
@@ -823,4 +866,39 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         return preloads;
     }
 
+    public static Map<String,Object> propertiesToMap(Properties p)
+    {
+        Map<String,Object> rval = null;
+        if (p!=null)
+        {
+            rval = new TreeMap<String, Object>();
+            for (Map.Entry<Object,Object> e:p.entrySet())
+            {
+                rval.put((String)e.getKey(), (String)e.getValue());
+            }
+        }
+        return rval;
+    }
+
+    public static Properties mapToProperties(Map<String,Object> m)
+    {
+        Properties rval = null;
+        if (m!=null)
+        {
+            for (Map.Entry<String,Object> e:m.entrySet())
+            {
+                rval.setProperty(e.getKey(), String.valueOf(e.getValue()));
+            }
+        }
+        return rval;
+
+    }
+
+    public LamarkFactory getLamarkFactory() {
+        return lamarkFactory;
+    }
+
+    public void setLamarkFactory(LamarkFactory lamarkFactory) {
+        this.lamarkFactory = lamarkFactory;
+    }
 }

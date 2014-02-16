@@ -1,0 +1,48 @@
+{
+  "creatorClasses": [
+    "com.erigir.lamark.example.LamarkFinderCreator",
+    "com.erigir.lamark.creator.BinaryStringCreator",
+    "com.erigir.lamark.creator.ByteListCreator",
+    "com.erigir.lamark.creator.DecimalStringCreator",
+    "com.erigir.lamark.creator.HexadecimalStringCreator",
+    "com.erigir.lamark.creator.IntegerListCreator",
+    "com.erigir.lamark.creator.IntegerListPermutationCreator",
+    "com.erigir.lamark.creator.RangedIntegerListCreator",
+    "com.erigir.lamark.creator.StringCreator",
+    "com.erigir.lamark.creator.AlphaAndSpaceStringCreator",
+    "com.erigir.lamark.creator.AlphaStringCreator"
+  ],
+  "crossoverClasses": [
+    "com.erigir.lamark.crossover.StringSinglePoint",
+    "com.erigir.lamark.crossover.ListSinglePoint",
+    "com.erigir.lamark.crossover.IntegerPermutationFill",
+    "com.erigir.lamark.crossover.IntegerPermutationLongestCommonSubsequence",
+    "com.erigir.lamark.crossover.IntegerPermutationLongestCommonSubstring"
+  ],
+  "mutatorClasses": [
+    "com.erigir.lamark.mutator.StringSimpleMutator",
+    "com.erigir.lamark.mutator.List2ExchangeMutator",
+    "com.erigir.lamark.mutator.ListSimpleMutator"
+
+  ],
+  "selectorClasses": [
+    "com.erigir.lamark.selector.RouletteWheel",
+    "com.erigir.lamark.selector.Tournament"
+  ],
+  "fitnessFunctionClasses": [
+    "com.erigir.lamark.example.LamarkFinderFitness"
+  ],
+    "upperElitism": 0.1 ,
+    "lowerElitism": 0.1 ,
+    "populationSize": 10 ,
+    "crossoverProbability": 1 ,
+    "mutationProbability": 0 ,
+    "numberOfWorkerThreads": 2 ,
+    "targetScore": 1 ,
+    "randomSeed": 1
+
+}
+
+
+
+

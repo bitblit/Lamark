@@ -1,0 +1,26 @@
+{
+  "numberOfWorkerThreads" : 2,
+  "crossoverProbability" : 1,
+  "populationSize" : 50,
+  "selectorClass" : "com.erigir.lamark.selector.RouletteWheel",
+  "upperElitism" : 0.1,
+  "fitnessFunctionClass" : "com.erigir.lamark.example.cellular.CAMajorityFitness",
+  "creatorClass" : "com.erigir.lamark.creator.BinaryStringCreator",
+  "randomSeed" : 1,
+  "mutatorClass" : "com.erigir.lamark.mutator.StringSimpleMutator",
+  "mutationProbability" : 0,
+  "crossoverClass" : "com.erigir.lamark.crossover.StringSinglePoint",
+  "lowerElitism" : 0.1 ,
+  "fitnessFunctionConfiguration" :
+  {
+    "tableHeight" : 100,
+    "tableWidth" : 100,
+    "radius" : 3
+  },
+  "creatorConfiguration" :
+  {
+    "size" : 128
+  }
+}
+
+//customListener.0=com.erigir.lamark.example.cellular.CAGraphicalListener

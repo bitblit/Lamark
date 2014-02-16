@@ -2,6 +2,7 @@ package com.erigir.lamark.example;
 
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.WorkPackage;
+import com.erigir.lamark.config.LamarkRuntimeParameters;
 import com.erigir.lamark.crossover.StringSinglePoint;
 import com.erigir.lamark.events.ExceptionEvent;
 import com.erigir.lamark.events.LamarkEvent;
@@ -53,18 +54,29 @@ public class MyFirstLamark implements LamarkEventListener {
         lamark.setSelector(new RouletteWheel());
         lamark.setMutator(new StringSimpleMutator());
         lamark.setCreator(new LamarkFinderCreator());
-        lamark.setNumberOfWorkerThreads(400);
-        lamark.setPopulationSize(50);
 
+        LamarkRuntimeParameters lrp = new LamarkRuntimeParameters();
+
+
+        lrp.setNumberOfWorkerThreads(400);
+        lrp.setPopulationSize(50);
+
+        lrp.setTargetScore(1.0);
+        lrp.setMutationProbability(.01);
+        lrp.setLowerElitism(.1);
+        lrp.setUpperElitism(.1);
+
+        lamark.setRuntimeParameters(lrp);
+
+
+        // Setup self as a listener
         lamark.addBetterIndividualFoundListener(this);
         lamark.addPopulationCompleteListener(this);
         lamark.addExceptionListener(this);
         lamark.addLastPopulationCompleteListener(this);
         lamark.addConfigurationListener(this);
-        lamark.setTargetScore(1.0);
-        lamark.setMutationProbability(.01);
-        lamark.setLowerElitism(.1);
-        lamark.setUpperElitism(.1);
+
+
         lamark.run();
     }
 
@@ -85,7 +97,7 @@ public class MyFirstLamark implements LamarkEventListener {
 
         if (je instanceof LastPopulationCompleteEvent) {
             System.out.println("Finished, best found was: " + je.getLamark().getCurrentBest());
-            System.out.println("WP Queue size grew to: " + WorkPackage.queueSize() + " for a population size of " + je.getLamark().getPopulationSize());
+            System.out.println("WP Queue size grew to: " + WorkPackage.queueSize() + " for a population size of " + je.getLamark().getRuntimeParameters().getPopulationSize());
             System.out.println("Total time spent was: " + je.getLamark().getTotalRunTime() + " ms");
             System.out.println("Total wait time was: " + je.getLamark().getTotalWaitTime() + " ms");
             System.out.println("Average wait time was: " + je.getLamark().getAverageWaitTime() + " ms");
