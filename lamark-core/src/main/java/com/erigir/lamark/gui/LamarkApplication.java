@@ -149,6 +149,8 @@ public class LamarkApplication implements ActionListener {
                             lastFile = f;
                         } catch (Exception ioe) {
                             LOG.warn("Error opening file",ioe);
+                            gui.clearOutput();
+                            gui.appendOutput(ioe);
                             JOptionPane.showMessageDialog(frame, "Error reading file:" + ioe);
                         }
                     } else {

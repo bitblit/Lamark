@@ -1,8 +1,8 @@
 package com.erigir.lamark.config;
 
 /**
- * A data object holding the various runtime
- *
+ * A data object holding the various runtime parameters of a lamark instance but no plugin defintions
+ * @see LamarkConfig
  * @see com.erigir.lamark.LamarkFactory
  *      <p/>
  *      <ul>

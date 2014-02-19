@@ -167,10 +167,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      */
     private JCheckBox lAbort = new JCheckBox("Aborted");
     /**
-     * Configuration listener enabler *
-     */
-    private JCheckBox lConfiguration = new JCheckBox("Configuration");
-    /**
      * Log listener enabler *
      */
     private JCheckBox lLog = new JCheckBox("Log");
@@ -261,7 +257,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         lLastPopDone.setEnabled(enable);
         lAbort.setEnabled(enable);
 
-        lConfiguration.setEnabled(enable);
         lLog.setEnabled(enable);
         lPopulationComplete.setEnabled(enable);
         lPopPlanDone.setEnabled(enable);
@@ -321,8 +316,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * @return boolean true if the config panel could be loaded from resource at that location
      */
 
-    public boolean loadFromLocation(String location, String optionalEntryName) {
-        boolean rval = false;
+    public void loadFromLocation(String location, String optionalEntryName) {
         try {
             String json = null;
 
@@ -375,20 +369,25 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
                             selected = configs.get(s);
                         }
                     }
-                    fromGUIConfig(selected);
 
-                    rval = true;
+                    if (selected!=null)
+                    {
+                        fromGUIConfig(selected);
+                    }
+                    else
+                    {
+                        JOptionPane.showMessageDialog(null,"No config selected.  Nothing happened.");
+                    }
+
+                }
+                else
+                {
+                    throw new IllegalStateException("Failed to load configuration JSON file");
                 }
             }
         } catch (IOException ioe) {
             LOG.error("Error reading location {}", location, ioe);
         }
-
-        if (!rval) {
-            JOptionPane.showMessageDialog(null, "Error trying to load config");
-        }
-
-        return rval;
 
     }
 
@@ -473,7 +472,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         lLastPopDone.setSelected(true);
         lAbort.setSelected(true);
 
-        lConfiguration.setSelected(false);
         lLog.setSelected(false);
         lPopulationComplete.setSelected(false);
         lPopPlanDone.setSelected(false);
@@ -484,7 +482,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         south.add(lLastPopDone);
         south.add(lAbort);
 
-        south.add(lConfiguration);
         south.add(lLog);
         south.add(lPopulationComplete);
         south.add(lPopPlanDone);
@@ -822,15 +819,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      */
     public boolean listenBetterIndividualFound() {
         return lBetterIndividualFound.isSelected();
-    }
-
-    /**
-     * Returns true if the given listener should be used.
-     *
-     * @return true if the given listener should be used
-     */
-    public boolean listenConfiguration() {
-        return lConfiguration.isSelected();
     }
 
     /**

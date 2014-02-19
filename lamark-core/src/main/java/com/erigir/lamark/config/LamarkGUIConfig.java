@@ -10,7 +10,10 @@ import com.erigir.lamark.ISelector;
 import java.util.List;
 
 /**
- * A data object holding the configuration of the Lamark GUI panel
+ * This object extends a standard LamarkConfig to add drivers for the GUI panel (allowing selection from a list)
+ *
+ * This class is itself a valid implementation of LamarkConfig, but also allows a list of the various
+ * pieces to be selected from (for driving the GUI)
  * User: cweiss
  * Date: 2/15/14
  * Time: 1:28 PM

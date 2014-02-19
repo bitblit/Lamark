@@ -197,7 +197,7 @@ public class LamarkFactory {
             }
             return rval;
         } catch (IOException ioe) {
-            throw new IllegalArgumentException("Couldn't format", ioe);
+            throw new IllegalArgumentException("Couldn't read json file : "+ioe.getMessage(), ioe);
         }
     }
 

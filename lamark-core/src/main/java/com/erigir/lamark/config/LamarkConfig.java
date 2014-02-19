@@ -15,6 +15,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * A class holding all the runtime parameters of a Lamark instance plus the classes necessary for the plugins.
+ *
+ * Given a fully filled out one of these objects, the
  * A data object holding all the configuration for a Lamark instance - for easy serialization of settings.
  * <p/>
  * This class does NOT hold any data about a current run.  It DOES enforce a valid configuration.
