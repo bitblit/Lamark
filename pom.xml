@@ -50,6 +50,7 @@
     </dependencies>
     <modules>
         <module>lamark-core</module>
+        <module>lamark-example</module>
         <module>lamark-teacher</module>
         <module>lamark-web</module>
         <module>lamark-music</module>

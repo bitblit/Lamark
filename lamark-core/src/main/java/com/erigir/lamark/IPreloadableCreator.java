@@ -11,11 +11,10 @@ package com.erigir.lamark;
  * IPreloadableCreator is the interface implemented by creators in Lamark that can handle preloads.
  * <p/>
  * Same as a regular creator, but a preloadable creator can take an input string
- * and convert it to an individual.  Used to allow a properties file to create a
+ * and convert it to an individual.  Used to allow a json file to create a
  * set of individuals to start the system with.  How the conversion is
  * performed is problem dependant.  This interface is for use when one wants
- * a creator to be able to be bootstraped from a properties file.  A more efficient
- * method would be to use Spring for inserting preloads in a more generic setting.
+ * a creator to be able to be bootstrapped from a json file.
  *
  * @param <T> Type of individuals in this class formats for display
  * @author cweiss

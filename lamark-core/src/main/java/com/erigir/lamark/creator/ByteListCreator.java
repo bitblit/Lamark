@@ -4,15 +4,12 @@
 package com.erigir.lamark.creator;
 
 import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.EConfigResult;
-import com.erigir.lamark.IConfigurable;
 import com.erigir.lamark.ICreator;
 import com.erigir.lamark.IValidatable;
 import com.erigir.lamark.Individual;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 
 /**
@@ -22,7 +19,7 @@ import java.util.Properties;
  * @author cweiss
  * @since 09/2007
  */
-public class ByteListCreator extends AbstractLamarkComponent implements ICreator<List<Byte>>, IValidatable, IConfigurable {
+public class ByteListCreator extends AbstractLamarkComponent implements ICreator<List<Byte>>, IValidatable {
     /**
      * Size of byte list to create *
      */
@@ -74,30 +71,4 @@ public class ByteListCreator extends AbstractLamarkComponent implements ICreator
         }
     }
 
-    /**
-     * @see com.erigir.lamark.IConfigurable#setProperty(String, String)
-     */
-    public EConfigResult setProperty(String name, String value) {
-        if (name.equalsIgnoreCase("size")) {
-            try {
-                size = new Integer(value);
-                return EConfigResult.OK;
-            } catch (Exception e) {
-                return EConfigResult.INVALID_VALUE;
-            }
-        } else {
-            return EConfigResult.NO_SUCH_PROPERTY;
-        }
-    }
-
-    /**
-     * @see com.erigir.lamark.IConfigurable#getProperties()
-     */
-    public Properties getProperties() {
-        Properties p = new Properties();
-        if (size != null) {
-            p.setProperty("size", size.toString());
-        }
-        return p;
-    }
 }

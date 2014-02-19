@@ -1,16 +1,13 @@
 package com.erigir.lamark.config;
 
-import com.erigir.lamark.DefaultIndividualFormatter;
 import com.erigir.lamark.ICreator;
 import com.erigir.lamark.ICrossover;
 import com.erigir.lamark.IFitnessFunction;
 import com.erigir.lamark.IIndividualFormatter;
 import com.erigir.lamark.IMutator;
 import com.erigir.lamark.ISelector;
-import com.erigir.lamark.selector.RouletteWheel;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * A data object holding the configuration of the Lamark GUI panel
@@ -18,7 +15,7 @@ import java.util.Map;
  * Date: 2/15/14
  * Time: 1:28 PM
  */
-public class LamarkGUIConfig extends LamarkConfig{
+public class LamarkGUIConfig extends LamarkConfig {
 
     /**
      * Handle to the creator components available *
@@ -46,25 +43,24 @@ public class LamarkGUIConfig extends LamarkConfig{
     private List<Class<? extends IIndividualFormatter>> individualFormatterClasses;
 
 
-    public Class<? extends ICreator> defaultCreator()
-    {
-        return (getCreatorClass()==null)?creatorClasses.get(0):getCreatorClass();
+    public Class<? extends ICreator> defaultCreator() {
+        return (getCreatorClass() == null) ? creatorClasses.get(0) : getCreatorClass();
     }
-    public Class<? extends ICrossover> defaultCrossover()
-    {
-        return (getCrossoverClass()==null)?crossoverClasses.get(0):getCrossoverClass();
+
+    public Class<? extends ICrossover> defaultCrossover() {
+        return (getCrossoverClass() == null) ? crossoverClasses.get(0) : getCrossoverClass();
     }
-    public Class<? extends IFitnessFunction> defaultFitnessFunction()
-    {
-        return (getFitnessFunctionClass()==null)?fitnessFunctionClasses.get(0):getFitnessFunctionClass();
+
+    public Class<? extends IFitnessFunction> defaultFitnessFunction() {
+        return (getFitnessFunctionClass() == null) ? fitnessFunctionClasses.get(0) : getFitnessFunctionClass();
     }
-    public Class<? extends ISelector> defaultSelector()
-    {
-        return (getSelectorClass()==null)?selectorClasses.get(0):getSelectorClass();
+
+    public Class<? extends ISelector> defaultSelector() {
+        return (getSelectorClass() == null) ? selectorClasses.get(0) : getSelectorClass();
     }
-    public Class<? extends IMutator> defaultMutator()
-    {
-        return (getMutatorClass()==null)?mutatorClasses.get(0):getMutatorClass();
+
+    public Class<? extends IMutator> defaultMutator() {
+        return (getMutatorClass() == null) ? mutatorClasses.get(0) : getMutatorClass();
     }
 
     public List<Class<? extends ICreator>> getCreatorClasses() {

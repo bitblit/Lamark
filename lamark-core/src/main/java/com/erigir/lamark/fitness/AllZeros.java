@@ -1,4 +1,4 @@
-package com.erigir.lamark.example.simple;
+package com.erigir.lamark.fitness;
 
 import com.erigir.lamark.EFitnessType;
 
@@ -9,13 +9,15 @@ import com.erigir.lamark.EFitnessType;
  * minimum-best fitness function.  It just takes the AllOnes
  * class and inverts the function.
  *
+ * This class is here mainly as a simple example and because it's used in the unit tests of the roulette wheel
+*
  * @author cweiss
  * @since 04/2006
  */
 
 public class AllZeros extends AllOnes {
     /**
-     * @see com.erigir.lamark.example.simple.AllOnes#fitnessType()
+     * @see com.erigir.lamark.fitness.AllOnes#fitnessType()
      */
     public EFitnessType fitnessType() {
         return EFitnessType.MINIMUM_BEST;

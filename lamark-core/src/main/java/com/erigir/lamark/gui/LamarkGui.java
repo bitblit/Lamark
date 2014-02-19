@@ -3,12 +3,9 @@
  */
 package com.erigir.lamark.gui;
 
-import com.erigir.lamark.IPreloadableCreator;
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.LamarkConfigurationFailedException;
-import com.erigir.lamark.LamarkFactory;
 import com.erigir.lamark.Util;
-import com.erigir.lamark.config.LamarkGUIConfig;
 import com.erigir.lamark.events.BetterIndividualFoundEvent;
 import com.erigir.lamark.events.ExceptionEvent;
 import com.erigir.lamark.events.LamarkEvent;
@@ -21,14 +18,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.util.concurrent.Executors;
 
 /**
  * A class implementing a simple GUI for creating and running Lamark instances.
@@ -39,7 +34,7 @@ import java.util.Properties;
  * for setting the various components and properties of the Lamark instance, and
  * for passing in custom properties and pre-load individuals.  It also can run
  * a Lamark instance defined via classpath (ie, a JAR file containing all needed
- * component classes + a Lamark.properties file).
+ * component classes + a lamark.json file).
  *
  * @author cweiss
  * @since 02-2005
@@ -107,23 +102,15 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
      */
     private Lamark currentRunner;
     /**
-     * Handle to the current configuration of Lamark *
-     */
-    private LamarkGUIConfig currentConfig;
-    /**
-     * Handle to the current classloader, if not default *
-     */
-    private URLClassLoader currentClassloader;
-    /**
      * Handle to the url loaded at startup, if any *
      */
-    private URL initialURL;
+    private String initialLocation;
     /**
      * Panel holding the current configuration *
      */
     private LamarkConfigPanel configPanel;
     /**
-     * String containing the lable of the open url button *
+     * String containing the label of the open url button *
      */
     public static final String OPEN_REMOTE = "Open URL...";
 
@@ -132,7 +119,10 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
      * Default constructor.
      * Lays out all the controls.
      */
-    public LamarkGui() {
+    public LamarkGui(String initialLocation, String initialSelection) {
+
+        configPanel = new LamarkConfigPanel(initialLocation,initialSelection);
+
         setLayout(new BorderLayout());
 
         JToolBar toolbar = new JToolBar();
@@ -189,10 +179,6 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
         add(toolPanel, BorderLayout.NORTH);
         add(getMainPanel(), BorderLayout.CENTER);
 
-        // If a url was given, load it
-        if (initialURL != null) {
-            openURL(initialURL);
-        }
     }
 
     /**
@@ -210,108 +196,16 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
     }
 
     /**
-     * Converts contents of config panel to lamark properties.
-     *
-     * @return Proeprties object containing the contents
-     */
-    public LamarkGUIConfig getConfigPanelProperties() {
-        return configPanel.toGUIConfigObject();
-    }
-
-    /**
-     * Loads config panel from a resource path containing a properties object
-     *
-     * @param resourcePath String containing a path to a resource
-     * @return boolean true if the config panel could be loaded from properties at that location
-     */
-    public boolean openPropertyResource(String resourcePath) {
-        InputStream is = getClass().getResourceAsStream(resourcePath);
-        if (is != null) {
-            output.append("Loading " + resourcePath + "...");
-            return openPropertyStream(is);
-        } else {
-            output.append("Couldn't read resource path:" + resourcePath);
-            return false;
-        }
-    }
-
-    /**
-     * Loads config panel from an input stream containing a properties object
-     *
-     * @param is InputStream to read properties from
-     * @return boolean true if the config panel could be loaded from properties at that location
-     */
-    public boolean openPropertyStream(InputStream is) {
-        if (is == null) {
-            throw new IllegalArgumentException("Passed stream cannot be null");
-        }
-        try {
-            clearCurrent();
-            currentConfig = configPanel.getLamarkFactory().jsonToGUIConfig(is);
-            is.close();
-            configPanel.fromGUIConfig(currentConfig);
-            output.append("\n\nLamark loaded from properties");
-            return true;
-        } catch (Exception e) {
-            output.append("Error reading stream :" + e);
-            clearCurrent();
-            return false;
-        }
-    }
-
-    /**
-     * Loads either a property file or entire classpath from a URL
-     *
-     * @param u URL to open and read
-     * @return boolean true if the URL could be read, false otherwise
-     */
-    public boolean openURL(URL u) {
-        try {
-            if (u.toString().endsWith(".properties")) {
-                clearCurrent();
-                InputStream is = u.openStream();
-                if (is != null) {
-                    return openPropertyStream(is);
-                } else {
-                    return false;
-                }
-            } else if (u.toString().endsWith(".jar")) {
-                output.append("Trying URL : " + u);
-                URLClassLoader ucl = new URLClassLoader(new URL[]{u});
-
-                InputStream is = ucl.getResourceAsStream("lamark.properties");
-
-                if (null != is) {
-                    currentConfig = configPanel.getLamarkFactory().jsonToGUIConfig(is);
-                    configPanel.fromGUIConfig(currentConfig);
-                    currentClassloader = ucl;
-                    is.close();
-                    updateClassLoaderLabel();
-                    output.append("\n\nLamark loaded from url");
-                    return true;
-                } else {
-                    output.append("Classpath didn't contain a lamark.properties file.  Ignoring");
-                }
-            } else {
-                output.append("Resource: " + u + " doesn't end with .properties or .jar ... Ignoring.");
-            }
-            clearCurrent();
-            return false;
-        } catch (Exception e) {
-            output.append("Error reading url : " + u + " was :" + e);
-            clearCurrent();
-            return false;
-        }
-    }
-
-    /**
      * Make the classloader label match the current class loader.
      */
     private void updateClassLoaderLabel() {
-        if (currentClassloader == null) {
+        if (configPanel.getCurrentClassloader()!=null && URLClassLoader.class.isAssignableFrom(configPanel.getCurrentClassloader().getClass()))
+        {
+            classLoaderLabel.setText("Classloader: " + Arrays.asList(((URLClassLoader)configPanel.getCurrentClassloader()).getURLs()));
+        }
+        else
+        {
             classLoaderLabel.setText("Classloader: default");
-        } else {
-            classLoaderLabel.setText("Classloader: " + Arrays.asList(currentClassloader.getURLs()));
         }
     }
 
@@ -320,8 +214,6 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
      */
     private void clearCurrent() {
         currentRunner = null;
-        currentClassloader = null;
-        currentConfig = new LamarkGUIConfig();
         updateClassLoaderLabel();
     }
 
@@ -332,64 +224,38 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
         if (e.getSource() == start) {
             output.setText("Starting new Lamark instance...\n\n");
 
-            try
-            {
-            // First, generate a new currentRunner
-            currentRunner = configPanel.getLamarkFactory().createLamarkFromConfig(currentConfig);
+            try {
+                // First, generate a new currentRunner
+                currentRunner = configPanel.createLamarkInstance(this);
 
-            // Add this as a generic listener for timers
-            currentRunner.addGenericListener(this);
+                // Add this as a generic listener for timers
+                currentRunner.addGenericListener(this);
 
-            // Add any defined listeners
-            OutputListener ol = new OutputListener(output);
-            if (configPanel.listenAbort()) {
-                currentRunner.addAbortListener(ol);
-            }
-            if (configPanel.listenBetterIndividualFound()) {
-                currentRunner.addBetterIndividualFoundListener(ol);
-            }
-            if (configPanel.listenConfiguration()) {
-                currentRunner.addConfigurationListener(ol);
-            }
-            if (configPanel.listenException()) {
-                currentRunner.addExceptionListener(ol);
-            }
-            if (configPanel.listenLastPopDone()) {
-                currentRunner.addLastPopulationCompleteListener(ol);
-            }
-            if (configPanel.listenLog()) {
-                currentRunner.addLogListener(ol);
-            }
-            if (configPanel.listenPopPlanDone()) {
-                currentRunner.addPopulationPlanCompleteListener(ol);
-            }
-            if (configPanel.listenPopulationComplete()) {
-                currentRunner.addPopulationCompleteListener(ol);
-            }
-            if (configPanel.listenUniformPop()) {
-                currentRunner.addUniformPopulationListener(ol);
-            }
-
-                // Create any custom listeners and attach them
-                List<LamarkEventListener> customList = configPanel.customListeners(currentClassloader, currentRunner);
-                for (LamarkEventListener l : customList) {
-                    currentRunner.addGenericListener(l);
-                    if (GUIEventListener.class.isAssignableFrom(l.getClass())) {
-                        ((GUIEventListener) l).setParentComponent(this);
-                    }
+                // Add any defined listeners
+                OutputListener ol = new OutputListener(output);
+                if (configPanel.listenAbort()) {
+                    currentRunner.addAbortListener(ol);
                 }
-
-                // If any preloads are there, process them
-                if (configPanel.getPreloads().size() > 0) {
-                    if (IPreloadableCreator.class.isAssignableFrom(currentRunner.getCreator().getClass())) {
-                        IPreloadableCreator pc = (IPreloadableCreator) currentRunner.getCreator();
-                        currentRunner.clearInsertQueue();
-                        for (String s : configPanel.getPreloads()) {
-                            currentRunner.enqueueForInsert(pc.createFromPreload(s));
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Creator doesnt extend IPreloadableCreator.  Ignoring preloads");
-                    }
+                if (configPanel.listenBetterIndividualFound()) {
+                    currentRunner.addBetterIndividualFoundListener(ol);
+                }
+                if (configPanel.listenException()) {
+                    currentRunner.addExceptionListener(ol);
+                }
+                if (configPanel.listenLastPopDone()) {
+                    currentRunner.addLastPopulationCompleteListener(ol);
+                }
+                if (configPanel.listenLog()) {
+                    currentRunner.addLogListener(ol);
+                }
+                if (configPanel.listenPopPlanDone()) {
+                    currentRunner.addPopulationPlanCompleteListener(ol);
+                }
+                if (configPanel.listenPopulationComplete()) {
+                    currentRunner.addPopulationCompleteListener(ol);
+                }
+                if (configPanel.listenUniformPop()) {
+                    currentRunner.addUniformPopulationListener(ol);
                 }
 
                 output.setText("");
@@ -399,16 +265,14 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
                 openUrl.setEnabled(false);
                 show.setEnabled(false);
                 configPanel.setEnabled(false);
-                new Thread(currentRunner).start();
-            }
-                catch (LamarkConfigurationFailedException lcfe)
-                {
-                    for (String s : lcfe.getReasons()) {
-                        output.append(s);
-                        output.append("\n");
-                    }
-                    output.append("\n\nStopping Lamark instance... errors found.\n");
+                Executors.newSingleThreadExecutor().submit(currentRunner);
+            } catch (LamarkConfigurationFailedException lcfe) {
+                for (String s : lcfe.getReasons()) {
+                    output.append(s);
+                    output.append("\n");
                 }
+                output.append("\n\nStopping Lamark instance... errors found.\n");
+            }
 
 
         } else if (e.getSource() == show) {
@@ -440,28 +304,17 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
     public void openUrlDialog() {
         String url = (String) JOptionPane.showInputDialog(
                 this,
-                "Enter a url to a config file (properties file) or jar file",
+                "Enter a url to a config file (json file) or jar file",
                 OPEN_REMOTE,
                 JOptionPane.PLAIN_MESSAGE,
                 null,
                 null,
                 null);
-
-        if (null != url && url.trim().length() > 0) {
-            try {
-                openURL(new URL(url));
-            } catch (Exception ex) {
-                appendOutput("\n\nError opening remote site:" + ex);
-            }
-        } else {
-            appendOutput("\n\nRemote classpath open cancelled.\n\n");
-        }
-
+        configPanel.loadFromLocation(url, null);
     }
 
-    public String configJSON()
-    {
-        return configPanel.getLamarkFactory().guiConfigToJson(configPanel.toGUIConfigObject());
+    public String configJSON() {
+        return configPanel.toGUIConfigString();
     }
 
 
@@ -485,14 +338,6 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
 
             textPane.add(outputScrollPane, BorderLayout.CENTER);
             output.setText("Lamark\nGraphical User Interface\nVersion " + Util.getVersion() + "\n");
-
-            configPanel = new LamarkConfigPanel();
-            currentRunner = new Lamark();
-            // Init stuff to default lamark
-            // TODO: reset?
-            //configPanel.fromGUIConfig(configPanel.getLamarkFactory().extractConfigFromLamark(currentRunner));
-            // Init drop lists
-            configPanel.initializeLists();
 
             mainPanel.add(configPanel, BorderLayout.NORTH);
             mainPanel.add(textPane, BorderLayout.CENTER);
@@ -526,8 +371,6 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
     public void resetToNew() {
         abortIfRunning();
         clearCurrent();
-        // TODO reset?
-        configPanel.initializeLists();
     }
 
     /**
@@ -569,7 +412,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
     */
 
     /**
-     * This handleEvent updates the toobar, not the output pane, which is handled by the custom handler below.
+     * This handleEvent updates the toolbar, not the output pane, which is handled by the custom handler below.
      *
      * @see com.erigir.lamark.events.LamarkEventListener#handleEvent(com.erigir.lamark.events.LamarkEvent)
      */
@@ -660,10 +503,19 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
     /**
      * Called the wrapper classes to start the GUI in a given state by opening a url
      *
-     * @param initialURL URL object to initialize to
+     * @param initialLocation URL object to initialize to
      */
-    public void setInitialURL(URL initialURL) {
-        this.initialURL = initialURL;
+    public void setInitialLocation(String initialLocation) {
+        this.initialLocation = initialLocation;
     }
 
+    /**
+     * Return a handle to the configuration panel
+     * The config panel can be used to force loading of a new configuration
+     *
+     * @return LamarkConfigPanel handle to the config panel
+     */
+    public LamarkConfigPanel getConfigPanel() {
+        return configPanel;
+    }
 }

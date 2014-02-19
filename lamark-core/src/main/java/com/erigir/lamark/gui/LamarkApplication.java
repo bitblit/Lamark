@@ -9,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.net.URL;
 import java.util.logging.Logger;
@@ -110,10 +109,11 @@ public class LamarkApplication implements ActionListener {
         frame.setJMenuBar(menuBar);
 
         // Add and init the lamarkgui
-        gui = new LamarkGui();
-        if (lastFile != null) {
-            gui.setInitialURL(toURL(lastFile));
-        }
+
+        String initialLocation = (lastFile==null)?null:lastFile.toURI().toString();
+        String initialSelection = null; // TODO: implement
+
+        gui = new LamarkGui(initialLocation, initialSelection);
 
         frame.add(gui, BorderLayout.CENTER);
 
@@ -136,14 +136,14 @@ public class LamarkApplication implements ActionListener {
             } else if (src.getText().equals(OPEN_LOCAL)) {
                 JFileChooser fc = new JFileChooser(lastFile);
                 fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                fc.setFileFilter(PropertiesAndJarsFilter.INSTANCE);
+                fc.setFileFilter(JsonAndJarsFilter.INSTANCE);
                 int rval = fc.showOpenDialog(frame);
                 if (rval == JFileChooser.APPROVE_OPTION) {
                     File f = fc.getSelectedFile();
                     if (f.exists()) {
                         try {
                             gui.appendOutput("\n\nOpening file " + f + "...\n");
-                            gui.openURL(toURL(f));
+                            gui.getConfigPanel().loadFromLocation(f.toURI().toString(), null);
                             lastFile = f;
                         } catch (Exception ioe) {
                             JOptionPane.showMessageDialog(frame, "Error reading file:" + ioe);
@@ -175,30 +175,16 @@ public class LamarkApplication implements ActionListener {
     }
 
     /**
-     * Converts a file handle to a url that the GUI can load.
-     *
-     * @param f File to convert
-     * @return URL to that file
-     */
-    private static URL toURL(File f) {
-        try {
-            return f.toURI().toURL();
-        } catch (Exception e) {
-            throw new IllegalStateException("Cant happen:" + e);
-        }
-    }
-
-    /**
      * Implements FileFilter only allowing JARs, Properties, and Directories
      *
      * @author cweiss
      * @since 11/2007
      */
-    static class PropertiesAndJarsFilter extends FileFilter {
+    static class JsonAndJarsFilter extends FileFilter {
         /**
          * Static instance singleton *
          */
-        public static PropertiesAndJarsFilter INSTANCE = new PropertiesAndJarsFilter();
+        public static JsonAndJarsFilter INSTANCE = new JsonAndJarsFilter();
 
         /**
          * @see javax.swing.filechooser.FileFilter#accept(java.io.File)
@@ -214,7 +200,7 @@ public class LamarkApplication implements ActionListener {
                 return false;
             }
             String ext = name.substring(idx).toUpperCase();
-            return (ext.equals(".PROPERTIES") || ext.equals(".JAR"));
+            return (ext.equals(".JSON") || ext.equals(".JAR"));
         }
 
         /**
@@ -222,7 +208,7 @@ public class LamarkApplication implements ActionListener {
          */
         @Override
         public String getDescription() {
-            return "JAR and Properties files (*.jar, *.properties)";
+            return "JAR and Json files (*.jar, *.json)";
         }
 
     }

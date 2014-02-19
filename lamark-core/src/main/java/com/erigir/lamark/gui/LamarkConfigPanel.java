@@ -1,18 +1,23 @@
 package com.erigir.lamark.gui;
 
-import com.erigir.lamark.ILamarkComponent;
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.LamarkFactory;
 import com.erigir.lamark.config.LamarkGUIConfig;
 import com.erigir.lamark.events.LamarkEventListener;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -35,6 +40,15 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * Logging instance *
      */
     private static final Logger LOG = LoggerFactory.getLogger(LamarkConfigPanel.class.getName());
+    /**
+     * Location of the default file
+     */
+    private static final String DEFAULT_CONFIG_LOCATION="classpath:com/erigir/lamark/gui/default-lamark.json";
+
+    /**
+     * Handle to the current classloader, if not default *
+     */
+    private ClassLoader currentClassloader = LamarkConfigPanel.class.getClassLoader();
 
     /**
      * Factory is used for serialization
@@ -269,12 +283,120 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         randomSeed.setEnabled(enable);
     }
 
+    private String readStreamToString(InputStream ios)
+            throws IOException
+    {
+        String rval = null;
+        if (ios!=null)
+        {
+            StringBuilder sb = new StringBuilder();
+            BufferedReader br = new BufferedReader(new InputStreamReader(ios));
+            String next = br.readLine();
+            while (next!=null)
+            {
+                sb.append(next);
+                next = br.readLine();
+            }
+            br.close();
+            rval = sb.toString();
+
+        }
+        return rval;
+    }
+
+    /**
+     * Given a location, load the config panel from it
+     * A location can be either of the form "classpath:xxx" or a url
+     * If its a URL, it can point either to a xxx.json file or a xxx.jar file
+     * If its a jar file, its assumed to have a file named "lamark.json" at the root level (along with
+     * all classes referred to in that file)
+     * After the json is read, it may have multiple entries - if one is specified, it will be used.
+     * If only one entry is found, it will be used
+     * Otherwise, a dialog box for choices will be shown
+     *
+     * @param location String containing a path to a resource
+     * @param optionalEntryName String optionally containing which entry in the json file to use
+     * @return boolean true if the config panel could be loaded from resource at that location
+     */
+
+    public boolean loadFromLocation(String location, String optionalEntryName)
+    {
+        boolean rval = false;
+        try {
+            String json = null;
+
+        if (location!=null)
+        {
+            if (location.startsWith("classpath:"))
+            {
+                 // Load as a resource - can only be a json file (no jars on classpath)
+                String readLoc = location.substring("classpath:".length());
+                InputStream ios = currentClassloader.getResourceAsStream(readLoc);
+                json = readStreamToString(ios);
+            }
+            else
+            {
+                // Load as a url
+                URL u = safeURL(location);
+                if (location.endsWith(".json"))
+                {
+                    // Just need to read the json
+                    json = readStreamToString(u.openStream());
+                }
+                else
+                {
+                    // Need to massage the classpath and load default
+                    currentClassloader = new URLClassLoader(new URL[]{u});
+                    json = readStreamToString(currentClassloader.getResourceAsStream("/lamark.json"));
+                }
+            }
+
+            if (json!=null)
+            {
+
+            Map<String,LamarkGUIConfig> configs = lamarkFactory.jsonToConfig(json, currentClassloader);
+
+            // If more than one and not specified, then pop the selection box
+            // TODO: implement
+            LamarkGUIConfig selectedConfig = configs.values().iterator().next();
+
+            fromGUIConfig(selectedConfig);
+            rval = true;
+            }
+        }
+        }
+        catch (IOException ioe)
+        {
+            LOG.error("Error reading location {}",location, ioe);
+        }
+
+        if (!rval)
+        {
+            JOptionPane.showMessageDialog(null,"Error trying to load config");
+        }
+
+        return rval;
+
+    }
+
+    private URL safeURL(String input)
+    {
+        try
+        {
+            return new URL(input);
+        }
+        catch (MalformedURLException mue)
+        {
+            throw new RuntimeException("Unable to read url",mue);
+        }
+    }
+
     /**
      * Default constructor.
      * <p/>
      * Builds the layout.
      */
-    public LamarkConfigPanel() {
+    public LamarkConfigPanel(final String inConfigResource, final String inSelectedItem) {
         super();
 
         setLayout(new BorderLayout());
@@ -282,6 +404,10 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         add(panel1(), BorderLayout.CENTER);
         add(panel2(), BorderLayout.SOUTH);
 
+        // Finally, initialize
+        String configResource = (inConfigResource==null)?DEFAULT_CONFIG_LOCATION:inConfigResource;
+
+        loadFromLocation(configResource, inSelectedItem);
     }
 
     /**
@@ -439,33 +565,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     }
 
     /**
-     * Searches the classpath for config files, and if found uses them to load the boxes.
-     */
-    public void initializeLists() {
-        try {
-            InputStream is = getClass().getResourceAsStream("/LamarkGuiConfig.json");
-            if (is == null) {
-                is = getClass().getResourceAsStream("DefaultLamarkGuiConfig.json");
-            }
-            if (is != null) {
-
-                LamarkGUIConfig p = lamarkFactory.jsonToGUIConfig(is);
-
-                // If any standard properties were specified, set them
-                fromGUIConfig(p);
-
-                setComboBoxValues(selector, p.getSelectorClasses(), p.defaultSelector());
-                setComboBoxValues(creator, p.getCreatorClasses(), p.defaultCreator());
-                setComboBoxValues(crossover, p.getCrossoverClasses(), p.defaultCrossover());
-                setComboBoxValues(fitness, p.getFitnessFunctionClasses(), p.defaultFitnessFunction());
-                setComboBoxValues(mutator, p.getMutatorClasses(), p.defaultMutator());
-            }
-        } catch (Exception e) {
-            LOG.warn("Error while trying to read config panel properties: {}", e);
-        }
-    }
-
-    /**
      * Sets the values in the frop for a combo box from a properties object.
      * All properties whos key starts with the given prefix will be loaded as
      * options into the combo box.
@@ -478,7 +577,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         box.setEditable(true);
 
         box.removeAllItems();
-        for (Class c:classes) {
+        for (Class c : classes) {
             box.addItem(formatClassName(c));
         }
 
@@ -486,56 +585,20 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     }
 
     /**
-     * Creates a string[] of all properties with the given key prefix.
-     *
-     * @param p      Properties object to extract values from
-     * @param prefix String containing prefix to select on
-     * @return String[] extracted from properties
-     */
-    private String[] loadStringsWithPrefix(Properties p, String prefix) {
-        // of the form prefix.number
-        int i = 0;
-        List<String> rval = new LinkedList<String>();
-        String data = p.getProperty(prefix + "." + i);
-        while (data != null) {
-            rval.add(data);
-            i++;
-            data = p.getProperty(prefix + "." + i);
-        }
-        return rval.toArray(new String[0]);
-    }
-
-    /**
-     * Generates and instantiates the list of custom listeners defined.
-     *
-     * @param cl    Classloader to load any listeners from
-     * @param logTo Lamark instance to log any messages to
-     * @return List of LamarkEventListeners generated
-     */
-    public List<LamarkEventListener> customListeners(ClassLoader cl, Lamark logTo) {
-        LinkedList<LamarkEventListener> rval = new LinkedList<LamarkEventListener>();
-        for (String s : customListener) {
-            Object o = LamarkFactory.badClassNameToNull(s, cl);
-            if (o != null) {
-                if (LamarkEventListener.class.isAssignableFrom(o.getClass())) {
-                    rval.add((LamarkEventListener) o);
-                } else {
-                    logTo.logWarning(s + " exists but isnt a lamarkeventlistener");
-                }
-            } else {
-                logTo.logWarning("Couldnt create custom listener : " + s);
-            }
-        }
-
-        return rval;
-    }
-
-    /**
-     * Sets all values in the panel from the properties object.
+     * Sets all values in the panel from the config object.
      *
      * @param lc Config object to load from.
      */
     public void fromGUIConfig(LamarkGUIConfig lc) {
+
+        // Init the drop boxes
+        setComboBoxValues(selector, lc.getSelectorClasses(), lc.defaultSelector());
+        setComboBoxValues(creator, lc.getCreatorClasses(), lc.defaultCreator());
+        setComboBoxValues(crossover, lc.getCrossoverClasses(), lc.defaultCrossover());
+        setComboBoxValues(fitness, lc.getFitnessFunctionClasses(), lc.defaultFitnessFunction());
+        setComboBoxValues(mutator, lc.getMutatorClasses(), lc.defaultMutator());
+
+
         creator.setSelectedItem(formatClassName(lc.defaultCreator()));
         crossover.setSelectedItem(formatClassName(lc.defaultCrossover()));
         fitness.setSelectedItem(formatClassName(lc.defaultFitnessFunction()));
@@ -551,7 +614,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         targetScore.setText(ein(lc.getTargetScore()));
         randomSeed.setText(ein(lc.getRandomSeed()));
 
-        creatorProperties =  mapToProperties(lc.getCreatorConfiguration());
+        creatorProperties = mapToProperties(lc.getCreatorConfiguration());
         crossoverProperties = mapToProperties(lc.getCrossoverConfiguration());
         fitnessProperties = mapToProperties(lc.getFitnessFunctionConfiguration());
         mutatorProperties = mapToProperties(lc.getMutatorConfiguration());
@@ -560,16 +623,16 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         preloads = new ArrayList<String>(lc.getPreCreatedIndividuals());
 
         customListener = new ArrayList<String>();
-        for (Class c:lc.getCustomListeners())
-        {
+        for (Class c : lc.getCustomListeners()) {
             customListener.add(c.getName());
         }
 
+
+
     }
 
-    public String toGUIConfigString()
-    {
-        return lamarkFactory.cleanToJSONString(toGUIConfigObject());
+    public String toGUIConfigString() {
+        return lamarkFactory.convertToJson(toGUIConfigObject());
     }
 
     /**
@@ -599,33 +662,26 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         return d;
     }
 
-    private Double nsDouble(String value)
-    {
-        return (value==null)?null:new Double(value);
+    private Double nsDouble(String value) {
+        return (value == null || value.trim().length()==0) ? null : new Double(value);
     }
 
-    private Integer nsInteger(String value)
-    {
-        return (value==null)?null:new Integer(value);
+    private Integer nsInteger(String value) {
+        return (value == null || value.trim().length()==0) ? null : new Integer(value);
     }
 
-    private Long nsLong(String value)
-    {
-        return (value==null)?null:new Long(value);
+    private Long nsLong(String value) {
+        return (value == null) ? null : new Long(value);
     }
 
-    private Class safeForName(String value)
-    {
+    private Class safeForName(String value) {
         Class rval = null;
-        try
-    {
-        rval = Class.forName(value);
-    }
-    catch (ClassNotFoundException cnf)
-    {
-        LOG.warn("Couldnt find class {} - returning null", value);
-        rval = null;
-    }
+        try {
+            rval = Class.forName(value);
+        } catch (ClassNotFoundException cnf) {
+            LOG.warn("Couldnt find class {} - returning null", value);
+            rval = null;
+        }
         return rval;
     }
 
@@ -636,24 +692,9 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * @return String that was converted
      */
     private String ein(Object s) {
-        return (s==null)?"":String.valueOf(s);
+        return (s == null) ? "" : String.valueOf(s);
     }
 
-
-    /**
-     * If the value and key are non-empty and non-null, sets them in the properties object.
-     *
-     * @param p     Properties object to receive the key
-     * @param key   String key to set in properties
-     * @param value String value to set in properties
-     */
-    private void setIfNonEmpty(Properties p, String key, Object value) {
-        if (value != null && p != null && key != null) {
-            if (!String.class.isInstance(value) || ((String) value).trim().length() > 0) {
-                p.setProperty(key, value.toString());
-            }
-        }
-    }
 
     /**
      * Creates a classname from the contents of the combobox.
@@ -672,13 +713,10 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
             int pi = start.indexOf("[");
             String classN = start.substring(0, pi);
             String packageN = start.substring(pi + 1, start.length() - 1);
-            try
-            {
+            try {
                 return Class.forName(packageN + "." + classN);
-            }
-            catch (ClassNotFoundException cnf)
-            {
-                throw new IllegalArgumentException("Cant find class "+cb.getSelectedItem());
+            } catch (ClassNotFoundException cnf) {
+                throw new IllegalArgumentException("Cant find class " + cb.getSelectedItem());
             }
         }
 
@@ -708,7 +746,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * @return String containing name in combo format
      */
     private String formatClassName(Class clazz) {
-        return (clazz==null)?null:formatClassName(clazz.getName());
+        return (clazz == null) ? null : formatClassName(clazz.getName());
     }
 
     /**
@@ -744,27 +782,12 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
 
         for (String s : customListener) {
             Class c = safeForName(s);
-            if (c!=null)
-            {
+            if (c != null) {
                 p.getCustomListeners().add(c);
             }
         }
 
         return p;
-    }
-
-    /**
-     * Adds component properties to a properties object, using the given prefix.
-     *
-     * @param componentPrefix     String containing the prefix for the given component.
-     * @param componentProperties Properties object containing the component properties
-     * @param targetProps         Properties object to stick the component properties into
-     */
-    private void addComponentProperties(String componentPrefix, Properties componentProperties, Properties targetProps) {
-        for (Object key : componentProperties.keySet()) {
-            String s = (String) key;
-            targetProps.setProperty(componentPrefix + s, componentProperties.getProperty(s));
-        }
     }
 
     /**
@@ -866,27 +889,22 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         return preloads;
     }
 
-    public static Map<String,Object> propertiesToMap(Properties p)
-    {
-        Map<String,Object> rval = null;
-        if (p!=null)
-        {
+    public static Map<String, Object> propertiesToMap(Properties p) {
+        Map<String, Object> rval = null;
+        if (p != null) {
             rval = new TreeMap<String, Object>();
-            for (Map.Entry<Object,Object> e:p.entrySet())
-            {
-                rval.put((String)e.getKey(), (String)e.getValue());
+            for (Map.Entry<Object, Object> e : p.entrySet()) {
+                rval.put((String) e.getKey(), (String) e.getValue());
             }
         }
         return rval;
     }
 
-    public static Properties mapToProperties(Map<String,Object> m)
-    {
+    public static Properties mapToProperties(Map<String, Object> m) {
         Properties rval = null;
-        if (m!=null)
-        {
-            for (Map.Entry<String,Object> e:m.entrySet())
-            {
+        if (m != null) {
+            rval = new Properties();
+            for (Map.Entry<String, Object> e : m.entrySet()) {
                 rval.setProperty(e.getKey(), String.valueOf(e.getValue()));
             }
         }
@@ -901,4 +919,18 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     public void setLamarkFactory(LamarkFactory lamarkFactory) {
         this.lamarkFactory = lamarkFactory;
     }
+
+    public ClassLoader getCurrentClassloader() {
+        return currentClassloader;
+    }
+
+    public void setCurrentClassloader(URLClassLoader currentClassloader) {
+        this.currentClassloader = currentClassloader;
+    }
+
+    public Lamark createLamarkInstance(Component optionalParentComponent)
+    {
+        return lamarkFactory.createLamarkFromConfig(toGUIConfigObject(),optionalParentComponent);
+    }
+
 }

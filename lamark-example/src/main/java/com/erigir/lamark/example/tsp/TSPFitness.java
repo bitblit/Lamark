@@ -4,9 +4,7 @@
 package com.erigir.lamark.example.tsp;
 
 import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.EConfigResult;
 import com.erigir.lamark.EFitnessType;
-import com.erigir.lamark.IConfigurable;
 import com.erigir.lamark.IFitnessFunction;
 import com.erigir.lamark.IValidatable;
 import com.erigir.lamark.Individual;
@@ -21,7 +19,6 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 import java.util.StringTokenizer;
 
 /**
@@ -35,7 +32,7 @@ import java.util.StringTokenizer;
  * @author cweiss
  * @since 04/2005
  */
-public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunction<List<Integer>>, IValidatable, IConfigurable {
+public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunction<List<Integer>>, IValidatable {
     /**
      * String handle to the original tsp file read *
      */
@@ -317,40 +314,7 @@ public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunct
         }
     }
 
-
-    /**
-     * @see com.erigir.lamark.IConfigurable#getProperties()
-     */
-    public Properties getProperties() {
-        Properties rval = new Properties();
-        if (bestKnown != null) {
-            rval.setProperty("bestKnown", bestKnown.toString());
-        }
-        if (tspFile != null) {
-            rval.setProperty("tspFile", tspFile);
-        }
-        return rval;
+    public String getTspFile() {
+        return tspFile;
     }
-
-    /**
-     * Can set bestKnown and points.
-     *
-     * @see com.erigir.lamark.IConfigurable#setProperty(java.lang.String, java.lang.String)
-     */
-    public EConfigResult setProperty(String name, String value) {
-        if (name.equalsIgnoreCase("bestKnown")) {
-            try {
-                setBestKnown(new Integer(value));
-            } catch (Exception e) {
-                return EConfigResult.INVALID_VALUE;
-            }
-        } else if (name.equalsIgnoreCase("tspFile")) {
-            setTspFile(value);
-        } else {
-            return EConfigResult.NO_SUCH_PROPERTY;
-        }
-        return EConfigResult.OK;
-    }
-
-
 }

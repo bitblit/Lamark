@@ -6,6 +6,8 @@ A Java based library for executing genetic algorithms
 
 Notes and Caveats
 -----------------
+First and foremost: Yes, I know that Lamarck has a 'c' in it.  It is this way on purpose.  Sue me.
+
 Lamark is a library I wrote back in 2006 when I was contemplating doing my masters thesis on music generated via genetic
 algorithm.  Fast-forward to 2014 - I've long ago finished my masters thesis ([on a different topic, as it turns out]
 (http://books.google.com/books/about/An_Improved_Algorithm_for_Deinterlacing.html?id=W41unQEACAAJ), buy your

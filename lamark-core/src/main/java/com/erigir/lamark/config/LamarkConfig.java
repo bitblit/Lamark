@@ -7,11 +7,8 @@ import com.erigir.lamark.IFitnessFunction;
 import com.erigir.lamark.IIndividualFormatter;
 import com.erigir.lamark.IMutator;
 import com.erigir.lamark.ISelector;
-import com.erigir.lamark.Individual;
 import com.erigir.lamark.events.LamarkEventListener;
 import com.erigir.lamark.selector.RouletteWheel;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -19,33 +16,33 @@ import java.util.Map;
 
 /**
  * A data object holding all the configuration for a Lamark instance - for easy serialization of settings.
- *
+ * <p/>
  * This class does NOT hold any data about a current run.  It DOES enforce a valid configuration.
  *
  * @see com.erigir.lamark.LamarkFactory
- *
- * <ul>
- * <li>maximumPopulations - Number of populations to run before stopping (note - if targetScore is set, lamark may stop earlier)</li>
- * <li>populationSize - Number of individuals in a population</li>
- * <li>upperElitism - Percent of the population to reserve across populations (ie, if set to .1 in a 20-individual population, then
- * the best 2 individuals will be copied to the next populations each cycle</li>
- * <li>lowerElitism - Percent of the population to discard each generation (ie, if set to .1 in a 20-individual population, then 2
- * individuals will be generated from scratch each population.  NOTE - this essentially functions as a massive mutation program.  Use
- * with care to avoid simply performing a random walk of the search space</li>
- * <li>crossoverProbability - Likelyhood that a crossover will occur (instead of a copy of one of the parents).  If set to 1, a crossover
- * always occurs</li>
- * <li>mutationProbability - Likelyhood that a mutation will occur <em>in a given individual</em>.  If set to 0, a mutation never occurs</li>
- * <li>individualSize - Used by many creators to determine how large a genome to make.</li>
- * <li>numberOfWorkerThreads - Number of threads to use in processing (not counting the main lamark thread)</li>
- * <li>targetScore - A score that, if reached, should cause Lamark to stop.  Lamark will stop if the current best score is >= this in the
- * case of a maxima search, or <= this in the case of a minima search</li>
- * <li>randomSeed - Value to use as the seed of the random number generator.  Used to get reproduceable runs of the GA - as long as the
- * number of worker threads is set to 1, and the runs are on machines with the same implementation of the JVM</li>
- * </ul>
-
- * User: cweiss
- * Date: 2/15/14
- * Time: 1:28 PM
+ *      <p/>
+ *      <ul>
+ *      <li>maximumPopulations - Number of populations to run before stopping (note - if targetScore is set, lamark may stop earlier)</li>
+ *      <li>populationSize - Number of individuals in a population</li>
+ *      <li>upperElitism - Percent of the population to reserve across populations (ie, if set to .1 in a 20-individual population, then
+ *      the best 2 individuals will be copied to the next populations each cycle</li>
+ *      <li>lowerElitism - Percent of the population to discard each generation (ie, if set to .1 in a 20-individual population, then 2
+ *      individuals will be generated from scratch each population.  NOTE - this essentially functions as a massive mutation program.  Use
+ *      with care to avoid simply performing a random walk of the search space</li>
+ *      <li>crossoverProbability - Likelyhood that a crossover will occur (instead of a copy of one of the parents).  If set to 1, a crossover
+ *      always occurs</li>
+ *      <li>mutationProbability - Likelyhood that a mutation will occur <em>in a given individual</em>.  If set to 0, a mutation never occurs</li>
+ *      <li>individualSize - Used by many creators to determine how large a genome to make.</li>
+ *      <li>numberOfWorkerThreads - Number of threads to use in processing (not counting the main lamark thread)</li>
+ *      <li>targetScore - A score that, if reached, should cause Lamark to stop.  Lamark will stop if the current best score is >= this in the
+ *      case of a maxima search, or <= this in the case of a minima search</li>
+ *      <li>randomSeed - Value to use as the seed of the random number generator.  Used to get reproduceable runs of the GA - as long as the
+ *      number of worker threads is set to 1, and the runs are on machines with the same implementation of the JVM</li>
+ *      </ul>
+ *      <p/>
+ *      User: cweiss
+ *      Date: 2/15/14
+ *      Time: 1:28 PM
  */
 public class LamarkConfig extends LamarkRuntimeParameters {
     /**
@@ -76,27 +73,27 @@ public class LamarkConfig extends LamarkRuntimeParameters {
     /**
      * Specific configuration for creator class
      */
-    private Map<String,Object> creatorConfiguration;
+    private Map<String, Object> creatorConfiguration;
     /**
      * Specific configuration for crossover class
      */
-    private Map<String,Object> crossoverConfiguration;
+    private Map<String, Object> crossoverConfiguration;
     /**
      * Specific configuration for fitness function class
      */
-    private Map<String,Object> fitnessFunctionConfiguration;
+    private Map<String, Object> fitnessFunctionConfiguration;
     /**
      * Specific configuration for mutator class
      */
-    private Map<String,Object> mutatorConfiguration;
+    private Map<String, Object> mutatorConfiguration;
     /**
      * Specific configuration for selector class
      */
-    private Map<String,Object> selectorConfiguration;
+    private Map<String, Object> selectorConfiguration;
     /**
      * Specific configuration for individual formatter class
      */
-    private Map<String,Object> individualFormatterConfiguration;
+    private Map<String, Object> individualFormatterConfiguration;
 
     /**
      * Classes to instantiate that listen for Lamark events
@@ -321,7 +318,8 @@ public class LamarkConfig extends LamarkRuntimeParameters {
     /**
      * Mutator method
      *
-     * @param individualFormatterConfiguration new value for the property
+     * @param individualFormatterConfiguration
+     *         new value for the property
      */
     public void setIndividualFormatterConfiguration(Map<String, Object> individualFormatterConfiguration) {
         this.individualFormatterConfiguration = individualFormatterConfiguration;

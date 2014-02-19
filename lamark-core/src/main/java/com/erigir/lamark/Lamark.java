@@ -5,12 +5,12 @@
  */
 package com.erigir.lamark;
 
-import com.erigir.lamark.config.LamarkConfig;
 import com.erigir.lamark.config.LamarkRuntimeParameters;
 import com.erigir.lamark.events.*;
 import com.erigir.lamark.selector.RouletteWheel;
 
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -28,18 +28,21 @@ import java.util.logging.Level;
  * <li>Set the component into Lamark using the appropriate set method</li>
  * <li>Optionally set the 5th component (selector) if this is useful for you</li>
  * <li>Optionally instantiate and set a custom individual formatter</li>
- * <li>Set the size of the population</li>
- * <li>Set any of the optional parameters as appropriate. See the lamark object properties for a list.</li>
+ * <li>Create a LamarkRuntimeParameters object and set it into the lamark instance</li>
  * <li>Instantiate and add any listeners as appropriate</li>
- * <li>Either call the run() method on the instance to run within your current thread, <em>or</em></li>
- * <li>call new Thread(lamark).start() to run the instance within a new thread (note that using this method, you should use a listener to know when lamark finishes)</li>
+ * <li>Run Lamark
+ * <ul><li>Either call the call() method on the instance to run within your current thread, <em>or</em></li>
+ * <li>submit the lamark instance to an executor from java.util.concurrent,
+ * <li>e.g., Executors.newSingleThreadExecutor().submit(lamark) If you use a new thread you can either</li>
+ * <li>wait on the Future (its for this reason Lamark implements "callable" or listen for the correct</li>
+ * <li>event.</li></ul></li>
  * <li>During the run (via events) or after the run (via cached data) perform analysis on gathered results.</li>
  * </ol>
  *
  * @author cweiss
  * @since 04/2006
  */
-public class Lamark implements Runnable {
+public class Lamark implements Callable<Population> {
     /**
      * Shared instance of the random class
      */
@@ -124,11 +127,6 @@ public class Lamark implements Runnable {
      */
     private Set<LamarkEventListener> planCompleteListeners = new HashSet<LamarkEventListener>();
 
-    /**
-     * Set of objects to be notified when a configuration event occurs *
-     */
-    private Set<LamarkEventListener> configurationListeners = new HashSet<LamarkEventListener>();
-
     // ----------------------------------------------------------------------------------------------------------------------------------
     /**
      * Whether this lamark instance was aborted.  Defaults to false *
@@ -183,13 +181,6 @@ public class Lamark implements Runnable {
      */
     private List<Individual> toBeInserted = new LinkedList<Individual>();
 
-    /**
-     * Holds the list of events that happened prior to the start of the instance.
-     * NOTE: This is here to allow clients to add components and listeners in any
-     * order, and still get the events back.  It has as a side effect that any
-     * configuration errors aren't realized and sent until the instance is started
-     */
-    private List<LamarkEvent> preStartEvents = new LinkedList<LamarkEvent>();
 
     /**
      * Records the parents for a given child in the parent registry.
@@ -363,7 +354,7 @@ public class Lamark implements Runnable {
      *
      * @see java.lang.Runnable#run()
      */
-    public final void run() {
+    public final Population call() {
         // Calc exit type and notify listeners
         LastPopulationCompleteEvent.Type exitType = LastPopulationCompleteEvent.Type.BY_POPULATION_NUMBER;
 
@@ -384,9 +375,6 @@ public class Lamark implements Runnable {
 
             // Start a deadlock monitor
             new Thread(new DeadLockMonitor(this, Thread.currentThread())).start();
-
-            // Clear the pre-start queue of events
-            firePreStartEvents();
 
             int lowerElitismCount = (int) Math.ceil(runtimeParameters.getPopulationSize()
                     * runtimeParameters.getLowerElitism());
@@ -543,14 +531,16 @@ public class Lamark implements Runnable {
             event(new ExceptionEvent(this, t));
             aborted = true;
         } finally {
-            running = false;
             totalRunTime = new Long(System.currentTimeMillis() - startTime);
             startTime = null;
 
             // Notify listeners of last population
             event(new LastPopulationCompleteEvent(this, current, exitType));
+            // Finally, mark running complete
+            running = false;
 
         }
+        return current;
     }
 
     /**
@@ -696,19 +686,6 @@ public class Lamark implements Runnable {
     }
 
     /**
-     * Adds a listener for the specified type of events.
-     *
-     * @param jel LamarkEventListener to add
-     */
-    public final void addConfigurationListener(LamarkEventListener jel) {
-        if (jel != null) {
-            configurationListeners.add(jel);
-            logInfo("Added conf listener listener:" + jel);
-
-        }
-    }
-
-    /**
      * Registers this listener to receive ALL events
      *
      * @param jel LamarkEventListener to add
@@ -723,7 +700,6 @@ public class Lamark implements Runnable {
             exceptionListeners.add(jel);
             logListeners.add(jel);
             planCompleteListeners.add(jel);
-            configurationListeners.add(jel);
             logInfo("Added generic listener:" + jel);
         }
     }
@@ -737,15 +713,12 @@ public class Lamark implements Runnable {
      */
     public final boolean event(LamarkEvent event) {
         if (event != null) {
-            if (running) {
                 Set<LamarkEventListener> listenerSet = null;
                 Class tClass = event.getClass();
                 if (AbortedEvent.class.isAssignableFrom(tClass)) {
                     listenerSet = abortListeners;
                 } else if (BetterIndividualFoundEvent.class.isAssignableFrom(tClass)) {
                     listenerSet = betterIndividualFoundListeners;
-                } else if (ConfigurationEvent.class.isAssignableFrom(tClass)) {
-                    listenerSet = configurationListeners;
                 } else if (ExceptionEvent.class.isAssignableFrom(tClass)) {
                     listenerSet = exceptionListeners;
                 } else if (LastPopulationCompleteEvent.class.isAssignableFrom(tClass)) {
@@ -765,36 +738,8 @@ public class Lamark implements Runnable {
                     listener.handleEvent(event);
                 }
                 return true;
-            } else {
-                // If not running, just put it in the queue of messages to dump when the processing starts
-                // We do this so that it is possible for a user to add their various properties and 
-                // components prior to registering their listeners, but at the cost of immediate feedback
-                // on configuration events
-                preStartEvents.add(event);
-                return false;
-            }
         }
         return false;
-    }
-
-
-    /**
-     * Emptys the queue of events that occurred prior to startup into the appropriate listeners.
-     */
-    private void firePreStartEvents() {
-        if (running) {
-            for (Iterator<LamarkEvent> i = preStartEvents.iterator(); i.hasNext(); ) {
-                LamarkEvent next = i.next();
-                if (event(next)) {
-                    i.remove();
-                }
-            }
-            if (!preStartEvents.isEmpty()) {
-                throw new IllegalStateException("CANT HAPPEN: failed to empty preStartEvents");
-            }
-        } else {
-            throw new IllegalStateException("CANT HAPPEN: ClearPreStartEvents should only be called when running.");
-        }
     }
 
     /**
@@ -933,10 +878,8 @@ public class Lamark implements Runnable {
         return creator;
     }
 
-    private void updateBackPointer(ILamarkComponent component)
-    {
-        if (component!=null)
-        {
+    private void updateBackPointer(ILamarkComponent component) {
+        if (component != null) {
             component.setLamark(this);
         }
     }

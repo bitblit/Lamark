@@ -1,15 +1,12 @@
-package com.erigir.lamark.example;
+package com.erigir.lamark.fitness;
 
 import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.EConfigResult;
 import com.erigir.lamark.EFitnessType;
-import com.erigir.lamark.IConfigurable;
 import com.erigir.lamark.IFitnessFunction;
 import com.erigir.lamark.IValidatable;
 import com.erigir.lamark.Individual;
 
 import java.util.List;
-import java.util.Properties;
 
 /**
  * A fitness function that searches for a given string.
@@ -21,7 +18,7 @@ import java.util.Properties;
  * @author cweiss
  * @since 10/2007
  */
-public class StringSearcher extends AbstractLamarkComponent implements IFitnessFunction<String>, IValidatable, IConfigurable {
+public class StringFinderFitness extends AbstractLamarkComponent implements IFitnessFunction<String>, IValidatable {
     /**
      * The target string for lamark to search for *
      */
@@ -30,7 +27,7 @@ public class StringSearcher extends AbstractLamarkComponent implements IFitnessF
     /**
      * Default constructor
      */
-    public StringSearcher() {
+    public StringFinderFitness() {
         super();
     }
 
@@ -39,7 +36,7 @@ public class StringSearcher extends AbstractLamarkComponent implements IFitnessF
      *
      * @param pTarget String to search for
      */
-    public StringSearcher(String pTarget) {
+    public StringFinderFitness(String pTarget) {
         super();
         target = pTarget;
     }
@@ -92,28 +89,6 @@ public class StringSearcher extends AbstractLamarkComponent implements IFitnessF
             }
         }
         return rval / (double) s.length();
-    }
-
-    /**
-     * @see com.erigir.lamark.IConfigurable#getProperties()
-     */
-    public Properties getProperties() {
-        Properties p = new Properties();
-        if (target != null) {
-            p.setProperty("target", target);
-        }
-        return p;
-    }
-
-    /**
-     * @see com.erigir.lamark.IConfigurable#setProperty(String, String)
-     */
-    public EConfigResult setProperty(String name, String value) {
-        if (name.equalsIgnoreCase("target")) {
-            target = value;
-            return EConfigResult.OK;
-        }
-        return EConfigResult.NO_SUCH_PROPERTY;
     }
 
 

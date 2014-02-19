@@ -2,12 +2,16 @@ package com.erigir.lamark;
 
 import com.erigir.lamark.config.LamarkConfig;
 import com.erigir.lamark.config.LamarkGUIConfig;
+import com.erigir.lamark.events.LamarkEventListener;
+import com.erigir.lamark.gui.GUIEventListener;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
@@ -23,10 +27,10 @@ import java.util.concurrent.Executors;
  * This class translates:
  * 'Lamark Instance' to/from 'LamarkConfig Instance'
  * 'LamarkConfig Instance' to/from 'JSON representation'
- *
+ * <p/>
  * Lamark instances hold both their configuration and data about the CURRENT run of that configuration - it is similar
  * to the relationship between a class and an instance.
- *
+ * <p/>
  * <br />
  * NOTE : This is a class for simple bootstrapping.  If your auto-conf needs are more complicated then an IOC container like
  * Spring (http://www.springframework.org) is recommended.
@@ -39,37 +43,39 @@ public class LamarkFactory {
 
     private ObjectMapper objectMapper;
 
-    public LamarkFactory()
-    {
+    public LamarkFactory() {
         super();
         objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
     }
 
 
-    public LamarkConfig extractConfigFromLamark(Lamark lamark)
-    {
-        LamarkConfig rval = cleanFromJSONString(cleanToJSONString(lamark.getRuntimeParameters()), LamarkConfig.class);
+    public LamarkConfig extractConfigFromLamark(Lamark lamark) {
+        LamarkConfig rval = cleanFromJSONString(convertToJson(lamark.getRuntimeParameters()), LamarkConfig.class);
         rval.setCreatorClass(lamark.getCreator().getClass());
-        rval.setCreatorConfiguration(cleanFromJSONString(cleanToJSONString(lamark.getCreator()), Map.class));
+        rval.setCreatorConfiguration(cleanFromJSONString(convertToJson(lamark.getCreator()), Map.class));
         rval.setCrossoverClass(lamark.getCrossover().getClass());
-        rval.setCrossoverConfiguration(cleanFromJSONString(cleanToJSONString(lamark.getCrossover()), Map.class));
+        rval.setCrossoverConfiguration(cleanFromJSONString(convertToJson(lamark.getCrossover()), Map.class));
         rval.setFitnessFunctionClass(lamark.getFitnessFunction().getClass());
-        rval.setFitnessFunctionConfiguration(cleanFromJSONString(cleanToJSONString(lamark.getFitnessFunction()), Map.class));
+        rval.setFitnessFunctionConfiguration(cleanFromJSONString(convertToJson(lamark.getFitnessFunction()), Map.class));
         rval.setMutatorClass(lamark.getMutator().getClass());
-        rval.setMutatorConfiguration(cleanFromJSONString(cleanToJSONString(lamark.getMutator()), Map.class));
+        rval.setMutatorConfiguration(cleanFromJSONString(convertToJson(lamark.getMutator()), Map.class));
         rval.setSelectorClass(lamark.getSelector().getClass());
-        rval.setSelectorConfiguration(cleanFromJSONString(cleanToJSONString(lamark.getSelector()), Map.class));
+        rval.setSelectorConfiguration(cleanFromJSONString(convertToJson(lamark.getSelector()), Map.class));
         rval.setIndividualFormatterClass(lamark.getFormatter().getClass());
-        rval.setIndividualFormatterConfiguration(cleanFromJSONString(cleanToJSONString(lamark.getFormatter()), Map.class));
+        rval.setIndividualFormatterConfiguration(cleanFromJSONString(convertToJson(lamark.getFormatter()), Map.class));
 
         return rval;
     }
 
     public Lamark createLamarkFromConfig(LamarkConfig lc)
-            throws LamarkConfigurationFailedException
-    {
+            throws LamarkConfigurationFailedException {
+        return createLamarkFromConfig(lc, null);
+    }
+
+    public Lamark createLamarkFromConfig(LamarkConfig lc, Component optionalParentComponent)
+            throws LamarkConfigurationFailedException {
         List<String> errors = new LinkedList<String>();
 
         ICreator creator = factoryCreate(lc.getCreatorClass(), lc.getCreatorConfiguration());
@@ -88,13 +94,10 @@ public class LamarkFactory {
         ExecutorService executor = null;
         if (lc.getNumberOfWorkerThreads() == null) {
             errors.add("Number of worker threads set to null (set to 1 for single-threading)");
-        }
-        else if (lc.getNumberOfWorkerThreads() < 1) {
+        } else if (lc.getNumberOfWorkerThreads() < 1) {
             errors.add("Must have at least 1 worker thread");
-        }
-        else
-        {
-            executor = (lc.getNumberOfWorkerThreads()==1)?Executors.newSingleThreadExecutor():Executors.newFixedThreadPool(lc.getNumberOfWorkerThreads());
+        } else {
+            executor = (lc.getNumberOfWorkerThreads() == 1) ? Executors.newSingleThreadExecutor() : Executors.newFixedThreadPool(lc.getNumberOfWorkerThreads());
         }
 
         if (lc.getPopulationSize() == null) {
@@ -113,12 +116,45 @@ public class LamarkFactory {
             errors.add("Mutation probability set to null (set to 0.0, if that's what you want)");
         }
 
-        if (errors.size()>0)
+        // Create any custom listeners
+        List<LamarkEventListener> listeners = new LinkedList<LamarkEventListener>();
+        for (Class c:lc.getCustomListeners())
         {
-            throw new LamarkConfigurationFailedException(errors);
+            try
+            {
+                LamarkEventListener l = (LamarkEventListener)c.newInstance();
+                if (optionalParentComponent!=null && GUIEventListener.class.isAssignableFrom(c))
+                {
+                    ((GUIEventListener)l).setParentComponent(optionalParentComponent);
+                }
+                listeners.add(l);
+            }
+            catch (Exception e)
+            {
+                LOG.warn("Couldn't create class of type {}",c,e);
+            }
         }
-        else
+
+        List<Individual> preloads = new LinkedList<Individual>();
+        if (lc.getPreCreatedIndividuals()!=null && lc.getPreCreatedIndividuals().size()>0)
         {
+            if (IPreloadableCreator.class.isAssignableFrom(creator.getClass()))
+            {
+                 for (String s:lc.getPreCreatedIndividuals())
+                 {
+                     preloads.add(((IPreloadableCreator)creator).createFromPreload(s));
+                 }
+            }
+            else
+            {
+                 errors.add("Preloads specified but creator doesn't implement IPreloadableCreator");
+            }
+        }
+
+
+        if (errors.size() > 0) {
+            throw new LamarkConfigurationFailedException(errors);
+        } else {
             Lamark rval = new Lamark();
             rval.setRuntimeParameters(lc);
             rval.setCreator(creator);
@@ -128,92 +164,53 @@ public class LamarkFactory {
             rval.setMutator(mutator);
             rval.setSelector(selector);
             rval.setExecutor(executor);
+            for (LamarkEventListener l:listeners)
+            {
+                rval.addGenericListener(l);
+            }
+            for (Individual i:preloads)
+            {
+                rval.enqueueForInsert(i);
+            }
 
             return rval;
         }
     }
 
-    private void require(Object value, String name, List<String> error)
-    {
-        if (value==null)
-        {
-            error.add(name+" is required but not defined or fails to initialize");
-        }
-        else
-        {
+    private void require(Object value, String name, List<String> error) {
+        if (value == null) {
+            error.add(name + " is required but not defined or fails to initialize");
+        } else {
             conditionalValidate(value, error);
         }
     }
 
-
-
-    public String configToJson(LamarkConfig lamark)
-    {
-        return cleanToJSONString(lamark);
-    }
-
-    public String guiConfigToJson(LamarkGUIConfig lamark)
-    {
-        return cleanToJSONString(lamark);
-    }
-
-    public String cleanToJSONString(Object value)
-    {
-        try
-        {
-            return (value==null)?null:objectMapper.writeValueAsString(value);
-        }
-        catch (IOException ioe)
-        {
-            throw new IllegalArgumentException("Couldn't format",ioe);
+    public String convertToJson(Object value) {
+        try {
+            return (value == null) ? null : objectMapper.writeValueAsString(value);
+        } catch (IOException ioe) {
+            throw new IllegalArgumentException("Couldn't format", ioe);
         }
     }
 
-    public <T> T cleanFromJSONString(String value, Class<T> clazz)
-    {
-        try
-        {
-            return (value==null || clazz==null)?null:objectMapper.readValue(value, clazz);
-        }
-        catch (IOException ioe)
-        {
-            throw new IllegalArgumentException("Couldn't format",ioe);
+    public <T> T cleanFromJSONString(String value, Class<T> clazz) {
+        try {
+            return (value == null || clazz == null) ? null : objectMapper.readValue(value, clazz);
+        } catch (IOException ioe) {
+            throw new IllegalArgumentException("Couldn't format", ioe);
         }
     }
 
-    public LamarkConfig jsonToConfig(String json)
-    {
-        try
-        {
-            return (json==null)?null:objectMapper.readValue(json, LamarkConfig.class);
-        }
-        catch (IOException ioe)
-        {
-            throw new IllegalArgumentException("Couldn't format",ioe);
-        }
-    }
-
-    public LamarkGUIConfig jsonToGUIConfig(String json)
-    {
-        try
-        {
-            return (json==null)?null:objectMapper.readValue(json, LamarkGUIConfig.class);
-        }
-        catch (IOException ioe)
-        {
-            throw new IllegalArgumentException("Couldn't format",ioe);
-        }
-    }
-
-    public LamarkGUIConfig jsonToGUIConfig(InputStream json)
-    {
-        try
-        {
-            return (json==null)?null:objectMapper.readValue(json, LamarkGUIConfig.class);
-        }
-        catch (IOException ioe)
-        {
-            throw new IllegalArgumentException("Couldn't format",ioe);
+    public Map<String,LamarkGUIConfig> jsonToConfig(String json, ClassLoader classLoader) {
+        try {
+            Map<String,LamarkGUIConfig> rval = null;
+            if (json!=null && classLoader!=null)
+            {
+               rval = objectMapper.readValue(json, new TypeReference<Map<String,LamarkGUIConfig>>() {});
+            }
+            return rval;
+        } catch (IOException ioe) {
+            throw new IllegalArgumentException("Couldn't format", ioe);
         }
     }
 
@@ -221,27 +218,19 @@ public class LamarkFactory {
         this.objectMapper = objectMapper;
     }
 
-    private <T> T factoryCreate(Class<T> clazz, Map<String,Object> config)
-    {
+    private <T> T factoryCreate(Class<T> clazz, Map<String, Object> config) {
         T rval = null;
-        try
-        {
-            if (clazz!=null)
-            {
-                if (config==null || config.size()==0)
-                {
+        try {
+            if (clazz != null) {
+                if (config == null || config.size() == 0) {
                     rval = clazz.newInstance();
-                }
-                else
-                {
+                } else {
                     String json = objectMapper.writeValueAsString(config);
                     rval = objectMapper.readValue(json, clazz);
                 }
             }
-        }
-        catch (Exception e)
-        {
-            LOG.warn("Error attempting to factory create {}",clazz, e);
+        } catch (Exception e) {
+            LOG.warn("Error attempting to factory create {}", clazz, e);
             rval = null;
         }
 
@@ -255,7 +244,7 @@ public class LamarkFactory {
      * @param errors List of errors, which the component can then add to if there is an error
      */
     private void conditionalValidate(Object comp, List<String> errors) {
-        if (comp!=null && IValidatable.class.isInstance(comp)) {
+        if (comp != null && IValidatable.class.isInstance(comp)) {
             ((IValidatable) comp).validate(errors);
         }
     }

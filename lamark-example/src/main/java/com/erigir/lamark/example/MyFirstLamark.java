@@ -30,7 +30,7 @@ public class MyFirstLamark implements LamarkEventListener {
      * @param ignored String[]
      */
     public static void main(String[] ignored) {
-        MyFirstLamark e = new MyFirstLamark();
+        com.erigir.lamark.MyFirstLamark e = new com.erigir.lamark.MyFirstLamark();
         e.go();
         System.exit(0);
     }
@@ -74,10 +74,9 @@ public class MyFirstLamark implements LamarkEventListener {
         lamark.addPopulationCompleteListener(this);
         lamark.addExceptionListener(this);
         lamark.addLastPopulationCompleteListener(this);
-        lamark.addConfigurationListener(this);
 
 
-        lamark.run();
+        lamark.call();
     }
 
 

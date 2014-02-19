@@ -4,9 +4,7 @@
 package com.erigir.lamark.example.schedule;
 
 import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.EConfigResult;
 import com.erigir.lamark.EFitnessType;
-import com.erigir.lamark.IConfigurable;
 import com.erigir.lamark.IFitnessFunction;
 import com.erigir.lamark.IValidatable;
 import com.erigir.lamark.Individual;
@@ -14,7 +12,6 @@ import com.erigir.lamark.Individual;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * This class creates a psuedorandom schedule problem and uses the DynamicScheduler
@@ -25,7 +22,7 @@ import java.util.Properties;
  * @author cweiss
  * @since 04/2005
  */
-public class ScheduleFitness extends AbstractLamarkComponent implements IFitnessFunction<List>, IValidatable, IConfigurable {
+public class ScheduleFitness extends AbstractLamarkComponent implements IFitnessFunction<List>, IValidatable {
     /**
      * The length of each job in units *
      */
@@ -76,34 +73,20 @@ public class ScheduleFitness extends AbstractLamarkComponent implements IFitness
         }
     }
 
-    /**
-     * @see com.erigir.lamark.IConfigurable#getProperties()
-     */
-    public Properties getProperties() {
-        Properties rval = new Properties();
-        rval.setProperty("times", intArrToString(times));
-        rval.setProperty("weights", intArrToString(weights));
-        return rval;
+    public int[] getTimes() {
+        return times;
     }
 
-    /**
-     * Allows setting of times and weights properties (comma-delimited integer list)
-     *
-     * @see com.erigir.lamark.IConfigurable#setProperty(java.lang.String, java.lang.String)
-     */
-    public EConfigResult setProperty(String name, String value) {
-        try {
-            if (name.equalsIgnoreCase("times")) {
-                times = stringToIntArr(value);
-            } else if (name.equalsIgnoreCase("weights")) {
-                weights = stringToIntArr(value);
-            } else {
-                return EConfigResult.NO_SUCH_PROPERTY;
-            }
-        } catch (Exception e) {
-            return EConfigResult.INVALID_VALUE;
-        }
-        return EConfigResult.OK;
+    public void setTimes(int[] times) {
+        this.times = times;
+    }
+
+    public int[] getWeights() {
+        return weights;
+    }
+
+    public void setWeights(int[] weights) {
+        this.weights = weights;
     }
 
     /**

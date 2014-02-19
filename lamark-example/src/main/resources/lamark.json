@@ -1,0 +1,196 @@
+{
+  "Cellular Automata" :
+  {
+    "numberOfWorkerThreads" : 4,
+    "crossoverProbability" : 1,
+    "populationSize" : 500,
+    "selectorClass" : "com.erigir.lamark.selector.RouletteWheel",
+    "upperElitism" : 0.1,
+    "fitnessFunctionClass" : "com.erigir.lamark.example.cellular.CAMajorityFitness",
+    "creatorClass" : "com.erigir.lamark.creator.BinaryStringCreator",
+    "randomSeed" : 1,
+    "mutatorClass" : "com.erigir.lamark.mutator.StringSimpleMutator",
+    "mutationProbability" : 0,
+    "crossoverClass" : "com.erigir.lamark.crossover.StringSinglePoint",
+    "lowerElitism" : 0.1 ,
+    "fitnessFunctionConfiguration" :
+    {
+      "tableHeight" : 100,
+      "tableWidth" : 100,
+      "radius" : 3
+    },
+    "creatorConfiguration" :
+    {
+      "size" : 128
+    },
+    "customListeners" :
+      [
+        "com.erigir.lamark.example.cellular.CAGraphicalListener"
+      ]
+  },
+  "Scheduling" :
+  {
+  "numberOfWorkerThreads" : 2,
+  "crossoverProbability" : 1,
+  "populationSize" : 50,
+  "selectorClass" : "com.erigir.lamark.selector.RouletteWheel",
+  "upperElitism" : 0.1,
+  "fitnessFunctionClass" : "com.erigir.lamark.example.schedule.ScheduleFitness",
+  "creatorClass" : "com.erigir.lamark.creator.IntegerListPermutationCreator",
+  "randomSeed" : 1,
+  "mutatorClass" : "com.erigir.lamark.mutator.ListSimpleMutator",
+  "mutationProbability" : 0,
+  "crossoverClass" : "com.erigir.lamark.crossover.IntegerPermutationFill",
+  "lowerElitism" : 0.1 ,
+  "fitnessFunctionConfiguration" :
+  {
+  },
+  "creatorConfiguration" :
+  {
+  "size" : 30
+  },
+  "customListeners" :
+  [
+  "com.erigir.lamark.example.schedule.ScheduleGraphicalListener"
+  ]
+  },
+  "Integer Sorting" :
+  {
+    "numberOfWorkerThreads" : 2,
+    "crossoverProbability" : 1,
+    "populationSize" : 10,
+    "selectorClass" : "com.erigir.lamark.selector.RouletteWheel",
+    "upperElitism" : 0.1,
+    "fitnessFunctionClass" : "com.erigir.lamark.example.simple.IntegerSort",
+    "creatorClass" : "com.erigir.lamark.creator.IntegerListPermutationCreator",
+    "randomSeed" : 1,
+    "mutatorClass" : "com.erigir.lamark.mutator.ListSimpleMutator",
+    "mutationProbability" : 0,
+    "crossoverClass" : "com.erigir.lamark.crossover.IntegerPermutationFill",
+    "lowerElitism" : 0.1 ,
+    "fitnessFunctionConfiguration" :
+    {
+    },
+    "creatorConfiguration" :
+    {
+      "size" : 30
+    },
+    "customListeners" :
+      [
+      ]
+  },
+  "Travelling Salesman : Berlin (52)" :
+  {
+    "numberOfWorkerThreads" : 2,
+    "crossoverProbability" : 1,
+    "populationSize" : 25,
+    "selectorClass" : "com.erigir.lamark.selector.RouletteWheel",
+    "upperElitism" : 0.1,
+    "fitnessFunctionClass" : "com.erigir.lamark.example.tsp.berlin.BerlinTSPFitness",
+    "creatorClass" : "com.erigir.lamark.creator.IntegerListPermutationCreator",
+    "randomSeed" : 1,
+    "mutatorClass" : "com.erigir.lamark.mutator.IntegerList2ExchangeMutator",
+    "mutationProbability" : 0,
+    "crossoverClass" : "com.erigir.lamark.crossover.IntegerPermutationFill",
+    "lowerElitism" : 0.1 ,
+    "fitnessFunctionConfiguration" :
+    {
+      "tspFile" : "/berlin52.tsp",
+      "bestKnown" : 7542
+    },
+    "creatorConfiguration" :
+    {
+      "size" : 52
+    },
+    "customListeners" :
+      [
+        "com.erigir.lamark.example.tsp.TSPGraphicalListener"
+      ]
+  },
+  "Travelling Salesman : Biergarten (127)" :
+  {
+    "numberOfWorkerThreads" : 2,
+    "crossoverProbability" : 1,
+    "populationSize" : 50,
+    "selectorClass" : "com.erigir.lamark.selector.RouletteWheel",
+    "upperElitism" : 0.1,
+    "fitnessFunctionClass" : "com.erigir.lamark.example.tsp.berlin.BerlinTSPFitness",
+    "creatorClass" : "com.erigir.lamark.creator.IntegerListPermutationCreator",
+    "randomSeed" : 1,
+    "mutatorClass" : "com.erigir.lamark.mutator.IntegerList2ExchangeMutator",
+    "mutationProbability" : 0,
+    "crossoverClass" : "com.erigir.lamark.crossover.IntegerPermutationFill",
+    "lowerElitism" : 0.1 ,
+    "fitnessFunctionConfiguration" :
+    {
+      "tspFile" : "/bier127.tsp",
+      "bestKnown" : 118282
+    },
+    "creatorConfiguration" :
+    {
+      "size" : 127
+    },
+    "customListeners" :
+      [
+        "com.erigir.lamark.example.tsp.TSPGraphicalListener"
+      ]
+  },
+  "Travelling Salesman : Germany (15112)" :
+  {
+    "numberOfWorkerThreads" : 2,
+    "crossoverProbability" : 1,
+    "populationSize" : 50,
+    "selectorClass" : "com.erigir.lamark.selector.RouletteWheel",
+    "upperElitism" : 0.1,
+    "fitnessFunctionClass" : "com.erigir.lamark.example.tsp.berlin.BerlinTSPFitness",
+    "creatorClass" : "com.erigir.lamark.creator.IntegerListPermutationCreator",
+    "randomSeed" : 1,
+    "mutatorClass" : "com.erigir.lamark.mutator.IntegerList2ExchangeMutator",
+    "mutationProbability" : 0,
+    "crossoverClass" : "com.erigir.lamark.crossover.IntegerPermutationFill",
+    "lowerElitism" : 0.1 ,
+    "fitnessFunctionConfiguration" :
+    {
+      "tspFile" : "/d15112.tsp",
+      "bestKnown" : 1573084
+    },
+    "creatorConfiguration" :
+    {
+      "size" : 15112
+    },
+    "customListeners" :
+      [
+        "com.erigir.lamark.example.tsp.TSPGraphicalListener"
+      ]
+  },
+  "Travelling Salesman : Ulysses (16)" :
+  {
+    "numberOfWorkerThreads" : 2,
+    "crossoverProbability" : 1,
+    "populationSize" : 50,
+    "selectorClass" : "com.erigir.lamark.selector.RouletteWheel",
+    "upperElitism" : 0.1,
+    "fitnessFunctionClass" : "com.erigir.lamark.example.tsp.berlin.BerlinTSPFitness",
+    "creatorClass" : "com.erigir.lamark.creator.IntegerListPermutationCreator",
+    "randomSeed" : 1,
+    "mutatorClass" : "com.erigir.lamark.mutator.IntegerList2ExchangeMutator",
+    "mutationProbability" : 0,
+    "crossoverClass" : "com.erigir.lamark.crossover.IntegerPermutationFill",
+    "lowerElitism" : 0.1 ,
+    "fitnessFunctionConfiguration" :
+    {
+      "tspFile" : "/ulysses16.tsp",
+      "bestKnown" : 6859
+    },
+    "creatorConfiguration" :
+    {
+      "size" : 16
+    },
+    "customListeners" :
+      [
+        "com.erigir.lamark.example.tsp.TSPGraphicalListener"
+      ]
+  }
+
+}
+

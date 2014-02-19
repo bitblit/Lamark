@@ -4,15 +4,12 @@
 package com.erigir.lamark.creator;
 
 import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.EConfigResult;
-import com.erigir.lamark.IConfigurable;
 import com.erigir.lamark.IPreloadableCreator;
 import com.erigir.lamark.IValidatable;
 import com.erigir.lamark.Individual;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * Creates new individuals of type String, with characters taken from the supplied valid character set.
@@ -20,7 +17,7 @@ import java.util.Properties;
  * @author cweiss
  * @since 04/2006
  */
-public class StringCreator extends AbstractLamarkComponent implements IPreloadableCreator<String>, IValidatable, IConfigurable {
+public class StringCreator extends AbstractLamarkComponent implements IPreloadableCreator<String>, IValidatable {
     /**
      * List of characters to create new strings from *
      */
@@ -120,47 +117,6 @@ public class StringCreator extends AbstractLamarkComponent implements IPreloadab
         if (size == null) {
             errors.add("No 'size' set for the creator");
         }
-    }
-
-
-    /**
-     * @see com.erigir.lamark.IConfigurable#setProperty(String, String)
-     */
-    public EConfigResult setProperty(String name, String value) {
-        if (name.equalsIgnoreCase("size")) {
-            try {
-                size = new Integer(value);
-                return EConfigResult.OK;
-            } catch (Exception e) {
-                return EConfigResult.INVALID_VALUE;
-            }
-        } else if (name.equalsIgnoreCase("validCharacters")) {
-            validCharacters = new ArrayList<Character>();
-            for (int i = 0; i < value.length(); i++) {
-                validCharacters.add(value.charAt(i));
-            }
-            return EConfigResult.OK;
-        } else {
-            return EConfigResult.NO_SUCH_PROPERTY;
-        }
-    }
-
-    /**
-     * @see com.erigir.lamark.IConfigurable#getProperties()
-     */
-    public Properties getProperties() {
-        Properties p = new Properties();
-        if (size != null) {
-            p.setProperty("size", size.toString());
-        }
-        if (validCharacters != null && validCharacters.size() > 0) {
-            StringBuffer sb = new StringBuffer();
-            for (Character c : validCharacters) {
-                sb.append(c);
-            }
-            p.setProperty("validCharacters", sb.toString());
-        }
-        return p;
     }
 
 

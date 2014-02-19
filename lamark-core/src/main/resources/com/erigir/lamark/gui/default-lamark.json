@@ -1,6 +1,8 @@
 {
+"Main" :
+{
   "creatorClasses": [
-    "com.erigir.lamark.example.LamarkFinderCreator",
+    "com.erigir.lamark.creator.StringCreator",
     "com.erigir.lamark.creator.BinaryStringCreator",
     "com.erigir.lamark.creator.ByteListCreator",
     "com.erigir.lamark.creator.DecimalStringCreator",
@@ -8,7 +10,6 @@
     "com.erigir.lamark.creator.IntegerListCreator",
     "com.erigir.lamark.creator.IntegerListPermutationCreator",
     "com.erigir.lamark.creator.RangedIntegerListCreator",
-    "com.erigir.lamark.creator.StringCreator",
     "com.erigir.lamark.creator.AlphaAndSpaceStringCreator",
     "com.erigir.lamark.creator.AlphaStringCreator"
   ],
@@ -30,8 +31,22 @@
     "com.erigir.lamark.selector.Tournament"
   ],
   "fitnessFunctionClasses": [
-    "com.erigir.lamark.example.LamarkFinderFitness"
+    "com.erigir.lamark.fitness.StringFinderFitness",
+    "com.erigir.lamark.fitness.AllOnes",
+    "com.erigir.lamark.fitness.AllZeros"
   ],
+  "fitnessFunctionClass" : "com.erigir.lamark.fitness.StringFinderFitness",
+  "fitnessFunctionConfiguration" :
+  {
+    "target" : "LAMARK"
+  },
+  "creatorClass" : "com.erigir.lamark.creator.StringCreator",
+  "creatorConfiguration" :
+  {
+    "validCharacters" : "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "size" : 6
+  },
+
     "upperElitism": 0.1 ,
     "lowerElitism": 0.1 ,
     "populationSize": 10 ,
@@ -41,6 +56,7 @@
     "targetScore": 1 ,
     "randomSeed": 1
 
+}
 }
 
 

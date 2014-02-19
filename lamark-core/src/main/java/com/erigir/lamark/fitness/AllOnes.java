@@ -1,4 +1,4 @@
-package com.erigir.lamark.example.simple;
+package com.erigir.lamark.fitness;
 
 import com.erigir.lamark.AbstractLamarkComponent;
 import com.erigir.lamark.EFitnessType;
@@ -7,6 +7,8 @@ import com.erigir.lamark.Individual;
 
 /**
  * A simple fitness function to find a string with all ones in it.
+ *
+ * This class is here mainly as a simple example and because it's used in the unit tests of the roulette wheel
  *
  * @author cweiss
  * @since 04/2006

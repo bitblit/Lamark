@@ -9,7 +9,7 @@ import java.util.List;
  * Date: 2/15/14
  * Time: 2:31 PM
  */
-public class LamarkConfigurationFailedException extends RuntimeException{
+public class LamarkConfigurationFailedException extends RuntimeException {
     private List<String> reasons = new LinkedList<String>();
 
     public LamarkConfigurationFailedException(List<String> reasons) {
@@ -20,10 +20,8 @@ public class LamarkConfigurationFailedException extends RuntimeException{
         return Collections.unmodifiableList(reasons);
     }
 
-    public void addReason(String reason)
-    {
-        if (reason!=null && reason.length()>0)
-        {
+    public void addReason(String reason) {
+        if (reason != null && reason.length() > 0) {
             reasons.add(reason);
         }
     }

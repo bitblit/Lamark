@@ -4,15 +4,12 @@
 package com.erigir.lamark.example.cellular;
 
 import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.EConfigResult;
 import com.erigir.lamark.EFitnessType;
-import com.erigir.lamark.IConfigurable;
 import com.erigir.lamark.IFitnessFunction;
 import com.erigir.lamark.IValidatable;
 import com.erigir.lamark.Individual;
 
 import java.util.List;
-import java.util.Properties;
 import java.util.Random;
 
 /**
@@ -22,7 +19,7 @@ import java.util.Random;
  * @author cweiss
  * @since 03/2007
  */
-public class CAMajorityFitness extends AbstractLamarkComponent implements IFitnessFunction<String>, IConfigurable, IValidatable {
+public class CAMajorityFitness extends AbstractLamarkComponent implements IFitnessFunction<String>, IValidatable {
     /**
      * An internal static random instnace *
      */
@@ -50,12 +47,12 @@ public class CAMajorityFitness extends AbstractLamarkComponent implements IFitne
     public static final int NUMBER_OF_CA_COLS = 5; // = number of tables
 
     /**
-     * Default widht of one of the tables *
+     * Default width of one of the tables *
      */
     public static final int DEFAULT_TABLE_WIDTH = 50;
 
     /**
-     * Defautl height of one of the tables *
+     * Default height of one of the tables *
      */
     public static final int DEFAULT_TABLE_HEIGHT = 50;
 
@@ -175,52 +172,6 @@ public class CAMajorityFitness extends AbstractLamarkComponent implements IFitne
         if (radius == null) {
             errors.add("You must set radius");
         }
-    }
-
-    /**
-     * @see com.erigir.lamark.IConfigurable#getProperties()
-     */
-    public Properties getProperties() {
-        Properties rval = new Properties();
-        if (tableWidth != null) {
-            rval.setProperty("tableWidth", tableWidth.toString());
-        }
-        if (tableHeight != null) {
-            rval.setProperty("tableHeight", tableHeight.toString());
-        }
-        if (radius != null) {
-            rval.setProperty("radius", radius.toString());
-        }
-
-        return rval;
-    }
-
-    /**
-     * @see com.erigir.lamark.IConfigurable#setProperty(java.lang.String, java.lang.String)
-     */
-    public EConfigResult setProperty(String name, String value) {
-        if (name.equalsIgnoreCase("tableHeight")) {
-            try {
-                this.setTableHeight(new Integer(value));
-            } catch (Exception e) {
-                return EConfigResult.INVALID_VALUE;
-            }
-        } else if (name.equalsIgnoreCase("tableWidth")) {
-            try {
-                setTableWidth(new Integer(value));
-            } catch (Exception e) {
-                return EConfigResult.INVALID_VALUE;
-            }
-        } else if (name.equalsIgnoreCase("radius")) {
-            try {
-                setRadius(new Integer(value));
-            } catch (Exception e) {
-                return EConfigResult.INVALID_VALUE;
-            }
-        } else {
-            return EConfigResult.NO_SUCH_PROPERTY;
-        }
-        return EConfigResult.OK;
     }
 
     /**
