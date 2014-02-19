@@ -7,7 +7,7 @@ import com.erigir.lamark.Individual;
 
 /**
  * A simple fitness function to find a string with all ones in it.
- *
+ * <p/>
  * This class is here mainly as a simple example and because it's used in the unit tests of the roulette wheel
  *
  * @author cweiss

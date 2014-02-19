@@ -20,7 +20,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
@@ -121,7 +120,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
      */
     public LamarkGui(String initialLocation, String initialSelection) {
 
-        configPanel = new LamarkConfigPanel(initialLocation,initialSelection);
+        configPanel = new LamarkConfigPanel(initialLocation, initialSelection);
 
         setLayout(new BorderLayout());
 
@@ -199,12 +198,10 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
      * Make the classloader label match the current class loader.
      */
     private void updateClassLoaderLabel() {
-        if (configPanel.getCurrentClassloader()!=null && URLClassLoader.class.isAssignableFrom(configPanel.getCurrentClassloader().getClass()))
-        {
-            classLoaderLabel.setText("Classloader: " + Arrays.asList(((URLClassLoader)configPanel.getCurrentClassloader()).getURLs()));
-        }
-        else
-        {
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        if (cl != null && URLClassLoader.class.isAssignableFrom(cl.getClass())) {
+            classLoaderLabel.setText("Classloader: " + Arrays.asList(((URLClassLoader) cl).getURLs()));
+        } else {
             classLoaderLabel.setText("Classloader: default");
         }
     }
@@ -371,6 +368,8 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
     public void resetToNew() {
         abortIfRunning();
         clearCurrent();
+        configPanel.reset();
+        updateClassLoaderLabel();
     }
 
     /**

@@ -147,4 +147,17 @@ be written on the following topics:_
 * Lamark Recursively: Using Lamark within a Lamark Component
 
 
+Bundling into JAR Files
+-----------------------
+Lamark allows you to bundle all of your classes, along with the configuration file, into a single JAR file (this is
+required if you are going to use the distributed form).  Please note if are going to load resources from that JAR
+file, Lamark will make your jar file the context classpath.  Therefore you should load resources like so:
+
+Thread.currentThread().getContextClassLoader().getResourceAsStream(myResource);
+
+Rather than
+
+getClass().getResourceAsStream(myResource)
+
+
 

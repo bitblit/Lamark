@@ -8,6 +8,8 @@ package com.erigir.lamark;
 import com.erigir.lamark.config.LamarkRuntimeParameters;
 import com.erigir.lamark.events.*;
 import com.erigir.lamark.selector.RouletteWheel;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -43,6 +45,7 @@ import java.util.logging.Level;
  * @since 04/2006
  */
 public class Lamark implements Callable<Population> {
+    private static final Logger LOG = LoggerFactory.getLogger(Lamark.class);
     /**
      * Shared instance of the random class
      */
@@ -713,31 +716,31 @@ public class Lamark implements Callable<Population> {
      */
     public final boolean event(LamarkEvent event) {
         if (event != null) {
-                Set<LamarkEventListener> listenerSet = null;
-                Class tClass = event.getClass();
-                if (AbortedEvent.class.isAssignableFrom(tClass)) {
-                    listenerSet = abortListeners;
-                } else if (BetterIndividualFoundEvent.class.isAssignableFrom(tClass)) {
-                    listenerSet = betterIndividualFoundListeners;
-                } else if (ExceptionEvent.class.isAssignableFrom(tClass)) {
-                    listenerSet = exceptionListeners;
-                } else if (LastPopulationCompleteEvent.class.isAssignableFrom(tClass)) {
-                    listenerSet = lastPopulationCompleteListeners;
-                } else if (LogEvent.class.isAssignableFrom(tClass)) {
-                    listenerSet = logListeners;
-                } else if (PopulationCompleteEvent.class.isAssignableFrom(tClass)) {
-                    listenerSet = populationCompleteListeners;
-                } else if (PopulationPlanCompleteEvent.class.isAssignableFrom(tClass)) {
-                    listenerSet = planCompleteListeners;
-                } else if (UniformPopulationEvent.class.isAssignableFrom(tClass)) {
-                    listenerSet = uniformPopulationListeners;
-                }
+            Set<LamarkEventListener> listenerSet = null;
+            Class tClass = event.getClass();
+            if (AbortedEvent.class.isAssignableFrom(tClass)) {
+                listenerSet = abortListeners;
+            } else if (BetterIndividualFoundEvent.class.isAssignableFrom(tClass)) {
+                listenerSet = betterIndividualFoundListeners;
+            } else if (ExceptionEvent.class.isAssignableFrom(tClass)) {
+                listenerSet = exceptionListeners;
+            } else if (LastPopulationCompleteEvent.class.isAssignableFrom(tClass)) {
+                listenerSet = lastPopulationCompleteListeners;
+            } else if (LogEvent.class.isAssignableFrom(tClass)) {
+                listenerSet = logListeners;
+            } else if (PopulationCompleteEvent.class.isAssignableFrom(tClass)) {
+                listenerSet = populationCompleteListeners;
+            } else if (PopulationPlanCompleteEvent.class.isAssignableFrom(tClass)) {
+                listenerSet = planCompleteListeners;
+            } else if (UniformPopulationEvent.class.isAssignableFrom(tClass)) {
+                listenerSet = uniformPopulationListeners;
+            }
 
-                // Send it to the proper set
-                for (LamarkEventListener listener : listenerSet) {
-                    listener.handleEvent(event);
-                }
-                return true;
+            // Send it to the proper set
+            for (LamarkEventListener listener : listenerSet) {
+                listener.handleEvent(event);
+            }
+            return true;
         }
         return false;
     }
@@ -1044,7 +1047,7 @@ public class Lamark implements Callable<Population> {
 
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                LOG.error("Deadlock failure", e);
             }
         }
     }

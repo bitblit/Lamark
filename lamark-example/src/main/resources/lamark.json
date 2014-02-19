@@ -86,16 +86,16 @@
     "populationSize" : 25,
     "selectorClass" : "com.erigir.lamark.selector.RouletteWheel",
     "upperElitism" : 0.1,
-    "fitnessFunctionClass" : "com.erigir.lamark.example.tsp.berlin.BerlinTSPFitness",
+    "fitnessFunctionClass" : "com.erigir.lamark.example.tsp.TSPFitness",
     "creatorClass" : "com.erigir.lamark.creator.IntegerListPermutationCreator",
     "randomSeed" : 1,
-    "mutatorClass" : "com.erigir.lamark.mutator.IntegerList2ExchangeMutator",
+    "mutatorClass" : "com.erigir.lamark.mutator.List2ExchangeMutator",
     "mutationProbability" : 0,
     "crossoverClass" : "com.erigir.lamark.crossover.IntegerPermutationFill",
     "lowerElitism" : 0.1 ,
     "fitnessFunctionConfiguration" :
     {
-      "tspFile" : "/berlin52.tsp",
+      "tspFile" : "berlin52.tsp",
       "bestKnown" : 7542
     },
     "creatorConfiguration" :
@@ -114,16 +114,16 @@
     "populationSize" : 50,
     "selectorClass" : "com.erigir.lamark.selector.RouletteWheel",
     "upperElitism" : 0.1,
-    "fitnessFunctionClass" : "com.erigir.lamark.example.tsp.berlin.BerlinTSPFitness",
+    "fitnessFunctionClass" : "com.erigir.lamark.example.tsp.TSPFitness",
     "creatorClass" : "com.erigir.lamark.creator.IntegerListPermutationCreator",
     "randomSeed" : 1,
-    "mutatorClass" : "com.erigir.lamark.mutator.IntegerList2ExchangeMutator",
+    "mutatorClass" : "com.erigir.lamark.mutator.List2ExchangeMutator",
     "mutationProbability" : 0,
     "crossoverClass" : "com.erigir.lamark.crossover.IntegerPermutationFill",
     "lowerElitism" : 0.1 ,
     "fitnessFunctionConfiguration" :
     {
-      "tspFile" : "/bier127.tsp",
+      "tspFile" : "bier127.tsp",
       "bestKnown" : 118282
     },
     "creatorConfiguration" :
@@ -142,16 +142,16 @@
     "populationSize" : 50,
     "selectorClass" : "com.erigir.lamark.selector.RouletteWheel",
     "upperElitism" : 0.1,
-    "fitnessFunctionClass" : "com.erigir.lamark.example.tsp.berlin.BerlinTSPFitness",
+    "fitnessFunctionClass" : "com.erigir.lamark.example.tsp.TSPFitness",
     "creatorClass" : "com.erigir.lamark.creator.IntegerListPermutationCreator",
     "randomSeed" : 1,
-    "mutatorClass" : "com.erigir.lamark.mutator.IntegerList2ExchangeMutator",
+    "mutatorClass" : "com.erigir.lamark.mutator.List2ExchangeMutator",
     "mutationProbability" : 0,
     "crossoverClass" : "com.erigir.lamark.crossover.IntegerPermutationFill",
     "lowerElitism" : 0.1 ,
     "fitnessFunctionConfiguration" :
     {
-      "tspFile" : "/d15112.tsp",
+      "tspFile" : "d15112.tsp",
       "bestKnown" : 1573084
     },
     "creatorConfiguration" :
@@ -170,16 +170,16 @@
     "populationSize" : 50,
     "selectorClass" : "com.erigir.lamark.selector.RouletteWheel",
     "upperElitism" : 0.1,
-    "fitnessFunctionClass" : "com.erigir.lamark.example.tsp.berlin.BerlinTSPFitness",
+    "fitnessFunctionClass" : "com.erigir.lamark.example.tsp.TSPFitness",
     "creatorClass" : "com.erigir.lamark.creator.IntegerListPermutationCreator",
     "randomSeed" : 1,
-    "mutatorClass" : "com.erigir.lamark.mutator.IntegerList2ExchangeMutator",
+    "mutatorClass" : "com.erigir.lamark.mutator.List2ExchangeMutator",
     "mutationProbability" : 0,
     "crossoverClass" : "com.erigir.lamark.crossover.IntegerPermutationFill",
     "lowerElitism" : 0.1 ,
     "fitnessFunctionConfiguration" :
     {
-      "tspFile" : "/ulysses16.tsp",
+      "tspFile" : "ulysses16.tsp",
       "bestKnown" : 6859
     },
     "creatorConfiguration" :

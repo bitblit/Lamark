@@ -10,8 +10,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileWriter;
-import java.net.URL;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 
 /**
  * A class for running a LamarkGUI instance as an application.
@@ -26,7 +28,7 @@ public class LamarkApplication implements ActionListener {
     /**
      * Logger instance *
      */
-    private static Logger LOG = Logger.getLogger(LamarkApplication.class.getName());
+    private static Logger LOG = LoggerFactory.getLogger(LamarkApplication.class);
 
     /**
      * String label for the save action *
@@ -75,7 +77,7 @@ public class LamarkApplication implements ActionListener {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
-            LOG.severe("Couldnt get system look and feel:" + e);
+            LOG.error("Couldnt get system look and feel:" + e);
         }
 
         //Make sure we have nice window decorations.
@@ -110,7 +112,7 @@ public class LamarkApplication implements ActionListener {
 
         // Add and init the lamarkgui
 
-        String initialLocation = (lastFile==null)?null:lastFile.toURI().toString();
+        String initialLocation = (lastFile == null) ? null : lastFile.toURI().toString();
         String initialSelection = null; // TODO: implement
 
         gui = new LamarkGui(initialLocation, initialSelection);
@@ -146,6 +148,7 @@ public class LamarkApplication implements ActionListener {
                             gui.getConfigPanel().loadFromLocation(f.toURI().toString(), null);
                             lastFile = f;
                         } catch (Exception ioe) {
+                            LOG.warn("Error opening file",ioe);
                             JOptionPane.showMessageDialog(frame, "Error reading file:" + ioe);
                         }
                     } else {

@@ -8,6 +8,8 @@ import com.erigir.lamark.EFitnessType;
 import com.erigir.lamark.IFitnessFunction;
 import com.erigir.lamark.IValidatable;
 import com.erigir.lamark.Individual;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,6 +35,7 @@ import java.util.StringTokenizer;
  * @since 04/2005
  */
 public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunction<List<Integer>>, IValidatable {
+    private static final Logger LOG = LoggerFactory.getLogger(TSPFitness.class);
     /**
      * String handle to the original tsp file read *
      */
@@ -111,7 +114,7 @@ public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunct
     private void loadPoints() {
         try {
             if (tspFile != null) {
-                InputStream is = getClass().getResourceAsStream(tspFile);
+                InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(tspFile);
                 if (is == null) {
                     getLamark().logFiner("Couldnt find resource:" + tspFile + " ... trying as file");
                     is = new FileInputStream(new File(tspFile));
@@ -124,7 +127,7 @@ public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunct
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Error on TSP load points from {}",tspFile,e);
             getLamark().logSevere("Error loading tspFile:" + e);
         }
     }

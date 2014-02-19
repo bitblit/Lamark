@@ -3,7 +3,6 @@ package com.erigir.lamark.gui;
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.LamarkFactory;
 import com.erigir.lamark.config.LamarkGUIConfig;
-import com.erigir.lamark.events.LamarkEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -43,12 +43,12 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     /**
      * Location of the default file
      */
-    private static final String DEFAULT_CONFIG_LOCATION="classpath:com/erigir/lamark/gui/default-lamark.json";
+    private static final String DEFAULT_CONFIG_LOCATION = "classpath:com/erigir/lamark/gui/default-lamark.json";
 
     /**
-     * Handle to the current classloader, if not default *
+     * Handle to the default classloader, for resets
      */
-    private ClassLoader currentClassloader = LamarkConfigPanel.class.getClassLoader();
+    private static final ClassLoader DEFAULT_CLASS_LOADER = LamarkConfigPanel.class.getClassLoader();
 
     /**
      * Factory is used for serialization
@@ -283,17 +283,19 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         randomSeed.setEnabled(enable);
     }
 
-    private String readStreamToString(InputStream ios)
-            throws IOException
+    public void reset()
     {
+        loadFromLocation(DEFAULT_CONFIG_LOCATION,null);
+    }
+
+    private String readStreamToString(InputStream ios)
+            throws IOException {
         String rval = null;
-        if (ios!=null)
-        {
+        if (ios != null) {
             StringBuilder sb = new StringBuilder();
             BufferedReader br = new BufferedReader(new InputStreamReader(ios));
             String next = br.readLine();
-            while (next!=null)
-            {
+            while (next != null) {
                 sb.append(next);
                 next = br.readLine();
             }
@@ -314,80 +316,87 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * If only one entry is found, it will be used
      * Otherwise, a dialog box for choices will be shown
      *
-     * @param location String containing a path to a resource
+     * @param location          String containing a path to a resource
      * @param optionalEntryName String optionally containing which entry in the json file to use
      * @return boolean true if the config panel could be loaded from resource at that location
      */
 
-    public boolean loadFromLocation(String location, String optionalEntryName)
-    {
+    public boolean loadFromLocation(String location, String optionalEntryName) {
         boolean rval = false;
         try {
             String json = null;
 
-        if (location!=null)
-        {
-            if (location.startsWith("classpath:"))
-            {
-                 // Load as a resource - can only be a json file (no jars on classpath)
-                String readLoc = location.substring("classpath:".length());
-                InputStream ios = currentClassloader.getResourceAsStream(readLoc);
-                json = readStreamToString(ios);
-            }
-            else
-            {
-                // Load as a url
-                URL u = safeURL(location);
-                if (location.endsWith(".json"))
-                {
-                    // Just need to read the json
-                    json = readStreamToString(u.openStream());
+            if (location != null) {
+                if (location.startsWith("classpath:")) {
+                    // If its on the classpath, reset to the default class loader
+                    Thread.currentThread().setContextClassLoader(DEFAULT_CLASS_LOADER);
+
+                    // Load as a resource - can only be a json file (no jars on classpath)
+                    String readLoc = location.substring("classpath:".length());
+                    InputStream ios = Thread.currentThread().getContextClassLoader().getResourceAsStream(readLoc);
+                    json = readStreamToString(ios);
+                } else {
+                    // Load as a url
+                    URL u = safeURL(location);
+                    if (location.endsWith(".json")) {
+                        // Just need to read the json
+                        json = readStreamToString(u.openStream());
+                    } else {
+                        // Need to massage the classpath and load default
+                        Thread.currentThread().setContextClassLoader(new URLClassLoader(new URL[]{u}, Thread.currentThread().getContextClassLoader()));
+                        json = readStreamToString(Thread.currentThread().getContextClassLoader().getResourceAsStream("lamark.json"));
+                    }
                 }
-                else
-                {
-                    // Need to massage the classpath and load default
-                    currentClassloader = new URLClassLoader(new URL[]{u});
-                    json = readStreamToString(currentClassloader.getResourceAsStream("/lamark.json"));
+
+                if (json != null) {
+
+                    Map<String, LamarkGUIConfig> configs = lamarkFactory.jsonToConfig(json);
+
+                    // If more than one and not specified, then pop the selection box
+                    LamarkGUIConfig selected = null;
+                    if (optionalEntryName != null) {
+                        selected = configs.get(optionalEntryName);
+                    } else if (configs.size() == 1) {
+                        selected = configs.values().iterator().next();
+                    } else {
+                        Set<String> options = configs.keySet();
+
+                        String s = (String)JOptionPane.showInputDialog(
+                                null,
+                                "Options:",
+                                "Select Algorithm",
+                                JOptionPane.PLAIN_MESSAGE,
+                                null,
+                                options.toArray(),
+                                null);
+
+                        if (s!=null && s.length()>0)
+                        {
+                            selected = configs.get(s);
+                        }
+                    }
+                    fromGUIConfig(selected);
+
+                    rval = true;
                 }
             }
-
-            if (json!=null)
-            {
-
-            Map<String,LamarkGUIConfig> configs = lamarkFactory.jsonToConfig(json, currentClassloader);
-
-            // If more than one and not specified, then pop the selection box
-            // TODO: implement
-            LamarkGUIConfig selectedConfig = configs.values().iterator().next();
-
-            fromGUIConfig(selectedConfig);
-            rval = true;
-            }
-        }
-        }
-        catch (IOException ioe)
-        {
-            LOG.error("Error reading location {}",location, ioe);
+        } catch (IOException ioe) {
+            LOG.error("Error reading location {}", location, ioe);
         }
 
-        if (!rval)
-        {
-            JOptionPane.showMessageDialog(null,"Error trying to load config");
+        if (!rval) {
+            JOptionPane.showMessageDialog(null, "Error trying to load config");
         }
 
         return rval;
 
     }
 
-    private URL safeURL(String input)
-    {
-        try
-        {
+    private URL safeURL(String input) {
+        try {
             return new URL(input);
-        }
-        catch (MalformedURLException mue)
-        {
-            throw new RuntimeException("Unable to read url",mue);
+        } catch (MalformedURLException mue) {
+            throw new RuntimeException("Unable to read url", mue);
         }
     }
 
@@ -405,7 +414,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         add(panel2(), BorderLayout.SOUTH);
 
         // Finally, initialize
-        String configResource = (inConfigResource==null)?DEFAULT_CONFIG_LOCATION:inConfigResource;
+        String configResource = (inConfigResource == null) ? DEFAULT_CONFIG_LOCATION : inConfigResource;
 
         loadFromLocation(configResource, inSelectedItem);
     }
@@ -577,8 +586,15 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         box.setEditable(true);
 
         box.removeAllItems();
-        for (Class c : classes) {
-            box.addItem(formatClassName(c));
+        if (classes!=null)
+        {
+            for (Class c : classes) {
+                box.addItem(formatClassName(c));
+            }
+        }
+        else if (def!=null)
+        {
+            box.addItem(formatClassName(def));
         }
 
         box.setSelectedItem(formatClassName(def));
@@ -628,7 +644,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         }
 
 
-
     }
 
     public String toGUIConfigString() {
@@ -663,11 +678,11 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     }
 
     private Double nsDouble(String value) {
-        return (value == null || value.trim().length()==0) ? null : new Double(value);
+        return (value == null || value.trim().length() == 0) ? null : new Double(value);
     }
 
     private Integer nsInteger(String value) {
-        return (value == null || value.trim().length()==0) ? null : new Integer(value);
+        return (value == null || value.trim().length() == 0) ? null : new Integer(value);
     }
 
     private Long nsLong(String value) {
@@ -677,7 +692,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     private Class safeForName(String value) {
         Class rval = null;
         try {
-            rval = Class.forName(value);
+            rval = Thread.currentThread().getContextClassLoader().loadClass(value);
         } catch (ClassNotFoundException cnf) {
             LOG.warn("Couldnt find class {} - returning null", value);
             rval = null;
@@ -706,15 +721,16 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         // First, try reading it as a class name.  If it works, use that
         try {
             String test = (String) cb.getSelectedItem();
-            return Class.forName(test);
+            return Thread.currentThread().getContextClassLoader().loadClass(test);
         } catch (Exception e) {
             String start = (String) cb.getSelectedItem();
 
             int pi = start.indexOf("[");
             String classN = start.substring(0, pi);
             String packageN = start.substring(pi + 1, start.length() - 1);
+            String fullN = packageN+"."+classN;
             try {
-                return Class.forName(packageN + "." + classN);
+                return Thread.currentThread().getContextClassLoader().loadClass(fullN);
             } catch (ClassNotFoundException cnf) {
                 throw new IllegalArgumentException("Cant find class " + cb.getSelectedItem());
             }
@@ -920,17 +936,8 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         this.lamarkFactory = lamarkFactory;
     }
 
-    public ClassLoader getCurrentClassloader() {
-        return currentClassloader;
-    }
-
-    public void setCurrentClassloader(URLClassLoader currentClassloader) {
-        this.currentClassloader = currentClassloader;
-    }
-
-    public Lamark createLamarkInstance(Component optionalParentComponent)
-    {
-        return lamarkFactory.createLamarkFromConfig(toGUIConfigObject(),optionalParentComponent);
+    public Lamark createLamarkInstance(Component optionalParentComponent) {
+        return lamarkFactory.createLamarkFromConfig(toGUIConfigObject(), optionalParentComponent);
     }
 
 }

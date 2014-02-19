@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -76,19 +75,27 @@ public class LamarkFactory {
 
     public Lamark createLamarkFromConfig(LamarkConfig lc, Component optionalParentComponent)
             throws LamarkConfigurationFailedException {
+        Lamark rval = new Lamark();
+
         List<String> errors = new LinkedList<String>();
 
         ICreator creator = factoryCreate(lc.getCreatorClass(), lc.getCreatorConfiguration());
+        rval.setCreator(creator);
         require(creator, "Creator", errors);
         ICrossover crossover = factoryCreate(lc.getCrossoverClass(), lc.getCrossoverConfiguration());
+        rval.setCrossover(crossover);
         require(crossover, "Crossover", errors);
         IFitnessFunction fitness = factoryCreate(lc.getFitnessFunctionClass(), lc.getFitnessFunctionConfiguration());
+        rval.setFitnessFunction(fitness);
         require(fitness, "Fitness Function", errors);
         IMutator mutator = factoryCreate(lc.getMutatorClass(), lc.getMutatorConfiguration());
+        rval.setMutator(mutator);
         require(mutator, "Mutator", errors);
         ISelector selector = factoryCreate(lc.getSelectorClass(), lc.getSelectorConfiguration());
+        rval.setSelector(selector);
         require(selector, "Selector", errors);
         IIndividualFormatter formatter = factoryCreate(lc.getIndividualFormatterClass(), lc.getIndividualFormatterConfiguration());
+        rval.setFormatter(formatter);
         require(formatter, "Individual Formatter", errors);
 
         ExecutorService executor = null;
@@ -118,36 +125,26 @@ public class LamarkFactory {
 
         // Create any custom listeners
         List<LamarkEventListener> listeners = new LinkedList<LamarkEventListener>();
-        for (Class c:lc.getCustomListeners())
-        {
-            try
-            {
-                LamarkEventListener l = (LamarkEventListener)c.newInstance();
-                if (optionalParentComponent!=null && GUIEventListener.class.isAssignableFrom(c))
-                {
-                    ((GUIEventListener)l).setParentComponent(optionalParentComponent);
+        for (Class c : lc.getCustomListeners()) {
+            try {
+                LamarkEventListener l = (LamarkEventListener) c.newInstance();
+                if (optionalParentComponent != null && GUIEventListener.class.isAssignableFrom(c)) {
+                    ((GUIEventListener) l).setParentComponent(optionalParentComponent);
                 }
                 listeners.add(l);
-            }
-            catch (Exception e)
-            {
-                LOG.warn("Couldn't create class of type {}",c,e);
+            } catch (Exception e) {
+                LOG.warn("Couldn't create class of type {}", c, e);
             }
         }
 
         List<Individual> preloads = new LinkedList<Individual>();
-        if (lc.getPreCreatedIndividuals()!=null && lc.getPreCreatedIndividuals().size()>0)
-        {
-            if (IPreloadableCreator.class.isAssignableFrom(creator.getClass()))
-            {
-                 for (String s:lc.getPreCreatedIndividuals())
-                 {
-                     preloads.add(((IPreloadableCreator)creator).createFromPreload(s));
-                 }
-            }
-            else
-            {
-                 errors.add("Preloads specified but creator doesn't implement IPreloadableCreator");
+        if (lc.getPreCreatedIndividuals() != null && lc.getPreCreatedIndividuals().size() > 0) {
+            if (IPreloadableCreator.class.isAssignableFrom(creator.getClass())) {
+                for (String s : lc.getPreCreatedIndividuals()) {
+                    preloads.add(((IPreloadableCreator) creator).createFromPreload(s));
+                }
+            } else {
+                errors.add("Preloads specified but creator doesn't implement IPreloadableCreator");
             }
         }
 
@@ -155,21 +152,12 @@ public class LamarkFactory {
         if (errors.size() > 0) {
             throw new LamarkConfigurationFailedException(errors);
         } else {
-            Lamark rval = new Lamark();
             rval.setRuntimeParameters(lc);
-            rval.setCreator(creator);
-            rval.setCrossover(crossover);
-            rval.setFitnessFunction(fitness);
-            rval.setFormatter(formatter);
-            rval.setMutator(mutator);
-            rval.setSelector(selector);
             rval.setExecutor(executor);
-            for (LamarkEventListener l:listeners)
-            {
+            for (LamarkEventListener l : listeners) {
                 rval.addGenericListener(l);
             }
-            for (Individual i:preloads)
-            {
+            for (Individual i : preloads) {
                 rval.enqueueForInsert(i);
             }
 
@@ -201,12 +189,11 @@ public class LamarkFactory {
         }
     }
 
-    public Map<String,LamarkGUIConfig> jsonToConfig(String json, ClassLoader classLoader) {
+    public Map<String, LamarkGUIConfig> jsonToConfig(String json) {
         try {
-            Map<String,LamarkGUIConfig> rval = null;
-            if (json!=null && classLoader!=null)
-            {
-               rval = objectMapper.readValue(json, new TypeReference<Map<String,LamarkGUIConfig>>() {});
+            Map<String, LamarkGUIConfig> rval = null;
+            if (json != null) {
+                rval = objectMapper.readValue(json, new TypeReference<Map<String, LamarkGUIConfig>>() {});
             }
             return rval;
         } catch (IOException ioe) {
@@ -249,22 +236,4 @@ public class LamarkFactory {
         }
     }
 
-    /**
-     * Returns an instance of the class, or null if a bad name was supplied.
-     *
-     * @param className String containing the name of the class to load
-     * @param cl        Classloader to load that class from
-     * @return Object containing the component
-     */
-    public static Object badClassNameToNull(String className, ClassLoader cl) {
-        try {
-            if (cl == null) {
-                return Class.forName(className).newInstance();
-            } else {
-                return cl.loadClass(className).newInstance();
-            }
-        } catch (Exception e) {
-            return null;
-        }
-    }
 }

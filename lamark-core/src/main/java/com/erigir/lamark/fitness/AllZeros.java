@@ -8,9 +8,9 @@ import com.erigir.lamark.EFitnessType;
  * NOTE: This is here to simply demonstrate the use of a
  * minimum-best fitness function.  It just takes the AllOnes
  * class and inverts the function.
- *
+ * <p/>
  * This class is here mainly as a simple example and because it's used in the unit tests of the roulette wheel
-*
+ *
  * @author cweiss
  * @since 04/2006
  */
