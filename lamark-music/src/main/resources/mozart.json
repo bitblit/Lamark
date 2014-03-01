@@ -1,0 +1,35 @@
+{
+"Main" :
+{
+  "fitnessFunctionClass" : "com.erigir.lamark.music.ScoreFitness",
+  "fitnessFunctionConfiguration" :
+  {
+  },
+  "creatorClass" : "com.erigir.lamark.music.MozartCreator",
+  "crossoverClass" : "com.erigir.lamark.music.MozartCrossover",
+
+  "creatorConfiguration" :
+  {
+    "size" : 4
+  },
+
+    "upperElitism": 0.1 ,
+    "lowerElitism": 0.1 ,
+    "populationSize": 30 ,
+    "maximumPopulations" : 50000,
+    "crossoverProbability": 1.0 ,
+    "mutationProbability": 0.01 ,
+    "numberOfWorkerThreads": 2 ,
+    "targetScore": 1 ,
+    "randomSeed": 1,
+"customListeners" :
+[
+"com.erigir.lamark.music.DrawScoreListener"
+]
+
+}
+}
+
+
+
+

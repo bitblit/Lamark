@@ -3,6 +3,7 @@ package com.erigir.lamark.music;
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.LamarkFactory;
 import com.erigir.lamark.Util;
+import com.erigir.lamark.config.LamarkGUIConfig;
 import com.erigir.lamark.events.AbortedEvent;
 import com.erigir.lamark.events.BetterIndividualFoundEvent;
 import com.erigir.lamark.events.ExceptionEvent;
@@ -22,6 +23,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 public class Mozart implements ActionListener, LamarkEventListener, Runnable {
@@ -41,6 +44,7 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
     private JComboBox signatureSelect;
     private JComboBox rangeSelect;
     private JTextField barCountEntry;
+    private LamarkFactory lamarkFactory = new LamarkFactory();
 
 
     private void createAndShowGUI() {
@@ -129,7 +133,7 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
             currentRunner.addBetterIndividualFoundListener(new DrawScoreListener());
 
             output.setText("");
-            new Thread(currentRunner).start();
+            Executors.newSingleThreadExecutor().submit(currentRunner);
             start.setEnabled(false);
             cancel.setEnabled(true);
         } else if (e.getSource() == cancel) {
@@ -153,9 +157,11 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
     }
 
 
-    public static Lamark mozartInstance(String keyS, String timeSigS, boolean fullRange, int barCount) {
+    public Lamark mozartInstance(String keyS, String timeSigS, boolean fullRange, int barCount) {
         try {
-            Lamark rval = LamarkFactory.createFromPropertiesResource("/mozart.properties", Mozart.class);
+            Map<String,LamarkGUIConfig> configs = lamarkFactory.jsonToConfig("/mozart.json");
+            Lamark rval = lamarkFactory.createLamarkFromConfig(configs.values().iterator().next());
+
             MozartCreator creator = (MozartCreator)rval.getCreator();
 
             if (!keyS.equals("ANY")) {
