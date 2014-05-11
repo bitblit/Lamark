@@ -23,14 +23,23 @@ public class NoteLengthDistribution {
 
         // Put all note types in the count table
         double sumExp = 0;
-        for (NoteDurationEnum nd : NoteDurationEnum.values()) {
+        NoteDurationEnum[] vals = NoteDurationEnum.values();
+        for (NoteDurationEnum nd : vals) {
             counts.put(nd, 0.0);
         }
 
         // Build counts
         for (Note n : notes) {
             NoteDurationEnum nd = NoteDurationEnum.valueFromNote(n);
+            if (nd==null)
+            {
+                LOG.info("This is weird note={}, nd=null", n);
+            }
             Double i = counts.get(nd);
+            if (i==null)
+            {
+                LOG.info("This is weird note={}, nd={}, i=null", n, nd);
+            }
             counts.put(nd, i + 1);
         }
         totalNotes = notes.size();
@@ -64,16 +73,23 @@ public class NoteLengthDistribution {
 
 
     public double correlation() {
-        NoteDurationEnum[] vals = NoteDurationEnum.values();
+            NoteDurationEnum[] vals = NoteDurationEnum.values();
+        try
+        {
 
-        double[] obs = new double[vals.length];
-        double[] exp = new double[vals.length];
+            double[] obs = new double[vals.length];
+            double[] exp = new double[vals.length];
 
-        for (int i = 0; i < vals.length; i++) {
-            obs[i] = counts.get(vals[i]);
-            exp[i] = vals[i].getExpectedFrequency() * totalNotes;
+            for (int i = 0; i < vals.length; i++) {
+                obs[i] = counts.get(vals[i]);
+                exp[i] = vals[i].getExpectedFrequency() * totalNotes;
+            }
+            return Math.abs(pearson(obs, exp));
         }
-        return Math.abs(pearson(obs, exp));
+        catch (NullPointerException npe)
+        {
+            throw npe;
+        }
     }
 
     public double pearson(double[] x, double[] y) {

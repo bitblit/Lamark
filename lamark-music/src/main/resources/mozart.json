@@ -8,6 +8,8 @@
   "creatorClass" : "com.erigir.lamark.music.MozartCreator",
   "crossoverClass" : "com.erigir.lamark.music.MozartCrossover",
 
+    "mutatorClass" : "com.erigir.lamark.music.MozartMutator",
+
   "creatorConfiguration" :
   {
     "size" : 4
@@ -20,7 +22,6 @@
     "crossoverProbability": 1.0 ,
     "mutationProbability": 0.01 ,
     "numberOfWorkerThreads": 2 ,
-    "targetScore": 1 ,
     "randomSeed": 1,
 "customListeners" :
 [

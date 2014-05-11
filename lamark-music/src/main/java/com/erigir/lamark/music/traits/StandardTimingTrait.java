@@ -10,10 +10,10 @@ import com.erigir.lamark.music.NoteLengthDistribution;
  */
 
 public class StandardTimingTrait extends AbstractMusicTrait {
-    private NoteLengthDistribution nld = new NoteLengthDistribution();
 
     @Override
     public double guardedFitness() {
+        NoteLengthDistribution nld = new NoteLengthDistribution();
         nld.initialize(getScoreAnalysis().getAllNotes());
         return nld.correlation() * 100.0;
     }

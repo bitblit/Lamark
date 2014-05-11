@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -189,7 +190,27 @@ public class LamarkFactory {
         }
     }
 
+    public <T> T cleanFromJSONString(InputStream value, Class<T> clazz) {
+        try {
+            return (value == null || clazz == null) ? null : objectMapper.readValue(value, clazz);
+        } catch (IOException ioe) {
+            throw new IllegalArgumentException("Couldn't format", ioe);
+        }
+    }
+
     public Map<String, LamarkGUIConfig> jsonToConfig(String json) {
+        try {
+            Map<String, LamarkGUIConfig> rval = null;
+            if (json != null) {
+                rval = objectMapper.readValue(json, new TypeReference<Map<String, LamarkGUIConfig>>() {});
+            }
+            return rval;
+        } catch (IOException ioe) {
+            throw new IllegalArgumentException("Couldn't read json file : "+ioe.getMessage(), ioe);
+        }
+    }
+
+    public Map<String, LamarkGUIConfig> jsonToConfig(InputStream json) {
         try {
             Map<String, LamarkGUIConfig> rval = null;
             if (json != null) {

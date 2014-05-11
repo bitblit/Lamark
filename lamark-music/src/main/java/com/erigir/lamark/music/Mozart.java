@@ -1,6 +1,7 @@
 package com.erigir.lamark.music;
 
 import com.erigir.lamark.Lamark;
+import com.erigir.lamark.LamarkConfigurationFailedException;
 import com.erigir.lamark.LamarkFactory;
 import com.erigir.lamark.Util;
 import com.erigir.lamark.config.LamarkGUIConfig;
@@ -12,6 +13,7 @@ import com.erigir.lamark.events.LamarkEventListener;
 import com.erigir.lamark.events.LastPopulationCompleteEvent;
 import com.erigir.lamark.events.PopulationCompleteEvent;
 import com.erigir.lamark.events.UniformPopulationEvent;
+import com.erigir.lamark.music.phrase.PhrasePool;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,6 +26,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
@@ -159,7 +162,8 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
 
     public Lamark mozartInstance(String keyS, String timeSigS, boolean fullRange, int barCount) {
         try {
-            Map<String,LamarkGUIConfig> configs = lamarkFactory.jsonToConfig("/mozart.json");
+
+            Map<String,LamarkGUIConfig> configs = lamarkFactory.jsonToConfig(getClass().getResourceAsStream("/mozart.json"));
             Lamark rval = lamarkFactory.createLamarkFromConfig(configs.values().iterator().next());
 
             MozartCreator creator = (MozartCreator)rval.getCreator();
@@ -178,9 +182,18 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
                 creator.setUpperBound(81);
             }
             creator.setSize(barCount);
+
+            PhrasePool.instance.initialize(rval.getRandom(), creator.getSignature(), creator.getScale(), creator.getLowerBound(), creator.getUpperBound());
+
             return rval;
 
-        } catch (Exception e) {
+        }
+        catch (LamarkConfigurationFailedException lcfe)
+        {
+            JOptionPane.showMessageDialog(null, "Failed to load config: "+lcfe.getReasons());
+            return null;
+        }
+        catch (Exception e) {
             IllegalArgumentException e2 = new IllegalArgumentException("Couldnt load defaults");
             e2.initCause(e);
             throw e2;
