@@ -9,6 +9,7 @@ import jm.music.data.Note;
 import jm.music.data.Part;
 import jm.music.data.Phrase;
 import jm.music.data.Score;
+import jm.util.View;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,7 +23,7 @@ public class DrawScoreListener implements GUIEventListener {
             Individual i = bife.getNewBest();
             Score s = (Score) i.getGenome();
 
-            // Build new score object to get aroud display bug
+            // Build new score object to get around display bug
             ScoreAnalysis sa = (ScoreAnalysis) i.getAttribute("ANALYSIS");
             Phrase newPhrase = new Phrase();
             for (Note n : sa.getAllNotes()) {
@@ -30,7 +31,18 @@ public class DrawScoreListener implements GUIEventListener {
             }
             Score newS = new Score(new Part(newPhrase));
 
+
+
+            if (scoreFrame!=null)
+            {
+                // Close the existing window
+                scoreFrame.dispose();
+            }
+
             scoreFrame = new Notate(newS, 0, 100);
+            scoreFrame.setMinimumSize(new Dimension(100,100));
+            scoreFrame.setTitle("Best Individual:" + i.getFitness());
+            //View.notate(newS);
 
 
             //scoreFrame = new Notate(s,50,50);
@@ -38,7 +50,6 @@ public class DrawScoreListener implements GUIEventListener {
             //View.notate(s);
             //View.histogram(s);
             //scoreFrame=new ShowScore(s.getPart(0).getPhrase(0));
-            scoreFrame.setTitle("Best Individual:" + i.getFitness());
         }
     }
 
