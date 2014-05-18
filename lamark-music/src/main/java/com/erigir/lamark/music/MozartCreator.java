@@ -11,7 +11,7 @@ import jm.music.data.Tempo;
 
 import java.util.List;
 
-public class MozartCreator implements ICreator {
+public class MozartCreator implements ICreator<Score> {
     private static int SEARCH_ITERATIONS = 2;
 
     private int size;
@@ -21,7 +21,7 @@ public class MozartCreator implements ICreator {
     private Integer upperBound;
     private Lamark lamark;
 
-    public Individual create() {
+    public Individual<Score> create() {
         Score s = new Score();
         if (null != signature) {
             s.setDenominator(signature.denominator());
@@ -71,10 +71,6 @@ public class MozartCreator implements ICreator {
             Score s = (Score) arg0.getGenome();
             return "Score, Size=" + s.getPart(0).getPhrase(0).getSize() + " SCORES:" + scores;
         }
-    }
-
-    public Class worksOn() {
-        return Score.class;
     }
 
     public Lamark getLamark() {

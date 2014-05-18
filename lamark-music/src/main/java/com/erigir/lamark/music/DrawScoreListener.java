@@ -9,11 +9,17 @@ import jm.music.data.Note;
 import jm.music.data.Part;
 import jm.music.data.Phrase;
 import jm.music.data.Score;
+import jm.util.View;
 
 import java.awt.*;
 
 public class DrawScoreListener implements GUIEventListener {
     private Notate scoreFrame;
+
+    public DrawScoreListener() {
+        //scoreFrame = new Notate((Score)null,50,50);
+    }
+
 
     public void handleEvent(LamarkEvent arg0) {
         if (arg0 instanceof BetterIndividualFoundEvent) {
@@ -21,6 +27,13 @@ public class DrawScoreListener implements GUIEventListener {
             Individual i = bife.getNewBest();
             Score s = (Score) i.getGenome();
 
+            View.notate(s);
+            //scoreFrame.
+        }
+    
+
+
+            /*
             // Build new score object to get around display bug
             ScoreAnalysis sa = (ScoreAnalysis) i.getAttribute("ANALYSIS");
             Phrase newPhrase = new Phrase();
@@ -47,6 +60,7 @@ public class DrawScoreListener implements GUIEventListener {
             //View.histogram(s);
             //scoreFrame=new ShowScore(s.getPart(0).getPhrase(0));
         }
+        */
     }
 
     public void setParentComponent(Component ignored) {
