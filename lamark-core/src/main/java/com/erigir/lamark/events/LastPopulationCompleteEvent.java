@@ -65,5 +65,5 @@ public class LastPopulationCompleteEvent extends PopulationCompleteEvent {
         UNIFORM
     }
 
-    ;
+
 }

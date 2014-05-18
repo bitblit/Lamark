@@ -100,10 +100,6 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
      */
     private Lamark currentRunner;
     /**
-     * Handle to the url loaded at startup, if any *
-     */
-    private String initialLocation;
-    /**
      * Panel holding the current configuration *
      */
     private LamarkConfigPanel configPanel;
@@ -446,15 +442,6 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
                 (Runtime.getRuntime().totalMemory() / (1024 * 1024)) + " Mb");
         freeMemory.setText("Free Memory :" +
                 (Runtime.getRuntime().freeMemory() / (1024 * 1024)) + " Mb");
-    }
-
-    /**
-     * Called the wrapper classes to start the GUI in a given state by opening a url
-     *
-     * @param initialLocation URL object to initialize to
-     */
-    public void setInitialLocation(String initialLocation) {
-        this.initialLocation = initialLocation;
     }
 
     /**

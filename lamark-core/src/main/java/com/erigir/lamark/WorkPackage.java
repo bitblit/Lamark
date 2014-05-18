@@ -271,6 +271,6 @@ public class WorkPackage implements Runnable {
         /**
          * Create a new individual via crossover *
          */
-        CROSSOVER;
+        CROSSOVER
     }
 }
