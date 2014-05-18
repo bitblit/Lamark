@@ -2,8 +2,8 @@ package com.erigir.lamark.teacher;
 
 import com.erigir.lamark.IMutator;
 import com.erigir.lamark.Individual;
-import com.erigir.lamark.Util;
-import com.erigir.lamark.configure.LamarkConfig;
+import com.erigir.lamark.Lamark;
+import com.erigir.lamark.config.LamarkConfig;
 
 import java.lang.reflect.Method;
 import java.util.Properties;
@@ -17,14 +17,16 @@ public class DynamicMutator implements IMutator {
     private Properties properties;
     private double pMutation;
 
+    private Lamark lamark;
+
+    public void setLamark(Lamark lamark) {
+        this.lamark = lamark;
+    }
 
     public Class worksOn() {
         return Object.class;
     }
 
-    public void setLamarkConfig(LamarkConfig pConfig) {
-        config = pConfig;
-    }
 
     public void configure(Properties pProperties) {
         properties = pProperties;
@@ -48,18 +50,14 @@ public class DynamicMutator implements IMutator {
         return cacheMethod;
     }
 
-    public boolean mutate(Individual i) {
-        if (Util.flip(pMutation)) {
-            try {
-                getMethod().invoke(null, new Object[]{i.getGenome(), properties, config});
-                return true;
-            } catch (Exception e) {
-                IllegalArgumentException iae = new IllegalArgumentException("Error attempting to create new individual via crossover:" + e);
-                iae.initCause(e);
-                throw iae;
-            }
+    public void mutate(Individual i) {
+        try {
+            getMethod().invoke(null, new Object[]{i.getGenome(), properties, config});
+        } catch (Exception e) {
+            IllegalArgumentException iae = new IllegalArgumentException("Error attempting to create new individual via crossover:" + e);
+            iae.initCause(e);
+            throw iae;
         }
-        return false;
     }
 
     private String header() {

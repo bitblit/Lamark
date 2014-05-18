@@ -2,7 +2,8 @@ package com.erigir.lamark.teacher;
 
 import com.erigir.lamark.ICreator;
 import com.erigir.lamark.Individual;
-import com.erigir.lamark.configure.LamarkConfig;
+import com.erigir.lamark.Lamark;
+import com.erigir.lamark.config.LamarkConfig;
 
 import java.lang.reflect.Method;
 import java.util.Properties;
@@ -12,24 +13,21 @@ public class DynamicCreator implements ICreator {
     private Logger LOG = Logger.getLogger(DynamicCreator.class.getName());
     private static String current = defaultCode();
     private Method cacheMethod;
-    private LamarkConfig config;
-    private Properties properties;
     private int size;
+
+    private Lamark lamark;
+
+    public void setLamark(Lamark lamark) {
+        this.lamark = lamark;
+    }
 
     public Class worksOn() {
         return Object.class;
     }
 
-    public void setLamarkConfig(LamarkConfig pConfig) {
-        config = pConfig;
-    }
 
     public String translate(Individual i) {
         return "Dynamic : " + i.getGenome().toString();
-    }
-
-    public void configure(Properties pProperties) {
-        properties = pProperties;
     }
 
     private synchronized Method getMethod() {
@@ -52,9 +50,8 @@ public class DynamicCreator implements ICreator {
 
     public Individual create() {
         try {
-            Object res = getMethod().invoke(null, new Object[]
-                    {size, properties, config
-                    });
+            // TODO: Call setters first?
+            Object res = getMethod().invoke(null, new Object[]{});
             return new Individual(res);
         } catch (Exception e) {
             IllegalArgumentException iae = new IllegalArgumentException("Error attempting to create new individual:" + e);

@@ -110,7 +110,7 @@ public class CodeDialog extends JDialog implements PropertyChangeListener {
                 // Compile selected
                 try {
                     String code = header + textField.getText() + footer;
-                    Class c = new ClassBodyEvaluator(code).evaluate();
+                    Class c = new ClassBodyEvaluator(code).getClazz();
                     method = c.getMethod(functionName, paramTypes);
                     //we're done; dismiss the dialog
                     setVisible(false);

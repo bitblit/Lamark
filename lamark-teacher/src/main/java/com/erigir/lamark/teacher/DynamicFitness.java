@@ -3,7 +3,8 @@ package com.erigir.lamark.teacher;
 import com.erigir.lamark.EFitnessType;
 import com.erigir.lamark.IFitnessFunction;
 import com.erigir.lamark.Individual;
-import com.erigir.lamark.configure.LamarkConfig;
+import com.erigir.lamark.Lamark;
+import com.erigir.lamark.config.LamarkConfig;
 
 import java.lang.reflect.Method;
 import java.util.Properties;
@@ -15,6 +16,12 @@ public class DynamicFitness implements IFitnessFunction {
     private Method cacheMethod;
     private LamarkConfig config;
     private Properties properties;
+
+    private Lamark lamark;
+
+    public void setLamark(Lamark lamark) {
+        this.lamark = lamark;
+    }
 
 
     public Class worksOn() {

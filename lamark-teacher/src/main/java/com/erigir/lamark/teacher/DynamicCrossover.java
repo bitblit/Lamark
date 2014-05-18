@@ -2,16 +2,15 @@ package com.erigir.lamark.teacher;
 
 import com.erigir.lamark.ICrossover;
 import com.erigir.lamark.Individual;
-import com.erigir.lamark.Util;
-import com.erigir.lamark.configure.LamarkConfig;
+import com.erigir.lamark.Lamark;
+import com.erigir.lamark.config.LamarkConfig;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-public class DynamicCrossover implements ICrossover {
+public class DynamicCrossover implements ICrossover<T> {
     private static String current = defaultCode();
     private Logger LOG = Logger.getLogger(DynamicCrossover.class.getName());
     private Method cacheMethod;
@@ -19,17 +18,10 @@ public class DynamicCrossover implements ICrossover {
     private Properties properties;
     private double pCrossover;
 
+    private Lamark lamark;
 
-    public Class worksOn() {
-        return Object.class;
-    }
-
-    public void setLamarkConfig(LamarkConfig pConfig) {
-        config = pConfig;
-    }
-
-    public void configure(Properties pProperties) {
-        properties = pProperties;
+    public void setLamark(Lamark lamark) {
+        this.lamark = lamark;
     }
 
     private synchronized Method getMethod() {
@@ -50,30 +42,24 @@ public class DynamicCrossover implements ICrossover {
         return cacheMethod;
     }
 
-    public List<Individual> crossover(List<Individual> parents) {
-        List<Individual> rval = new ArrayList<Individual>(2);
-        if (Util.flip(pCrossover)) {
-            try {
+    @Override
+    public Individual<T> crossover(List<Individual<T>> parents) {
 
-                Object[] temp = new Object[2];
-                for (int i = 0; i < 2; i++) {
-                    temp[i] = parents.get(i).getGenome();
-                }
+        try {
 
-                Object[] res = (Object[]) getMethod().invoke(null, new Object[]{temp, properties, config});
-                for (int i = 0; i < 2; i++) {
-                    rval.add(new Individual(res[i], parents));
-                }
-            } catch (Exception e) {
-                IllegalArgumentException iae = new IllegalArgumentException("Error attempting to create new individual via crossover:" + e);
-                iae.initCause(e);
-                throw iae;
+            T temp = null;
+            for (int i = 0; i < 2; i++) {
+                temp = parents.get(i).getGenome();
             }
-        } else {
-            rval.add(new Individual(parents.get(0), parents));
-            rval.add(new Individual(parents.get(1), parents));
+
+            // TODO: call setters first?
+            Object[] res = (Object[]) getMethod().invoke(null, new Object[]{});
+            return new Individual(res);
+        } catch (Exception e) {
+            IllegalArgumentException iae = new IllegalArgumentException("Error attempting to create new individual via crossover:" + e);
+            iae.initCause(e);
+            throw iae;
         }
-        return rval;
     }
 
     private String header() {
