@@ -1,5 +1,5 @@
 {
-  "Cellular Automata yy" :
+  "Cellular Automata" :
   {
     "numberOfWorkerThreads" : 4,
     "crossoverProbability" : 1,
