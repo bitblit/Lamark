@@ -31,6 +31,13 @@ import java.util.concurrent.Executors;
  * Lamark instances hold both their configuration and data about the CURRENT run of that configuration - it is similar
  * to the relationship between a class and an instance.
  * <p/>
+ * <p>
+ *     Since this class is responsible for loading up instances from JSON representations, it is also responsible for
+ *     setting the classloader before asking Jackson to read the JSON (which autoconverts class names to class objects)
+ *     so if a special classloader is needed (for example when reading from network or disk) it should be bundled into
+ *     a url classloader and set in the factory object before calling the deserialize functions
+ * </p>
+ *
  * <br />
  * NOTE : This is a class for simple bootstrapping.  If your auto-conf needs are more complicated then an IOC container like
  * Spring (http://www.springframework.org) is recommended.
@@ -42,12 +49,26 @@ public class LamarkFactory {
     private static final Logger LOG = LoggerFactory.getLogger(LamarkFactory.class);
 
     private ObjectMapper objectMapper;
+    private ClassLoader classLoader;
+
+    public ObjectMapper defaultObjectMapper()
+    {
+        ObjectMapper rval = new ObjectMapper();
+        rval.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        rval.configure(SerializationFeature.INDENT_OUTPUT, true);
+        return rval;
+    }
 
     public LamarkFactory() {
         super();
-        objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+        objectMapper = defaultObjectMapper();
+        this.classLoader = Thread.currentThread().getContextClassLoader();
+    }
+
+    public LamarkFactory(ClassLoader classLoader) {
+        super();
+        objectMapper = defaultObjectMapper();
+        this.classLoader = classLoader;
     }
 
 
@@ -184,6 +205,7 @@ public class LamarkFactory {
 
     public <T> T cleanFromJSONString(String value, Class<T> clazz) {
         try {
+            Thread.currentThread().setContextClassLoader(classLoader);
             return (value == null || clazz == null) ? null : objectMapper.readValue(value, clazz);
         } catch (IOException ioe) {
             throw new IllegalArgumentException("Couldn't format", ioe);
@@ -192,6 +214,7 @@ public class LamarkFactory {
 
     public <T> T cleanFromJSONString(InputStream value, Class<T> clazz) {
         try {
+            Thread.currentThread().setContextClassLoader(classLoader);
             return (value == null || clazz == null) ? null : objectMapper.readValue(value, clazz);
         } catch (IOException ioe) {
             throw new IllegalArgumentException("Couldn't format", ioe);
@@ -202,6 +225,7 @@ public class LamarkFactory {
         try {
             Map<String, LamarkGUIConfig> rval = null;
             if (json != null) {
+                Thread.currentThread().setContextClassLoader(classLoader);
                 rval = objectMapper.readValue(json, new TypeReference<Map<String, LamarkGUIConfig>>() {});
             }
             return rval;
@@ -214,6 +238,7 @@ public class LamarkFactory {
         try {
             Map<String, LamarkGUIConfig> rval = null;
             if (json != null) {
+                Thread.currentThread().setContextClassLoader(classLoader);
                 rval = objectMapper.readValue(json, new TypeReference<Map<String, LamarkGUIConfig>>() {});
             }
             return rval;
@@ -233,6 +258,7 @@ public class LamarkFactory {
                 if (config == null || config.size() == 0) {
                     rval = clazz.newInstance();
                 } else {
+                    Thread.currentThread().setContextClassLoader(classLoader);
                     String json = objectMapper.writeValueAsString(config);
                     rval = objectMapper.readValue(json, clazz);
                 }
@@ -257,4 +283,23 @@ public class LamarkFactory {
         }
     }
 
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
+
+    public Class safeLoadClass(String classname)
+    {
+        Class rval = null;
+        try {
+            rval = classLoader.loadClass(classname);
+        } catch (ClassNotFoundException cnf) {
+            LOG.warn("Couldnt find class {} - returning null", classname);
+            rval = null;
+        }
+        return rval;
+    }
 }

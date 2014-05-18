@@ -45,10 +45,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      */
     private static final String DEFAULT_CONFIG_LOCATION = "classpath:com/erigir/lamark/gui/default-lamark.json";
 
-    /**
-     * Handle to the default classloader, for resets
-     */
-    private static final ClassLoader DEFAULT_CLASS_LOADER = LamarkConfigPanel.class.getClassLoader();
 
     /**
      * Factory is used for serialization
@@ -322,9 +318,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
 
             if (location != null) {
                 if (location.startsWith("classpath:")) {
-                    // If its on the classpath, reset to the default class loader
-                    Thread.currentThread().setContextClassLoader(DEFAULT_CLASS_LOADER);
-
                     // Load as a resource - can only be a json file (no jars on classpath)
                     String readLoc = location.substring("classpath:".length());
                     InputStream ios = Thread.currentThread().getContextClassLoader().getResourceAsStream(readLoc);
@@ -337,8 +330,9 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
                         json = readStreamToString(u.openStream());
                     } else {
                         // Need to massage the classpath and load default
-                        Thread.currentThread().setContextClassLoader(new URLClassLoader(new URL[]{u}, Thread.currentThread().getContextClassLoader()));
-                        json = readStreamToString(Thread.currentThread().getContextClassLoader().getResourceAsStream("lamark.json"));
+                        URLClassLoader newClassLoader = new URLClassLoader(new URL[]{u}, Thread.currentThread().getContextClassLoader());
+                        lamarkFactory = new LamarkFactory(newClassLoader);
+                        json = readStreamToString(lamarkFactory.getClassLoader().getResourceAsStream("lamark.json"));
                     }
                 }
 
@@ -686,16 +680,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         return (value == null) ? null : new Long(value);
     }
 
-    private Class safeForName(String value) {
-        Class rval = null;
-        try {
-            rval = Thread.currentThread().getContextClassLoader().loadClass(value);
-        } catch (ClassNotFoundException cnf) {
-            LOG.warn("Couldnt find class {} - returning null", value);
-            rval = null;
-        }
-        return rval;
-    }
 
     /**
      * Converts null to empty string, otherwise does nothing.
@@ -726,11 +710,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
             String classN = start.substring(0, pi);
             String packageN = start.substring(pi + 1, start.length() - 1);
             String fullN = packageN+"."+classN;
-            try {
-                return Thread.currentThread().getContextClassLoader().loadClass(fullN);
-            } catch (ClassNotFoundException cnf) {
-                throw new IllegalArgumentException("Cant find class " + cb.getSelectedItem());
-            }
+            return lamarkFactory.safeLoadClass(fullN);
         }
 
     }
@@ -794,7 +774,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         p.setPreCreatedIndividuals(new LinkedList<String>(preloads));
 
         for (String s : customListener) {
-            Class c = safeForName(s);
+            Class c = lamarkFactory.safeLoadClass(s);
             if (c != null) {
                 p.getCustomListeners().add(c);
             }
