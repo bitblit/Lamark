@@ -17,14 +17,14 @@ import java.util.Random;
  */
 public class PhrasePool {
     public static PhrasePool instance = new PhrasePool();
+    public static int POOLSIZE = 100;
+    private List<PhraseWrapper> pool = new ArrayList<PhraseWrapper>(POOLSIZE);
+    private static int SEARCH_ITERATIONS = 2;
     private ScaleEnum scale;
     private TimeSignatureEnum signature;
     private Integer lowerBound;
     private Integer upperBound;
-    public static int POOLSIZE = 100;
-    private List<PhraseWrapper> pool = new ArrayList<PhraseWrapper>(POOLSIZE);
     private boolean initialized = false;
-    private static int SEARCH_ITERATIONS = 2;
     private Random random;
 
     private PhrasePool() {
@@ -78,7 +78,7 @@ public class PhrasePool {
         return current;
     }
 
-    public void initialize(Random pRandom,TimeSignatureEnum pSignature, ScaleEnum pScale, Integer pLowerBound, Integer pUpperBound) {
+    public void initialize(Random pRandom, TimeSignatureEnum pSignature, ScaleEnum pScale, Integer pLowerBound, Integer pUpperBound) {
         random = pRandom;
         scale = pScale;
         signature = pSignature;

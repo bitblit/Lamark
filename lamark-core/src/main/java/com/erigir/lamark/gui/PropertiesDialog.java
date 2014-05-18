@@ -58,26 +58,6 @@ public class PropertiesDialog extends JDialog implements ActionListener, ListSel
     private Properties returnProps;
 
     /**
-     * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
-     */
-    public void valueChanged(ListSelectionEvent arg0) {
-        PropertiesTableModel ptm = (PropertiesTableModel) propTable.getModel();
-        int row = propTable.getSelectedRow();
-        editKey.setText((String) ptm.getValueAt(row, 0));
-        editValue.setText((String) ptm.getValueAt(row, 1));
-
-    }
-
-    /**
-     * Generates a properties object matching the backed data.
-     *
-     * @return Properties object matching the table
-     */
-    public Properties getProperties() {
-        return returnProps;
-    }
-
-    /**
      * Constructor initialized with the given title and initial properties.
      *
      * @param title   String containing the title to use on the dialog box
@@ -135,6 +115,26 @@ public class PropertiesDialog extends JDialog implements ActionListener, ListSel
         returnProps = initial;
 
         pack();
+    }
+
+    /**
+     * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
+     */
+    public void valueChanged(ListSelectionEvent arg0) {
+        PropertiesTableModel ptm = (PropertiesTableModel) propTable.getModel();
+        int row = propTable.getSelectedRow();
+        editKey.setText((String) ptm.getValueAt(row, 0));
+        editValue.setText((String) ptm.getValueAt(row, 1));
+
+    }
+
+    /**
+     * Generates a properties object matching the backed data.
+     *
+     * @return Properties object matching the table
+     */
+    public Properties getProperties() {
+        return returnProps;
     }
 
     /**

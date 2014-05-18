@@ -17,13 +17,6 @@ public abstract class AbstractLamarkComponent implements ILamarkComponent {
     private Lamark lamark;
 
     /**
-     * @see com.erigir.lamark.ILamarkComponent#setLamark(Lamark)
-     */
-    public void setLamark(Lamark pLamark) {
-        lamark = pLamark;
-    }
-
-    /**
      * Returns a handle to the stored lamark instance.
      * Exposes the private Lamark instance
      * for use by any subclasses.
@@ -32,6 +25,13 @@ public abstract class AbstractLamarkComponent implements ILamarkComponent {
      */
     public Lamark getLamark() {
         return lamark;
+    }
+
+    /**
+     * @see com.erigir.lamark.ILamarkComponent#setLamark(Lamark)
+     */
+    public void setLamark(Lamark pLamark) {
+        lamark = pLamark;
     }
 
 }

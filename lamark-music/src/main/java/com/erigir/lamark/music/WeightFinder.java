@@ -3,18 +3,7 @@ package com.erigir.lamark.music;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.Util;
 import com.erigir.lamark.music.control.ControlSongs;
-import com.erigir.lamark.music.traits.CenterInTrebleCleffTrait;
-import com.erigir.lamark.music.traits.IMusicTrait;
-import com.erigir.lamark.music.traits.MinimizeDirectionChangesTrait;
-import com.erigir.lamark.music.traits.PenalizeLargeJumpsTrait;
-import com.erigir.lamark.music.traits.PenalizeTooManyRepeatsTrait;
-import com.erigir.lamark.music.traits.PercentInScaleBigFiveTrait;
-import com.erigir.lamark.music.traits.ReduceStandardDeviationTrait;
-import com.erigir.lamark.music.traits.RepeatingThemeTrait;
-import com.erigir.lamark.music.traits.StandardTimingTrait;
-import com.erigir.lamark.music.traits.TimingStepsTrait;
-import com.erigir.lamark.music.traits.TraitWrapper;
-import com.erigir.lamark.music.traits.WithinStandardDeviationTrait;
+import com.erigir.lamark.music.traits.*;
 import jm.music.data.Score;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +86,7 @@ public class WeightFinder {
                 scores[i][j] = test.get(j).getFitness();
                 songAverageScore[j] += scores[i][j];
             }
-            LOG.info("For song {} scores was {}" ,songs[i].getTitle() , Arrays.asList(scores[i]));
+            LOG.info("For song {} scores was {}", songs[i].getTitle(), Arrays.asList(scores[i]));
         }
         for (int i = 0; i < test.size(); i++) {
             songAverageScore[i] /= (double) songs.length;
@@ -128,7 +117,7 @@ public class WeightFinder {
         double currentPercent;
         double stepsPerIndex = ((MAXIMUM_WEIGHT - MINIMUM_WEIGHT) + 1) / STEP_VALUE;
         double iterationCount = Math.pow(stepsPerIndex, weights.length);
-        LOG.info("Trying {} per index, {} indexs, total of {} iterations" , new Object[]{ stepsPerIndex , weights.length , iterationCount });
+        LOG.info("Trying {} per index, {} indexs, total of {} iterations", new Object[]{stepsPerIndex, weights.length, iterationCount});
 
         double iteration = 0;
         long startTime = System.currentTimeMillis();
@@ -204,11 +193,10 @@ public class WeightFinder {
             ioe.printStackTrace();
         }
 
-        LOG.info("Last tried: {}" , Arrays.asList(weights));
+        LOG.info("Last tried: {}", Arrays.asList(weights));
 
         return rval;
     }
-
 
 
 }

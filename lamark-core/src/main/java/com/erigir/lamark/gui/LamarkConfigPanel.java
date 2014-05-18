@@ -18,13 +18,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeMap;
 
 /**
  * A panel for holding and organizing the various properties controls for LamarkGUI.
@@ -237,6 +232,48 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     private JTextField randomSeed = new JTextField();
 
     /**
+     * Default constructor.
+     * <p/>
+     * Builds the layout.
+     */
+    public LamarkConfigPanel(final String inConfigResource, final String inSelectedItem) {
+        super();
+
+        setLayout(new BorderLayout());
+        add(classPanel(), BorderLayout.NORTH);
+        add(panel1(), BorderLayout.CENTER);
+        add(panel2(), BorderLayout.SOUTH);
+
+        // Finally, initialize
+        String configResource = (inConfigResource == null) ? DEFAULT_CONFIG_LOCATION : inConfigResource;
+
+        loadFromLocation(configResource, inSelectedItem);
+    }
+
+    public static Map<String, Object> propertiesToMap(Properties p) {
+        Map<String, Object> rval = null;
+        if (p != null) {
+            rval = new TreeMap<String, Object>();
+            for (Map.Entry<Object, Object> e : p.entrySet()) {
+                rval.put((String) e.getKey(), (String) e.getValue());
+            }
+        }
+        return rval;
+    }
+
+    public static Properties mapToProperties(Map<String, Object> m) {
+        Properties rval = null;
+        if (m != null) {
+            rval = new Properties();
+            for (Map.Entry<String, Object> e : m.entrySet()) {
+                rval.setProperty(e.getKey(), String.valueOf(e.getValue()));
+            }
+        }
+        return rval;
+
+    }
+
+    /**
      * @see javax.swing.JComponent#setEnabled(boolean)
      */
     public void setEnabled(boolean enable) {
@@ -274,9 +311,8 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         randomSeed.setEnabled(enable);
     }
 
-    public void reset()
-    {
-        loadFromLocation(DEFAULT_CONFIG_LOCATION,null);
+    public void reset() {
+        loadFromLocation(DEFAULT_CONFIG_LOCATION, null);
     }
 
     private String readStreamToString(InputStream ios)
@@ -349,7 +385,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
                     } else {
                         Set<String> options = configs.keySet();
 
-                        String s = (String)JOptionPane.showInputDialog(
+                        String s = (String) JOptionPane.showInputDialog(
                                 null,
                                 "Options:",
                                 "Select Algorithm",
@@ -358,24 +394,18 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
                                 options.toArray(),
                                 null);
 
-                        if (s!=null && s.length()>0)
-                        {
+                        if (s != null && s.length() > 0) {
                             selected = configs.get(s);
                         }
                     }
 
-                    if (selected!=null)
-                    {
+                    if (selected != null) {
                         fromGUIConfig(selected);
-                    }
-                    else
-                    {
-                        JOptionPane.showMessageDialog(null,"No config selected.  Nothing happened.");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "No config selected.  Nothing happened.");
                     }
 
-                }
-                else
-                {
+                } else {
                     throw new IllegalStateException("Failed to load configuration JSON file");
                 }
             }
@@ -391,25 +421,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         } catch (MalformedURLException mue) {
             throw new RuntimeException("Unable to read url", mue);
         }
-    }
-
-    /**
-     * Default constructor.
-     * <p/>
-     * Builds the layout.
-     */
-    public LamarkConfigPanel(final String inConfigResource, final String inSelectedItem) {
-        super();
-
-        setLayout(new BorderLayout());
-        add(classPanel(), BorderLayout.NORTH);
-        add(panel1(), BorderLayout.CENTER);
-        add(panel2(), BorderLayout.SOUTH);
-
-        // Finally, initialize
-        String configResource = (inConfigResource == null) ? DEFAULT_CONFIG_LOCATION : inConfigResource;
-
-        loadFromLocation(configResource, inSelectedItem);
     }
 
     /**
@@ -577,14 +588,11 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         box.setEditable(true);
 
         box.removeAllItems();
-        if (classes!=null)
-        {
+        if (classes != null) {
             for (Class c : classes) {
                 box.addItem(formatClassName(c));
             }
-        }
-        else if (def!=null)
-        {
+        } else if (def != null) {
             box.addItem(formatClassName(def));
         }
 
@@ -680,7 +688,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         return (value == null) ? null : new Long(value);
     }
 
-
     /**
      * Converts null to empty string, otherwise does nothing.
      *
@@ -690,7 +697,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     private String ein(Object s) {
         return (s == null) ? "" : String.valueOf(s);
     }
-
 
     /**
      * Creates a classname from the contents of the combobox.
@@ -709,7 +715,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
             int pi = start.indexOf("[");
             String classN = start.substring(0, pi);
             String packageN = start.substring(pi + 1, start.length() - 1);
-            String fullN = packageN+"."+classN;
+            String fullN = packageN + "." + classN;
             return lamarkFactory.safeLoadClass(fullN);
         }
 
@@ -871,29 +877,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      */
     public List<String> getPreloads() {
         return preloads;
-    }
-
-    public static Map<String, Object> propertiesToMap(Properties p) {
-        Map<String, Object> rval = null;
-        if (p != null) {
-            rval = new TreeMap<String, Object>();
-            for (Map.Entry<Object, Object> e : p.entrySet()) {
-                rval.put((String) e.getKey(), (String) e.getValue());
-            }
-        }
-        return rval;
-    }
-
-    public static Properties mapToProperties(Map<String, Object> m) {
-        Properties rval = null;
-        if (m != null) {
-            rval = new Properties();
-            for (Map.Entry<String, Object> e : m.entrySet()) {
-                rval.setProperty(e.getKey(), String.valueOf(e.getValue()));
-            }
-        }
-        return rval;
-
     }
 
     public LamarkFactory getLamarkFactory() {

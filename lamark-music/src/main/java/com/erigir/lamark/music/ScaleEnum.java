@@ -2,11 +2,7 @@ package com.erigir.lamark.music;
 
 import jm.music.data.Note;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 public enum ScaleEnum {
     A(3),
@@ -23,30 +19,24 @@ public enum ScaleEnum {
     Gs(-4);
 
     private int sharpOrFlatCount;
-
-    ScaleEnum(int sharpOrFlatCount)
-    {
+    private SortedSet<Integer> cacheScale;
+    private SortedSet<Integer> cacheBigFiveScale;
+    ScaleEnum(int sharpOrFlatCount) {
         this.sharpOrFlatCount = sharpOrFlatCount;
     }
 
-    private SortedSet<Integer> cacheScale;
-    private SortedSet<Integer> cacheBigFiveScale;
-
-    public int getSharpOrFlatCount() {
-        return sharpOrFlatCount;
-    }
-
-    public static ScaleEnum fromSharpOrFlatCount(int sharpOrFlatCount)
-    {
+    public static ScaleEnum fromSharpOrFlatCount(int sharpOrFlatCount) {
         ScaleEnum rval = null;
-        for (ScaleEnum e:values())
-        {
-            if (e.sharpOrFlatCount==sharpOrFlatCount)
-            {
+        for (ScaleEnum e : values()) {
+            if (e.sharpOrFlatCount == sharpOrFlatCount) {
                 rval = e;
             }
         }
         return rval;
+    }
+
+    public int getSharpOrFlatCount() {
+        return sharpOrFlatCount;
     }
 
     public SortedSet<Integer> scale() {

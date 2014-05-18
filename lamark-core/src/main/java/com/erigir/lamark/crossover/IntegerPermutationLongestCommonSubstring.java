@@ -27,62 +27,6 @@ import java.util.List;
 public class IntegerPermutationLongestCommonSubstring extends AbstractLamarkComponent implements ICrossover<List<Integer>> {
 
     /**
-     * @see com.erigir.lamark.ICrossover#parentCount()
-     */
-    public int parentCount() {
-        return 2;
-    }
-
-
-    /**
-     * @see com.erigir.lamark.ICrossover#crossover(java.util.List)
-     */
-    public Individual<List<Integer>> crossover(List<Individual<List<Integer>>> parents) {
-        List<Integer> p1 = parents.get(0).getGenome();
-        List<Integer> p2 = parents.get(1).getGenome();
-        int size = p1.size();
-
-        // Find the largest common substring in any order
-        List sub = lcs(p1, p2); // Get the longest common subsequence
-        ArrayList<Integer> p1r = new ArrayList<Integer>(p1);
-        ArrayList<Integer> p2r = new ArrayList<Integer>(p2);
-        Collections.reverse(p1r);
-        Collections.reverse(p2r);
-        List test = lcs(p1, p2r);
-        if (test.size() > sub.size()) {
-            sub = test;
-        }
-        test = lcs(p1r, p2);
-        if (test.size() > sub.size()) {
-            sub = test;
-        }
-        test = lcs(p1r, p2r);
-        if (test.size() > sub.size()) {
-            sub = test;
-        }
-
-        ArrayList<Integer> c1 = new ArrayList<Integer>(size);
-
-        // Build child 1
-        int otherParentIdx = 0;
-        for (int i = 0; i < size; i++) {
-            if (sub.contains(p1.get(i))) {
-                c1.add((Integer) p1.get(i));
-            } else {
-                while (sub.contains(p2.get(otherParentIdx % size))) {
-                    otherParentIdx++;
-                }
-                c1.add((Integer) p2.get(otherParentIdx % size));
-                otherParentIdx++;
-            }
-        }
-
-        Collections.reverse(c1);
-
-        return new Individual<List<Integer>>(c1);
-    }
-
-    /**
      * Construct the longest common substring between two strings if such
      * a substring exists. Note that this is different from the longest
      * common subsequence in that it assumes you want the longest
@@ -100,8 +44,8 @@ public class IntegerPermutationLongestCommonSubstring extends AbstractLamarkComp
      * @param arr1 the first string instance
      * @param arr2 the second string instance
      * @return the longest common substring, or the empty string if
-     *         at least one of the arguments are <code>null</code>, empty,
-     *         or there is no match.
+     * at least one of the arguments are <code>null</code>, empty,
+     * or there is no match.
      */
     public static List<Integer> lcs(List<Integer> arr1, List<Integer> arr2) {
         ArrayList empty = new ArrayList();
@@ -200,6 +144,61 @@ public class IntegerPermutationLongestCommonSubstring extends AbstractLamarkComp
             }
         }
         return match;
+    }
+
+    /**
+     * @see com.erigir.lamark.ICrossover#parentCount()
+     */
+    public int parentCount() {
+        return 2;
+    }
+
+    /**
+     * @see com.erigir.lamark.ICrossover#crossover(java.util.List)
+     */
+    public Individual<List<Integer>> crossover(List<Individual<List<Integer>>> parents) {
+        List<Integer> p1 = parents.get(0).getGenome();
+        List<Integer> p2 = parents.get(1).getGenome();
+        int size = p1.size();
+
+        // Find the largest common substring in any order
+        List sub = lcs(p1, p2); // Get the longest common subsequence
+        ArrayList<Integer> p1r = new ArrayList<Integer>(p1);
+        ArrayList<Integer> p2r = new ArrayList<Integer>(p2);
+        Collections.reverse(p1r);
+        Collections.reverse(p2r);
+        List test = lcs(p1, p2r);
+        if (test.size() > sub.size()) {
+            sub = test;
+        }
+        test = lcs(p1r, p2);
+        if (test.size() > sub.size()) {
+            sub = test;
+        }
+        test = lcs(p1r, p2r);
+        if (test.size() > sub.size()) {
+            sub = test;
+        }
+
+        ArrayList<Integer> c1 = new ArrayList<Integer>(size);
+
+        // Build child 1
+        int otherParentIdx = 0;
+        for (int i = 0; i < size; i++) {
+            if (sub.contains(p1.get(i))) {
+                c1.add((Integer) p1.get(i));
+            } else {
+                while (sub.contains(p2.get(otherParentIdx % size))) {
+                    otherParentIdx++;
+                }
+                c1.add((Integer) p2.get(otherParentIdx % size));
+                otherParentIdx++;
+            }
+        }
+
+        Collections.reverse(c1);
+
+        return new Individual<List<Integer>>(c1);
     }
 
     /**

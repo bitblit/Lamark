@@ -1,34 +1,30 @@
 {
-"Main" :
-{
-  "fitnessFunctionClass" : "com.erigir.lamark.music.ScoreFitness",
-  "fitnessFunctionConfiguration" :
-  {
-  },
-  "creatorClass" : "com.erigir.lamark.music.MozartCreator",
-  "crossoverClass" : "com.erigir.lamark.music.MozartCrossover",
+    "Main": {
+        "fitnessFunctionClass": "com.erigir.lamark.music.ScoreFitness",
+        "fitnessFunctionConfiguration": {
+        },
+        "creatorClass": "com.erigir.lamark.music.MozartCreator",
+        "crossoverClass": "com.erigir.lamark.music.MozartCrossover",
 
-    "mutatorClass" : "com.erigir.lamark.music.MozartMutator",
+        "mutatorClass": "com.erigir.lamark.music.MozartMutator",
 
-  "creatorConfiguration" :
-  {
-    "size" : 4
-  },
+        "creatorConfiguration": {
+            "size": 4
+        },
 
-    "upperElitism": 0.1 ,
-    "lowerElitism": 0.1 ,
-    "populationSize": 30 ,
-    "maximumPopulations" : 50000,
-    "crossoverProbability": 1.0 ,
-    "mutationProbability": 0.01 ,
-    "numberOfWorkerThreads": 2 ,
-    "randomSeed": 1,
-"customListeners" :
-[
-"com.erigir.lamark.music.DrawScoreListener"
-]
+        "upperElitism": 0.1,
+        "lowerElitism": 0.1,
+        "populationSize": 30,
+        "maximumPopulations": 50000,
+        "crossoverProbability": 1.0,
+        "mutationProbability": 0.01,
+        "numberOfWorkerThreads": 2,
+        "randomSeed": 1,
+        "customListeners": [
+            "com.erigir.lamark.music.DrawScoreListener"
+        ]
 
-}
+    }
 }
 
 

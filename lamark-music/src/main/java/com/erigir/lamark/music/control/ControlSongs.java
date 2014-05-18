@@ -1,14 +1,19 @@
 package com.erigir.lamark.music.control;
 
 import com.erigir.lamark.music.NoteDurationEnum;
-import jm.music.data.Note;
-import jm.music.data.Part;
-import jm.music.data.Phrase;
-import jm.music.data.Score;
-import jm.music.data.Tempo;
+import jm.music.data.*;
 
 public enum ControlSongs {
     MARY_HAD_A_LITTLE_LAMB, NEW_WORLD_SYMPHONY, MINUET_IN_G, TWINKLE_TWINKLE, PACHABEL_CANON_IN_D;//GRAND_STAFF_SCALE, 
+
+    public static Score[] getSongs() {
+        ControlSongs[] songs = ControlSongs.values();
+        Score[] rval = new Score[songs.length];
+        for (int i = 0; i < songs.length; i++) {
+            rval[i] = songs[i].getSong();
+        }
+        return rval;
+    }
 
     public Score getSong() {
         switch (this) {
@@ -26,15 +31,6 @@ public enum ControlSongs {
             default:
                 throw new IllegalStateException("Cant happen : Unknown item :" + this);
         }
-    }
-
-    public static Score[] getSongs() {
-        ControlSongs[] songs = ControlSongs.values();
-        Score[] rval = new Score[songs.length];
-        for (int i = 0; i < songs.length; i++) {
-            rval[i] = songs[i].getSong();
-        }
-        return rval;
     }
 
     public int getLength() {

@@ -6,12 +6,7 @@ package com.erigir.lamark.gui;
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.LamarkConfigurationFailedException;
 import com.erigir.lamark.Util;
-import com.erigir.lamark.events.BetterIndividualFoundEvent;
-import com.erigir.lamark.events.ExceptionEvent;
-import com.erigir.lamark.events.LamarkEvent;
-import com.erigir.lamark.events.LamarkEventListener;
-import com.erigir.lamark.events.LastPopulationCompleteEvent;
-import com.erigir.lamark.events.PopulationCompleteEvent;
+import com.erigir.lamark.events.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -40,6 +35,10 @@ import java.util.concurrent.Executors;
  */
 
 public class LamarkGui extends JPanel implements LamarkEventListener, ActionListener {
+    /**
+     * String containing the label of the open url button *
+     */
+    public static final String OPEN_REMOTE = "Open URL...";
     /**
      * Handle to the central panel *
      */
@@ -108,10 +107,6 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
      * Panel holding the current configuration *
      */
     private LamarkConfigPanel configPanel;
-    /**
-     * String containing the label of the open url button *
-     */
-    public static final String OPEN_REMOTE = "Open URL...";
 
 
     /**
@@ -454,6 +449,25 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
     }
 
     /**
+     * Called the wrapper classes to start the GUI in a given state by opening a url
+     *
+     * @param initialLocation URL object to initialize to
+     */
+    public void setInitialLocation(String initialLocation) {
+        this.initialLocation = initialLocation;
+    }
+
+    /**
+     * Return a handle to the configuration panel
+     * The config panel can be used to force loading of a new configuration
+     *
+     * @return LamarkConfigPanel handle to the config panel
+     */
+    public LamarkConfigPanel getConfigPanel() {
+        return configPanel;
+    }
+
+    /**
      * A class to wrap a lamarklistener around the output panel of the gui.
      * <p/>
      * This class catches the selected events and outputs their
@@ -497,24 +511,5 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
                 output.insert(je.toString() + " \n\n", 0);
             }
         }
-    }
-
-    /**
-     * Called the wrapper classes to start the GUI in a given state by opening a url
-     *
-     * @param initialLocation URL object to initialize to
-     */
-    public void setInitialLocation(String initialLocation) {
-        this.initialLocation = initialLocation;
-    }
-
-    /**
-     * Return a handle to the configuration panel
-     * The config panel can be used to force loading of a new configuration
-     *
-     * @return LamarkConfigPanel handle to the config panel
-     */
-    public LamarkConfigPanel getConfigPanel() {
-        return configPanel;
     }
 }

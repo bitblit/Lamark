@@ -1,6 +1,5 @@
 package com.erigir.lamark.music;
 
-import com.erigir.lamark.Util;
 import jm.JMC;
 import jm.music.data.Note;
 
@@ -67,6 +66,114 @@ public enum NoteDurationEnum {
         for (int i = 0; i < 33; i++) {
             notesLessThanOrEqualTo.get(0).removeAll(creationExcludedNotes());
         }
+    }
+
+    public static boolean isShortNote(Note n) {
+        NoteDurationEnum nde = valueFromNote(n);
+        switch (nde) {
+            case THIRTYSECOND_NOTE_TRIPLET:
+                return true;
+            case THIRTYSECOND_NOTE:
+                return true;
+            case SIXTEENTH_NOTE_TRIPLET:
+                return true;
+            case SIXTEENTH_NOTE:
+                return true;
+            case EIGHTH_NOTE_TRIPLET:
+                return true;
+            case DOTTED_SIXTEENTH_NOTE:
+                return true;
+            case EIGHTH_NOTE:
+                return true;
+            case QUARTER_NOTE_TRIPLET:
+                return true;
+            case DOTTED_EIGHTH_NOTE:
+                return true;
+            case DOUBLE_DOTTED_EIGHTH_NOTE:
+                return true;
+            case QUARTER_NOTE:
+                return false;
+            case HALF_NOTE_TRIPLET:
+                return false;
+            case DOTTED_QUARTER_NOTE:
+                return false;
+            case DOUBLE_DOTTED_QUARTER_NOTE:
+                return false;
+            case HALF_NOTE:
+                return false;
+            case DOTTED_HALF_NOTE:
+                return false;
+            case DOUBLE_DOTTED_HALF_NOTE:
+                return false;
+            case WHOLE_NOTE:
+                return false;
+            default:
+                throw new IllegalStateException("Cant happen : not a member of this enum: " + n);
+        }
+    }
+
+    public static boolean isWholeNote(Note n) {
+        NoteDurationEnum nde = valueFromNote(n);
+        switch (nde) {
+            case WHOLE_NOTE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static NoteDurationEnum valueFromNote(Note n) {
+        double d = n.getRhythmValue();
+        if (JMC.THIRTYSECOND_NOTE_TRIPLET == d) {
+            return THIRTYSECOND_NOTE_TRIPLET;
+        } else if (JMC.THIRTYSECOND_NOTE == d) {
+            return THIRTYSECOND_NOTE;
+        } else if (JMC.SIXTEENTH_NOTE_TRIPLET == d) {
+            return SIXTEENTH_NOTE_TRIPLET;
+        } else if (JMC.SIXTEENTH_NOTE == d) {
+            return SIXTEENTH_NOTE;
+        } else if (JMC.EIGHTH_NOTE_TRIPLET == d) {
+            return EIGHTH_NOTE_TRIPLET;
+        } else if (JMC.DOTTED_SIXTEENTH_NOTE == d) {
+            return DOTTED_SIXTEENTH_NOTE;
+        } else if (JMC.EIGHTH_NOTE == d) {
+            return EIGHTH_NOTE;
+        } else if (JMC.QUARTER_NOTE_TRIPLET == d) {
+            return QUARTER_NOTE_TRIPLET;
+        } else if (JMC.DOTTED_EIGHTH_NOTE == d) {
+            return DOTTED_EIGHTH_NOTE;
+        } else if (JMC.DOUBLE_DOTTED_EIGHTH_NOTE == d) {
+            return DOUBLE_DOTTED_EIGHTH_NOTE;
+        } else if (JMC.QUARTER_NOTE == d) {
+            return QUARTER_NOTE;
+        } else if (JMC.HALF_NOTE_TRIPLET == d) {
+            return HALF_NOTE_TRIPLET;
+        } else if (JMC.DOTTED_QUARTER_NOTE == d) {
+            return DOTTED_QUARTER_NOTE;
+        } else if (JMC.DOUBLE_DOTTED_QUARTER_NOTE == d) {
+            return DOUBLE_DOTTED_QUARTER_NOTE;
+        } else if (JMC.HALF_NOTE == d) {
+            return HALF_NOTE;
+        } else if (JMC.DOTTED_HALF_NOTE == d) {
+            return DOTTED_HALF_NOTE;
+        } else if (JMC.DOUBLE_DOTTED_HALF_NOTE == d) {
+            return DOUBLE_DOTTED_HALF_NOTE;
+        } else if (JMC.WHOLE_NOTE == d) {
+            return WHOLE_NOTE;
+        }
+        throw new IllegalArgumentException("Illegal note rythm value:" + n.getRhythmValue() + " Note Was :" + n + " quarter is " + QUARTER_NOTE.getDuration());
+
+    }
+
+    public static NoteDurationEnum newNoteValue(int upperBoundIn32s, Random rand) {
+        initializeNotesLessList();
+        List<NoteDurationEnum> list = notesLessThanOrEqualTo.get(upperBoundIn32s);
+        return list.get(rand.nextInt(list.size()));
+    }
+
+    public static NoteDurationEnum randomDuration(Random rand) {
+        NoteDurationEnum[] vals = values();
+        return vals[rand.nextInt(vals.length)];
     }
 
     public double getDuration() {
@@ -155,106 +262,9 @@ public enum NoteDurationEnum {
         }
     }
 
-    public static boolean isShortNote(Note n) {
-        NoteDurationEnum nde = valueFromNote(n);
-        switch (nde) {
-            case THIRTYSECOND_NOTE_TRIPLET:
-                return true;
-            case THIRTYSECOND_NOTE:
-                return true;
-            case SIXTEENTH_NOTE_TRIPLET:
-                return true;
-            case SIXTEENTH_NOTE:
-                return true;
-            case EIGHTH_NOTE_TRIPLET:
-                return true;
-            case DOTTED_SIXTEENTH_NOTE:
-                return true;
-            case EIGHTH_NOTE:
-                return true;
-            case QUARTER_NOTE_TRIPLET:
-                return true;
-            case DOTTED_EIGHTH_NOTE:
-                return true;
-            case DOUBLE_DOTTED_EIGHTH_NOTE:
-                return true;
-            case QUARTER_NOTE:
-                return false;
-            case HALF_NOTE_TRIPLET:
-                return false;
-            case DOTTED_QUARTER_NOTE:
-                return false;
-            case DOUBLE_DOTTED_QUARTER_NOTE:
-                return false;
-            case HALF_NOTE:
-                return false;
-            case DOTTED_HALF_NOTE:
-                return false;
-            case DOUBLE_DOTTED_HALF_NOTE:
-                return false;
-            case WHOLE_NOTE:
-                return false;
-            default:
-                throw new IllegalStateException("Cant happen : not a member of this enum: " + n);
-        }
-    }
-
-    public static boolean isWholeNote(Note n) {
-        NoteDurationEnum nde = valueFromNote(n);
-        switch (nde) {
-            case WHOLE_NOTE:
-                return true;
-            default:
-                return false;
-        }
-    }
-
     public boolean isTriplet() {
         return (this == THIRTYSECOND_NOTE_TRIPLET || this == SIXTEENTH_NOTE_TRIPLET ||
                 this == EIGHTH_NOTE_TRIPLET || this == QUARTER_NOTE_TRIPLET);
-    }
-
-    public static NoteDurationEnum valueFromNote(Note n) {
-        double d = n.getRhythmValue();
-        if (JMC.THIRTYSECOND_NOTE_TRIPLET == d) {
-            return THIRTYSECOND_NOTE_TRIPLET;
-        } else if (JMC.THIRTYSECOND_NOTE == d) {
-            return THIRTYSECOND_NOTE;
-        } else if (JMC.SIXTEENTH_NOTE_TRIPLET == d) {
-            return SIXTEENTH_NOTE_TRIPLET;
-        } else if (JMC.SIXTEENTH_NOTE == d) {
-            return SIXTEENTH_NOTE;
-        } else if (JMC.EIGHTH_NOTE_TRIPLET == d) {
-            return EIGHTH_NOTE_TRIPLET;
-        } else if (JMC.DOTTED_SIXTEENTH_NOTE == d) {
-            return DOTTED_SIXTEENTH_NOTE;
-        } else if (JMC.EIGHTH_NOTE == d) {
-            return EIGHTH_NOTE;
-        } else if (JMC.QUARTER_NOTE_TRIPLET == d) {
-            return QUARTER_NOTE_TRIPLET;
-        } else if (JMC.DOTTED_EIGHTH_NOTE == d) {
-            return DOTTED_EIGHTH_NOTE;
-        } else if (JMC.DOUBLE_DOTTED_EIGHTH_NOTE == d) {
-            return DOUBLE_DOTTED_EIGHTH_NOTE;
-        } else if (JMC.QUARTER_NOTE == d) {
-            return QUARTER_NOTE;
-        } else if (JMC.HALF_NOTE_TRIPLET == d) {
-            return HALF_NOTE_TRIPLET;
-        } else if (JMC.DOTTED_QUARTER_NOTE == d) {
-            return DOTTED_QUARTER_NOTE;
-        } else if (JMC.DOUBLE_DOTTED_QUARTER_NOTE == d) {
-            return DOUBLE_DOTTED_QUARTER_NOTE;
-        } else if (JMC.HALF_NOTE == d) {
-            return HALF_NOTE;
-        } else if (JMC.DOTTED_HALF_NOTE == d) {
-            return DOTTED_HALF_NOTE;
-        } else if (JMC.DOUBLE_DOTTED_HALF_NOTE == d) {
-            return DOUBLE_DOTTED_HALF_NOTE;
-        } else if (JMC.WHOLE_NOTE == d) {
-            return WHOLE_NOTE;
-        }
-        throw new IllegalArgumentException("Illegal note rythm value:" + n.getRhythmValue() + " Note Was :" + n + " quarter is " + QUARTER_NOTE.getDuration());
-
     }
 
     public int getThirtySeconds() {
@@ -298,16 +308,5 @@ public enum NoteDurationEnum {
             default:
                 throw new IllegalStateException("Cant happen : not a member of this enum: " + this);
         }
-    }
-
-    public static NoteDurationEnum newNoteValue(int upperBoundIn32s, Random rand) {
-        initializeNotesLessList();
-        List<NoteDurationEnum> list = notesLessThanOrEqualTo.get(upperBoundIn32s);
-        return list.get(rand.nextInt(list.size()));
-    }
-
-    public static NoteDurationEnum randomDuration(Random rand) {
-        NoteDurationEnum[] vals = values();
-        return vals[rand.nextInt(vals.length)];
     }
 }

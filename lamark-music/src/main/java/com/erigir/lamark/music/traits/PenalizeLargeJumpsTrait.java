@@ -12,8 +12,8 @@ import java.util.logging.Logger;
  */
 
 public class PenalizeLargeJumpsTrait extends AbstractMusicTrait {
-    private static Logger LOG = Logger.getLogger(PenalizeLargeJumpsTrait.class.getName());
     private static final int TOO_FAR = 4;
+    private static Logger LOG = Logger.getLogger(PenalizeLargeJumpsTrait.class.getName());
 
     @Override
     public double guardedFitness() {

@@ -25,18 +25,6 @@ import java.util.List;
 public class List2ExchangeMutator extends AbstractLamarkComponent implements IMutator<List> {
 
     /**
-     * @see com.erigir.lamark.IMutator#mutate(com.erigir.lamark.Individual)
-     */
-    public void mutate(Individual<List> being) {
-        List chromosome = being.getGenome();
-
-        int loc1 = getLamark().getRandom().nextInt(chromosome.size());
-        int loc2 = getLamark().getRandom().nextInt(chromosome.size());
-
-        being.setGenome(exchange2(chromosome, Math.min(loc1, loc2), Math.max(loc1, loc2)));
-    }
-
-    /**
      * Switches the 2 points in the passed list.
      *
      * @param data   List containing the points to switch
@@ -63,6 +51,18 @@ public class List2ExchangeMutator extends AbstractLamarkComponent implements IMu
             }
         }
         return rval;
+    }
+
+    /**
+     * @see com.erigir.lamark.IMutator#mutate(com.erigir.lamark.Individual)
+     */
+    public void mutate(Individual<List> being) {
+        List chromosome = being.getGenome();
+
+        int loc1 = getLamark().getRandom().nextInt(chromosome.size());
+        int loc2 = getLamark().getRandom().nextInt(chromosome.size());
+
+        being.setGenome(exchange2(chromosome, Math.min(loc1, loc2), Math.max(loc1, loc2)));
     }
 
 }

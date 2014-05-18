@@ -1,19 +1,12 @@
 package com.erigir.lamark.music;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class TestLST {
     @Test
-    public void testSubstring()
-    {
+    public void testSubstring() {
         List<Integer> song = new ArrayList<Integer>();
 
         song.add(76);

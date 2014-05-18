@@ -25,6 +25,10 @@ public class DisplayControl implements Runnable, ActionListener {
     private JButton noteAnalyze;
     private ScoreFitness fitness = new ScoreFitness();
 
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new DisplayControl());
+    }
+
     /**
      * Create the GUI and show it.  For thread safety,
      * this method should be invoked from the
@@ -103,10 +107,6 @@ public class DisplayControl implements Runnable, ActionListener {
         } else if (e.getSource() == noteAnalyze) {
             JOptionPane.showMessageDialog(frame, noteAnalyze(song.getSong()));
         }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new DisplayControl());
     }
 
     public void run() {

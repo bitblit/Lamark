@@ -3,11 +3,7 @@
  */
 package com.erigir.lamark.example.cellular;
 
-import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.EFitnessType;
-import com.erigir.lamark.IFitnessFunction;
-import com.erigir.lamark.IValidatable;
-import com.erigir.lamark.Individual;
+import com.erigir.lamark.*;
 
 import java.util.List;
 import java.util.Random;
@@ -21,85 +17,158 @@ import java.util.Random;
  */
 public class CAMajorityFitness extends AbstractLamarkComponent implements IFitnessFunction<String>, IValidatable {
     /**
-     * An internal static random instnace *
-     */
-    private static Random INTERNAL_RANDOM = new Random();
-
-    /**
-     * Best score found to date?? *
-     */
-    public static int highScore = 0;
-
-    /**
      * Number of tables used to test the CA rule *
      */
     public static final int NUMBER_OF_TABLES = 25;
-
     /**
      * Number of rows in the table *
      */
     public static final int NUMBER_OF_CA_ROWS = 5; // this times the next
-    // should be
-
     /**
      * Number of columns in the table *
      */
     public static final int NUMBER_OF_CA_COLS = 5; // = number of tables
-
     /**
      * Default width of one of the tables *
      */
     public static final int DEFAULT_TABLE_WIDTH = 50;
-
+    // should be
     /**
      * Default height of one of the tables *
      */
     public static final int DEFAULT_TABLE_HEIGHT = 50;
-
     /**
      * Default distribution of random data in a table *
      */
     public static final String DEFAULT_DISTRIBUTION = "FLAT";
-
     /**
      * Default radius of a rule in a table *
      */
     public static final int DEFAULT_RADIUS = 3;
-
     /**
      * Default interval of images in a table *
      */
     public static final int DEFAULT_IMAGE_INTERVAL = 25;
-
+    /**
+     * Best score found to date?? *
+     */
+    public static int highScore = 0;
+    /**
+     * An internal static random instnace *
+     */
+    private static Random INTERNAL_RANDOM = new Random();
+    /**
+     * A set of pre-created first rows for testing rules *
+     */
+    private static String[] firstRows;
+    /**
+     * Length of the string holding a rule set *
+     */
+    public int stringLength;
+    /**
+     * Interval of images in a rule set *
+     */
+    public int imageInterval;
     /**
      * Width of a given table *
      */
     private Integer tableWidth;
-
     /**
      * Height of a given table *
      */
     private Integer tableHeight;
-
     /**
      * Radius of a given rule set *
      */
     private Integer radius;
 
     /**
-     * Length of the string holding a rule set *
+     * Fills a boolean array with a normal distribution of values
+     *
+     * @param value boolean array to fill
      */
-    public int stringLength;
+    public static void fillNormalDistributionBooleanArray(boolean[] value) {
+        for (int i = 0; i < value.length; i++) {
+            value[i] = INTERNAL_RANDOM.nextBoolean();
+        }
+    }
 
     /**
-     * Interval of images in a rule set *
+     * Fills a boolean array with a flat distribution of values
+     *
+     * @param value       boolean array to fill
+     * @param percentTrue int containinig approximate percentage of values that should be true
      */
-    public int imageInterval;
+    public static void fillFlatDistributionBooleanArray(boolean[] value,
+                                                        int percentTrue) {
+        if (percentTrue < 0 || percentTrue > 100) {
+            throw new IllegalArgumentException("Invalid percent true:"
+                    + percentTrue);
+        }
+        for (int i = 0; i < value.length; i++) {
+            value[i] = (INTERNAL_RANDOM.nextInt(100) < percentTrue);
+        }
+    }
 
     /**
-     * A set of pre-created first rows for testing rules *
+     * Creates and fills a boolean array with a normal distribution of values
+     *
+     * @param length int contianign the size of the new array
+     * @return boolean array containing the values
      */
-    private static String[] firstRows;
+    public static boolean[] newNormalDistributionBooleanArray(int length) {
+        boolean[] rval = new boolean[length];
+        fillNormalDistributionBooleanArray(rval);
+        return rval;
+    }
+
+    /**
+     * Creates and fills a boolean array with a flat distribution of values
+     *
+     * @param length      int contianign the size of the new array
+     * @param percentTrue int containinig approximate percentage of values that should be true
+     * @return boolean array containing the values
+     */
+    public static boolean[] newFlatDistributionBooleanArray(int length,
+                                                            int percentTrue) {
+        boolean[] rval = new boolean[length];
+        fillFlatDistributionBooleanArray(rval, percentTrue);
+        return rval;
+    }
+
+    /**
+     * Converts a boolean array to a string of 0 and 1
+     *
+     * @param data boolean array to convert
+     * @return String containing the values
+     */
+    public static String booleanArrayToString(boolean[] data) {
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < data.length; i++) {
+            if (data[i]) {
+                sb.append("1");
+            } else {
+                sb.append("0");
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Calculate how many true values there are in a boolean array
+     *
+     * @param data boolean array to survey
+     * @return int containing the number of trues
+     */
+    public static int trueCount(boolean[] data) {
+        int rval = 0;
+        for (int i = 0; i < data.length; i++) {
+            if (data[i]) {
+                rval++;
+            }
+        }
+        return rval;
+    }
 
     /**
      * Calculated preferred width of a table
@@ -119,14 +188,12 @@ public class CAMajorityFitness extends AbstractLamarkComponent implements IFitne
         return (NUMBER_OF_CA_COLS * tableWidth) + NUMBER_OF_CA_COLS - 1;
     }
 
-
     /**
      * @see com.erigir.lamark.IFitnessFunction#fitnessType()
      */
     public EFitnessType fitnessType() {
         return EFitnessType.MAXIMUM_BEST;
     }
-
 
     /**
      * @see com.erigir.lamark.IFitnessFunction#fitnessValue(com.erigir.lamark.Individual)
@@ -235,95 +302,6 @@ public class CAMajorityFitness extends AbstractLamarkComponent implements IFitne
             int pctTrue = (int) (((double) i / (double) NUMBER_OF_TABLES) * 100.0);
             firstRows[i] = booleanArrayToString(newFlatDistributionBooleanArray(tableWidth, pctTrue));
         }
-    }
-
-
-    /**
-     * Fills a boolean array with a normal distribution of values
-     *
-     * @param value boolean array to fill
-     */
-    public static void fillNormalDistributionBooleanArray(boolean[] value) {
-        for (int i = 0; i < value.length; i++) {
-            value[i] = INTERNAL_RANDOM.nextBoolean();
-        }
-    }
-
-    /**
-     * Fills a boolean array with a flat distribution of values
-     *
-     * @param value       boolean array to fill
-     * @param percentTrue int containinig approximate percentage of values that should be true
-     */
-    public static void fillFlatDistributionBooleanArray(boolean[] value,
-                                                        int percentTrue) {
-        if (percentTrue < 0 || percentTrue > 100) {
-            throw new IllegalArgumentException("Invalid percent true:"
-                    + percentTrue);
-        }
-        for (int i = 0; i < value.length; i++) {
-            value[i] = (INTERNAL_RANDOM.nextInt(100) < percentTrue);
-        }
-    }
-
-    /**
-     * Creates and fills a boolean array with a normal distribution of values
-     *
-     * @param length int contianign the size of the new array
-     * @return boolean array containing the values
-     */
-    public static boolean[] newNormalDistributionBooleanArray(int length) {
-        boolean[] rval = new boolean[length];
-        fillNormalDistributionBooleanArray(rval);
-        return rval;
-    }
-
-    /**
-     * Creates and fills a boolean array with a flat distribution of values
-     *
-     * @param length      int contianign the size of the new array
-     * @param percentTrue int containinig approximate percentage of values that should be true
-     * @return boolean array containing the values
-     */
-    public static boolean[] newFlatDistributionBooleanArray(int length,
-                                                            int percentTrue) {
-        boolean[] rval = new boolean[length];
-        fillFlatDistributionBooleanArray(rval, percentTrue);
-        return rval;
-    }
-
-    /**
-     * Converts a boolean array to a string of 0 and 1
-     *
-     * @param data boolean array to convert
-     * @return String containing the values
-     */
-    public static String booleanArrayToString(boolean[] data) {
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < data.length; i++) {
-            if (data[i]) {
-                sb.append("1");
-            } else {
-                sb.append("0");
-            }
-        }
-        return sb.toString();
-    }
-
-    /**
-     * Calculate how many true values there are in a boolean array
-     *
-     * @param data boolean array to survey
-     * @return int containing the number of trues
-     */
-    public static int trueCount(boolean[] data) {
-        int rval = 0;
-        for (int i = 0; i < data.length; i++) {
-            if (data[i]) {
-                rval++;
-            }
-        }
-        return rval;
     }
 
 

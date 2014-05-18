@@ -1,10 +1,6 @@
 package com.erigir.lamark.music;
 
-import com.erigir.lamark.EFitnessType;
-import com.erigir.lamark.IFitnessFunction;
-import com.erigir.lamark.Individual;
-import com.erigir.lamark.Lamark;
-import com.erigir.lamark.Util;
+import com.erigir.lamark.*;
 import com.erigir.lamark.music.traits.TraitWrapper;
 import jm.music.data.Score;
 

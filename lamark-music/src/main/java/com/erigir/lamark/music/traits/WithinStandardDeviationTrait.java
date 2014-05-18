@@ -15,8 +15,8 @@ import java.util.logging.Logger;
  */
 
 public class WithinStandardDeviationTrait extends AbstractMusicTrait {
-    private static Logger LOG = Logger.getLogger(WithinStandardDeviationTrait.class.getName());
     public static double ACCEPTABLE_STD_DEVIATIONS = 2.0;
+    private static Logger LOG = Logger.getLogger(WithinStandardDeviationTrait.class.getName());
 
     @Override
     public double guardedFitness() {

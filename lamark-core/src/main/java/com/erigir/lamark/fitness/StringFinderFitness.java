@@ -1,10 +1,6 @@
 package com.erigir.lamark.fitness;
 
-import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.EFitnessType;
-import com.erigir.lamark.IFitnessFunction;
-import com.erigir.lamark.IValidatable;
-import com.erigir.lamark.Individual;
+import com.erigir.lamark.*;
 
 import java.util.List;
 
@@ -51,21 +47,21 @@ public class StringFinderFitness extends AbstractLamarkComponent implements IFit
     }
 
     /**
-     * Mutator for property
-     *
-     * @param pTarget Variable to change
-     */
-    public void setTarget(String pTarget) {
-        target = pTarget.toUpperCase();
-    }
-
-    /**
      * Assessor for property
      *
      * @return String containing the property
      */
     public String getTarget() {
         return target;
+    }
+
+    /**
+     * Mutator for property
+     *
+     * @param pTarget Variable to change
+     */
+    public void setTarget(String pTarget) {
+        target = pTarget.toUpperCase();
     }
 
     /**

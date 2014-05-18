@@ -1,17 +1,12 @@
 package com.erigir.lamark.config;
 
-import com.erigir.lamark.ICreator;
-import com.erigir.lamark.ICrossover;
-import com.erigir.lamark.IFitnessFunction;
-import com.erigir.lamark.IIndividualFormatter;
-import com.erigir.lamark.IMutator;
-import com.erigir.lamark.ISelector;
+import com.erigir.lamark.*;
 
 import java.util.List;
 
 /**
  * This object extends a standard LamarkConfig to add drivers for the GUI panel (allowing selection from a list)
- *
+ * <p/>
  * This class is itself a valid implementation of LamarkConfig, but also allows a list of the various
  * pieces to be selected from (for driving the GUI)
  * User: cweiss

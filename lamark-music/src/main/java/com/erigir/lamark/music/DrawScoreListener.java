@@ -9,9 +9,7 @@ import jm.music.data.Note;
 import jm.music.data.Part;
 import jm.music.data.Phrase;
 import jm.music.data.Score;
-import jm.util.View;
 
-import javax.swing.*;
 import java.awt.*;
 
 public class DrawScoreListener implements GUIEventListener {
@@ -32,15 +30,13 @@ public class DrawScoreListener implements GUIEventListener {
             Score newS = new Score(new Part(newPhrase));
 
 
-
-            if (scoreFrame!=null)
-            {
+            if (scoreFrame != null) {
                 // Close the existing window
                 scoreFrame.dispose();
             }
 
             scoreFrame = new Notate(newS, 0, 100);
-            scoreFrame.setMinimumSize(new Dimension(100,100));
+            scoreFrame.setMinimumSize(new Dimension(100, 100));
             scoreFrame.setTitle("Best Individual:" + i.getFitness());
             //View.notate(newS);
 

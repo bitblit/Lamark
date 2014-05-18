@@ -2,11 +2,7 @@ package com.erigir.lamark.music.traits;
 
 import com.erigir.lamark.music.SubstringCalculationTrie;
 
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * This trait attempts to find repeating "themes" in the timing of

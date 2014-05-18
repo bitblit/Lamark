@@ -31,13 +31,11 @@ public class NoteLengthDistribution {
         // Build counts
         for (Note n : notes) {
             NoteDurationEnum nd = NoteDurationEnum.valueFromNote(n);
-            if (nd==null)
-            {
+            if (nd == null) {
                 LOG.info("This is weird note={}, nd=null", n);
             }
             Double i = counts.get(nd);
-            if (i==null)
-            {
+            if (i == null) {
                 LOG.info("This is weird note={}, nd={}, i=null", n, nd);
             }
             counts.put(nd, i + 1);
@@ -61,21 +59,20 @@ public class NoteLengthDistribution {
             double OmE2 = OmE * OmE;
             double OmE2dE = OmE2 / E;
             runSum += OmE2dE;
-            LOG.trace("{} e= {} o= {} ome={} OmE2dE={} Ome2={}", new Object[]{ nd , E , O , OmE , OmE2dE , OmE2});
+            LOG.trace("{} e= {} o= {} ome={} OmE2dE={} Ome2={}", new Object[]{nd, E, O, OmE, OmE2dE, OmE2});
             sumE += E;
             sumO += O;
         }
 
-        LOG.trace("SE= {} SO={}" + sumE , sumO);
-        LOG.debug("rval= {}" , runSum);
+        LOG.trace("SE= {} SO={}" + sumE, sumO);
+        LOG.debug("rval= {}", runSum);
         return runSum;
     }
 
 
     public double correlation() {
-            NoteDurationEnum[] vals = NoteDurationEnum.values();
-        try
-        {
+        NoteDurationEnum[] vals = NoteDurationEnum.values();
+        try {
 
             double[] obs = new double[vals.length];
             double[] exp = new double[vals.length];
@@ -85,9 +82,7 @@ public class NoteLengthDistribution {
                 exp[i] = vals[i].getExpectedFrequency() * totalNotes;
             }
             return Math.abs(pearson(obs, exp));
-        }
-        catch (NullPointerException npe)
-        {
+        } catch (NullPointerException npe) {
             throw npe;
         }
     }

@@ -14,64 +14,53 @@ import java.util.Random;
  */
 public class CellularAutomata {
     /**
-     * Handle to a private random isntace *
-     */
-    public final Random random = new Random();
-
-    /**
-     * Holds the CA table *
-     */
-    private boolean[][] table;
-
-    /**
-     * Holds the length of a ruleset string *
-     */
-    private int stringLength = -1;
-
-    /**
-     * Holds the widht of the target table *
-     */
-    private int width = -1;
-
-    /**
-     * Holds the height of the target table *
-     */
-    private int height = -1;
-
-    /**
-     * Holds the radius of the rule set *
-     */
-    private int radius = -1;
-
-    /**
-     * Holds the distribution stype *
-     */
-    private int distribution = -1;
-
-    /**
-     * Holds the percentage of true used for a flat distribution *
-     */
-    private int flatDistributionPercentage = -1;
-
-    /**
-     * Holds the ruleset for this CA *
-     */
-    private String ruleSet = null;
-
-    /**
      * Constant for undefined distribution (random)*
      */
     public static final int UNDEFINED = -1;
-
     /**
      * Constant for flat distribution*
      */
     public static final int FLAT_DISTRIBUTION = 1;
-
     /**
      * Constant for normal distribution*
      */
     public static final int NORMAL_DISTRIBUTION = 2;
+    /**
+     * Handle to a private random isntace *
+     */
+    public final Random random = new Random();
+    /**
+     * Holds the CA table *
+     */
+    private boolean[][] table;
+    /**
+     * Holds the length of a ruleset string *
+     */
+    private int stringLength = -1;
+    /**
+     * Holds the widht of the target table *
+     */
+    private int width = -1;
+    /**
+     * Holds the height of the target table *
+     */
+    private int height = -1;
+    /**
+     * Holds the radius of the rule set *
+     */
+    private int radius = -1;
+    /**
+     * Holds the distribution stype *
+     */
+    private int distribution = -1;
+    /**
+     * Holds the percentage of true used for a flat distribution *
+     */
+    private int flatDistributionPercentage = -1;
+    /**
+     * Holds the ruleset for this CA *
+     */
+    private String ruleSet = null;
 
     /**
      * Standard constructor for creating and running a cellular automata of a
@@ -133,6 +122,57 @@ public class CellularAutomata {
     }
 
     /**
+     * Calcs the sum of powers of 2 up to width
+     *
+     * @param width int containing upper bound
+     * @return int containing the calc'd value
+     */
+    public static int andNumber(int width) {
+        int total = 0;
+        int factor = 1;
+        for (int i = 0; i < width; i++) {
+            total += factor;
+            factor *= 2;
+        }
+        return total;
+    }
+
+    /**
+     * Converts binary string to integer
+     *
+     * @param value String containing the binary number
+     * @return int containing the new number in int form
+     */
+    public static int binToInt(String value) {
+        int rval = 0;
+        int factor = 1;
+        for (int i = value.length() - 1; i > -1; i--) {
+            if (value.charAt(i) == '1') {
+                rval += factor;
+            }
+            factor *= 2;
+        }
+
+        return rval;
+    }
+
+    /**
+     * Converts integer into binary string
+     *
+     * @param value int containing value to convert
+     * @param width int containing width of desired output string
+     * @return String containing the binary number
+     */
+    public static String intToBin(int value, int width) {
+        StringBuffer sb = new StringBuffer();
+        sb.append(Integer.toBinaryString(value));
+        while (sb.length() < width) {
+            sb.insert(0, '0');
+        }
+        return sb.toString();
+    }
+
+    /**
      * Get the boolean value at a location in a table
      *
      * @param x int index of horz value
@@ -188,24 +228,6 @@ public class CellularAutomata {
         return width;
     }
 
-
-    /**
-     * Calcs the sum of powers of 2 up to width
-     *
-     * @param width int containing upper bound
-     * @return int containing the calc'd value
-     */
-    public static int andNumber(int width) {
-        int total = 0;
-        int factor = 1;
-        for (int i = 0; i < width; i++) {
-            total += factor;
-            factor *= 2;
-        }
-        return total;
-    }
-
-
     /**
      * Fills the internal table using the provided rules
      */
@@ -242,42 +264,6 @@ public class CellularAutomata {
 
         return rval;
     }
-
-    /**
-     * Converts binary string to integer
-     *
-     * @param value String containing the binary number
-     * @return int containing the new number in int form
-     */
-    public static int binToInt(String value) {
-        int rval = 0;
-        int factor = 1;
-        for (int i = value.length() - 1; i > -1; i--) {
-            if (value.charAt(i) == '1') {
-                rval += factor;
-            }
-            factor *= 2;
-        }
-
-        return rval;
-    }
-
-    /**
-     * Converts integer into binary string
-     *
-     * @param value int containing value to convert
-     * @param width int containing width of desired output string
-     * @return String containing the binary number
-     */
-    public static String intToBin(int value, int width) {
-        StringBuffer sb = new StringBuffer();
-        sb.append(Integer.toBinaryString(value));
-        while (sb.length() < width) {
-            sb.insert(0, '0');
-        }
-        return sb.toString();
-    }
-
 
     /**
      * Calcs if a table starts with the majority of its items true

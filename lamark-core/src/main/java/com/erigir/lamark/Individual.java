@@ -63,6 +63,23 @@ public class Individual<T> implements Serializable {
     private Map<String, Object> attributes = new HashMap<String, Object>();
 
     /**
+     * Creates a new, blank individual with a null genome.
+     */
+    public Individual() {
+        super();
+    }
+
+    /**
+     * Creates a new individual with the given genome
+     *
+     * @param pGenome Object containing the genome to wrap
+     */
+    public Individual(T pGenome) {
+        super();
+        this.genome = pGenome;
+    }
+
+    /**
      * Returns the class of the wrapped genome object.
      *
      * @return Class of the wrapped genome object
@@ -124,23 +141,6 @@ public class Individual<T> implements Serializable {
      */
     public void incrementSelected() {
         selectedCount++;
-    }
-
-    /**
-     * Creates a new, blank individual with a null genome.
-     */
-    public Individual() {
-        super();
-    }
-
-    /**
-     * Creates a new individual with the given genome
-     *
-     * @param pGenome Object containing the genome to wrap
-     */
-    public Individual(T pGenome) {
-        super();
-        this.genome = pGenome;
     }
 
     /**

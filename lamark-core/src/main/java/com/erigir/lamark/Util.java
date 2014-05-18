@@ -15,29 +15,34 @@ import java.text.DecimalFormat;
  */
 public class Util {
     /**
+     * Static constant *
+     */
+    private static final int MILLIS_IN_SECOND = 1000;
+    /**
+     * Static constant *
+     */
+    private static final int MILLIS_IN_MINUTE = MILLIS_IN_SECOND * 60;
+    /**
+     * Static constant *
+     */
+    private static final int MILLIS_IN_HOUR = MILLIS_IN_MINUTE * 60;
+    /**
      * Static instance to hold cache values *
      */
     private static Util instance = new Util();
-
     /**
      * Formatter instance *
      */
     private DecimalFormat formatter;
 
     /**
-     * Static constant *
+     * Private constructor to enforce singleton.
      */
-    private static final int MILLIS_IN_SECOND = 1000;
-
-    /**
-     * Static constant *
-     */
-    private static final int MILLIS_IN_MINUTE = MILLIS_IN_SECOND * 60;
-
-    /**
-     * Static constant *
-     */
-    private static final int MILLIS_IN_HOUR = MILLIS_IN_MINUTE * 60;
+    private Util() {
+        super();
+        formatter = new DecimalFormat();
+        formatter.setMaximumFractionDigits(2);
+    }
 
     /**
      * A method that will take a milliseconds number and convert it to a String
@@ -78,16 +83,6 @@ public class Util {
         buf.append(milliseconds);
         return buf.toString();
     }
-
-    /**
-     * Private constructor to enforce singleton.
-     */
-    private Util() {
-        super();
-        formatter = new DecimalFormat();
-        formatter.setMaximumFractionDigits(2);
-    }
-
 
     /**
      * Builds a string describing the current version.

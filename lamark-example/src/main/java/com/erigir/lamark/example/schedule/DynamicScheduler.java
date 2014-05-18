@@ -79,6 +79,25 @@ public class DynamicScheduler {
     }
 
     /**
+     * Converts an int array to a string for printing purposes
+     *
+     * @param value int[] to convert
+     * @return String containing the converted value
+     */
+    private static String intArrayAsString(int[] value) {
+        StringBuffer sb = new StringBuffer();
+        sb.append("[");
+        for (int i = 0; i < value.length; i++) {
+            sb.append(value[i]);
+            if (i < value.length - 1) {
+                sb.append(",");
+            }
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    /**
      * Returns the best time for this configuration
      *
      * @return int containing the time
@@ -229,25 +248,6 @@ public class DynamicScheduler {
             throw new IllegalStateException();
         }
         return weightTable[to] - weightTable[from];
-    }
-
-    /**
-     * Converts an int array to a string for printing purposes
-     *
-     * @param value int[] to convert
-     * @return String containing the converted value
-     */
-    private static String intArrayAsString(int[] value) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("[");
-        for (int i = 0; i < value.length; i++) {
-            sb.append(value[i]);
-            if (i < value.length - 1) {
-                sb.append(",");
-            }
-        }
-        sb.append("]");
-        return sb.toString();
     }
 
     /**

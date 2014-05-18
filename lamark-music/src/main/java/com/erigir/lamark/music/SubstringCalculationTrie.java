@@ -1,10 +1,6 @@
 package com.erigir.lamark.music;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SubstringCalculationTrie {
     private node root = new node();
@@ -119,12 +115,12 @@ public class SubstringCalculationTrie {
         }
     }
 
+    public int getNodeCount() {
+        return nodeCount;
+    }
+
     static class node {
         Map<Object, node> children = new HashMap<Object, node>();
         boolean valueNode = false;
-    }
-
-    public int getNodeCount() {
-        return nodeCount;
     }
 }

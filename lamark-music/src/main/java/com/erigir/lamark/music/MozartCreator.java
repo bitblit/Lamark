@@ -3,7 +3,6 @@ package com.erigir.lamark.music;
 import com.erigir.lamark.ICreator;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.Lamark;
-import com.erigir.lamark.music.phrase.PhrasePool;
 import com.erigir.lamark.music.phrase.PhraseUtils;
 import jm.music.data.Part;
 import jm.music.data.Phrase;
@@ -11,7 +10,6 @@ import jm.music.data.Score;
 import jm.music.data.Tempo;
 
 import java.util.List;
-import java.util.Properties;
 
 public class MozartCreator implements ICreator {
     private static int SEARCH_ITERATIONS = 2;
@@ -79,10 +77,6 @@ public class MozartCreator implements ICreator {
         return Score.class;
     }
 
-    public void setSize(int pSize) {
-        size = pSize;
-    }
-
     public Lamark getLamark() {
         return lamark;
     }
@@ -91,9 +85,12 @@ public class MozartCreator implements ICreator {
         this.lamark = lamark;
     }
 
-
     public int getSize() {
         return size;
+    }
+
+    public void setSize(int pSize) {
+        size = pSize;
     }
 
     public TimeSignatureEnum getSignature() {

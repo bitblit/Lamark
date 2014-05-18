@@ -32,12 +32,12 @@ import java.util.concurrent.Executors;
  * to the relationship between a class and an instance.
  * <p/>
  * <p>
- *     Since this class is responsible for loading up instances from JSON representations, it is also responsible for
- *     setting the classloader before asking Jackson to read the JSON (which autoconverts class names to class objects)
- *     so if a special classloader is needed (for example when reading from network or disk) it should be bundled into
- *     a url classloader and set in the factory object before calling the deserialize functions
+ * Since this class is responsible for loading up instances from JSON representations, it is also responsible for
+ * setting the classloader before asking Jackson to read the JSON (which autoconverts class names to class objects)
+ * so if a special classloader is needed (for example when reading from network or disk) it should be bundled into
+ * a url classloader and set in the factory object before calling the deserialize functions
  * </p>
- *
+ * <p/>
  * <br />
  * NOTE : This is a class for simple bootstrapping.  If your auto-conf needs are more complicated then an IOC container like
  * Spring (http://www.springframework.org) is recommended.
@@ -51,14 +51,6 @@ public class LamarkFactory {
     private ObjectMapper objectMapper;
     private ClassLoader classLoader;
 
-    public ObjectMapper defaultObjectMapper()
-    {
-        ObjectMapper rval = new ObjectMapper();
-        rval.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        rval.configure(SerializationFeature.INDENT_OUTPUT, true);
-        return rval;
-    }
-
     public LamarkFactory() {
         super();
         objectMapper = defaultObjectMapper();
@@ -71,6 +63,12 @@ public class LamarkFactory {
         this.classLoader = classLoader;
     }
 
+    public ObjectMapper defaultObjectMapper() {
+        ObjectMapper rval = new ObjectMapper();
+        rval.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        rval.configure(SerializationFeature.INDENT_OUTPUT, true);
+        return rval;
+    }
 
     public LamarkConfig extractConfigFromLamark(Lamark lamark) {
         LamarkConfig rval = cleanFromJSONString(convertToJson(lamark.getRuntimeParameters()), LamarkConfig.class);
@@ -226,11 +224,12 @@ public class LamarkFactory {
             Map<String, LamarkGUIConfig> rval = null;
             if (json != null) {
                 Thread.currentThread().setContextClassLoader(classLoader);
-                rval = objectMapper.readValue(json, new TypeReference<Map<String, LamarkGUIConfig>>() {});
+                rval = objectMapper.readValue(json, new TypeReference<Map<String, LamarkGUIConfig>>() {
+                });
             }
             return rval;
         } catch (IOException ioe) {
-            throw new IllegalArgumentException("Couldn't read json file : "+ioe.getMessage(), ioe);
+            throw new IllegalArgumentException("Couldn't read json file : " + ioe.getMessage(), ioe);
         }
     }
 
@@ -239,11 +238,12 @@ public class LamarkFactory {
             Map<String, LamarkGUIConfig> rval = null;
             if (json != null) {
                 Thread.currentThread().setContextClassLoader(classLoader);
-                rval = objectMapper.readValue(json, new TypeReference<Map<String, LamarkGUIConfig>>() {});
+                rval = objectMapper.readValue(json, new TypeReference<Map<String, LamarkGUIConfig>>() {
+                });
             }
             return rval;
         } catch (IOException ioe) {
-            throw new IllegalArgumentException("Couldn't read json file : "+ioe.getMessage(), ioe);
+            throw new IllegalArgumentException("Couldn't read json file : " + ioe.getMessage(), ioe);
         }
     }
 
@@ -283,16 +283,15 @@ public class LamarkFactory {
         }
     }
 
-    public void setClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
-    }
-
     public ClassLoader getClassLoader() {
         return classLoader;
     }
 
-    public Class safeLoadClass(String classname)
-    {
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+
+    public Class safeLoadClass(String classname) {
         Class rval = null;
         try {
             rval = classLoader.loadClass(classname);

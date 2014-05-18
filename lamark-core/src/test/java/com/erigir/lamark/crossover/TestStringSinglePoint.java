@@ -7,7 +7,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class TestStringSinglePoint {
 
@@ -42,15 +43,15 @@ public class TestStringSinglePoint {
             }
         }
 
-        double pc1 = (double)case1/size;
-        double pc2 = (double)case2/size;
-        double pc3 = (double)case3/size;
+        double pc1 = (double) case1 / size;
+        double pc2 = (double) case2 / size;
+        double pc3 = (double) case3 / size;
 
         // For valid randomizer and correct algorithm and sufficient size,
         // none of these should be far away from 33%
-        assertTrue(pc1<.34);
-        assertTrue(pc2<.34);
-        assertTrue(pc3<.34);
+        assertTrue(pc1 < .34);
+        assertTrue(pc2 < .34);
+        assertTrue(pc3 < .34);
 
     }
 }

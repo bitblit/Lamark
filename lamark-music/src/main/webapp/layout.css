@@ -26,11 +26,11 @@ p {
     padding: 0px;
 }
 
-.Content>p {
+.Content > p {
     margin: 0px;
 }
 
-.Content>p+p {
+.Content > p + p {
     text-indent: 30px;
 }
 
@@ -95,7 +95,7 @@ a:hover {
 length values to user agents that exhibit the parsing error exploited above yet get 
 the CSS box model right and understand the CSS2 parent-child selector. ALWAYS include
 a "be nice to Opera 5" rule every time you use the Tantek Celik hack (above). */
-body>#navAlpha {
+body > #navAlpha {
     width: 128px;
 }
 
@@ -115,6 +115,6 @@ body>#navAlpha {
 }
 
 /* Again, "be nice to Opera 5". */
-body>#navBeta {
+body > #navBeta {
     width: 168px;
 }

@@ -8,8 +8,8 @@ package com.erigir.lamark;
 import com.erigir.lamark.config.LamarkRuntimeParameters;
 import com.erigir.lamark.events.*;
 import com.erigir.lamark.selector.RouletteWheel;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -846,59 +846,6 @@ public class Lamark implements Callable<Population> {
     }
 
     /**
-     * Accessor method
-     *
-     * @return IFitnessFunction containing the property
-     */
-    public final IFitnessFunction getFitnessFunction() {
-        return fitnessFunction;
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return IMutator containing the property
-     */
-    public final IMutator getMutator() {
-        return mutator;
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return ISelector containing the property
-     */
-    public final ISelector getSelector() {
-        return selector;
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return ICreator containing the property
-     */
-    public final ICreator getCreator() {
-        return creator;
-    }
-
-    private void updateBackPointer(ILamarkComponent component) {
-        if (component != null) {
-            component.setLamark(this);
-        }
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param pCreator new value
-     */
-    public final void setCreator(ICreator pCreator) {
-        checkRunning();
-        this.creator = pCreator;
-        updateBackPointer(pCreator);
-    }
-
-    /**
      * Mutator method
      *
      * @param pCrossover new value
@@ -907,6 +854,15 @@ public class Lamark implements Callable<Population> {
         checkRunning();
         this.crossover = pCrossover;
         updateBackPointer(pCrossover);
+    }
+
+    /**
+     * Accessor method
+     *
+     * @return IFitnessFunction containing the property
+     */
+    public final IFitnessFunction getFitnessFunction() {
+        return fitnessFunction;
     }
 
     /**
@@ -921,6 +877,15 @@ public class Lamark implements Callable<Population> {
     }
 
     /**
+     * Accessor method
+     *
+     * @return IMutator containing the property
+     */
+    public final IMutator getMutator() {
+        return mutator;
+    }
+
+    /**
      * Mutator method
      *
      * @param pMutator new value
@@ -932,6 +897,15 @@ public class Lamark implements Callable<Population> {
     }
 
     /**
+     * Accessor method
+     *
+     * @return ISelector containing the property
+     */
+    public final ISelector getSelector() {
+        return selector;
+    }
+
+    /**
      * Mutator method
      *
      * @param pSelector new value
@@ -940,6 +914,32 @@ public class Lamark implements Callable<Population> {
         checkRunning();
         this.selector = pSelector;
         updateBackPointer(pSelector);
+    }
+
+    /**
+     * Accessor method
+     *
+     * @return ICreator containing the property
+     */
+    public final ICreator getCreator() {
+        return creator;
+    }
+
+    /**
+     * Mutator method
+     *
+     * @param pCreator new value
+     */
+    public final void setCreator(ICreator pCreator) {
+        checkRunning();
+        this.creator = pCreator;
+        updateBackPointer(pCreator);
+    }
+
+    private void updateBackPointer(ILamarkComponent component) {
+        if (component != null) {
+            component.setLamark(this);
+        }
     }
 
     /**
@@ -978,6 +978,82 @@ public class Lamark implements Callable<Population> {
     }
 
     /**
+     * Accessor method
+     *
+     * @return Random containing the property
+     */
+    public Random getRandom() {
+        return random;
+    }
+
+    /**
+     * Mutator method
+     *
+     * @param random new value
+     */
+    public void setRandom(Random random) {
+        checkRunning();
+        this.random = random;
+    }
+
+    /**
+     * Accessor method
+     *
+     * @return IIndividualFormatter containing the property
+     */
+    public IIndividualFormatter getFormatter() {
+        return formatter;
+    }
+
+    /**
+     * Mutator method
+     *
+     * @param pFormatter new value
+     */
+    public void setFormatter(IIndividualFormatter pFormatter) {
+        checkRunning();
+        this.formatter = pFormatter;
+    }
+
+    /**
+     * Accessor method
+     *
+     * @return LamarkRuntimeParameters containing the property
+     */
+    public LamarkRuntimeParameters getRuntimeParameters() {
+        return runtimeParameters;
+    }
+
+    /**
+     * Mutator method
+     *
+     * @param runtimeParameters new value
+     */
+    public void setRuntimeParameters(LamarkRuntimeParameters runtimeParameters) {
+        checkRunning();
+        this.runtimeParameters = runtimeParameters;
+    }
+
+    /**
+     * Accessor method
+     *
+     * @return LamarkConfig containing the property
+     */
+    public ExecutorService getExecutor() {
+        return executor;
+    }
+
+    /**
+     * Mutator method
+     *
+     * @param executor new value
+     */
+    public void setExecutor(ExecutorService executor) {
+        checkRunning();
+        this.executor = executor;
+    }
+
+    /**
      * A little inner class to run and make sure the GA hasn't hung up somewhere.
      * <p/>
      * Currently this class does little except send out messages when it thinks
@@ -991,6 +1067,10 @@ public class Lamark implements Callable<Population> {
     class DeadLockMonitor implements Runnable {
 
         /**
+         * Number of times I need to see the same generation before I assume deadlock *
+         */
+        private static final int THRESHOLD = 4;
+        /**
          * Lamark object to monitor *
          */
         private Lamark subject;
@@ -1002,10 +1082,6 @@ public class Lamark implements Callable<Population> {
          * Number of times Ive seen that generation when I awoke *
          */
         private int cycleCount;
-        /**
-         * Number of times I need to see the same generation before I assume deadlock *
-         */
-        private static final int THRESHOLD = 4;
         /**
          * Handle to the main thread running lamark *
          */
@@ -1050,82 +1126,5 @@ public class Lamark implements Callable<Population> {
                 LOG.error("Deadlock failure", e);
             }
         }
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return Random containing the property
-     */
-    public Random getRandom() {
-        return random;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param random new value
-     */
-    public void setRandom(Random random) {
-        checkRunning();
-        this.random = random;
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return IIndividualFormatter containing the property
-     */
-    public IIndividualFormatter getFormatter() {
-        return formatter;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param pFormatter new value
-     */
-    public void setFormatter(IIndividualFormatter pFormatter) {
-        checkRunning();
-        this.formatter = pFormatter;
-    }
-
-
-    /**
-     * Accessor method
-     *
-     * @return LamarkRuntimeParameters containing the property
-     */
-    public LamarkRuntimeParameters getRuntimeParameters() {
-        return runtimeParameters;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param runtimeParameters new value
-     */
-    public void setRuntimeParameters(LamarkRuntimeParameters runtimeParameters) {
-        checkRunning();
-        this.runtimeParameters = runtimeParameters;
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return LamarkConfig containing the property
-     */
-    public ExecutorService getExecutor() {
-        return executor;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param executor new value
-     */
-    public void setExecutor(ExecutorService executor) {
-        checkRunning();
-        this.executor = executor;
     }
 }

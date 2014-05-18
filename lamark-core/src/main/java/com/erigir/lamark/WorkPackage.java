@@ -26,6 +26,10 @@ import java.util.List;
 public class WorkPackage implements Runnable {
 
     /**
+     * Static cached list of workpackage objects held to prevent repeated instantiation *
+     */
+    private static final List<WorkPackage> AVAILABLE_WP = Collections.synchronizedList(new LinkedList<WorkPackage>());
+    /**
      * Enum holding what type of workpackage this is (create/crossover, etc) *
      */
     private Type type;
@@ -47,9 +51,11 @@ public class WorkPackage implements Runnable {
     private Population crossoverSourcePopulation;
 
     /**
-     * Static cached list of workpackage objects held to prevent repeated instantiation *
+     * Private constructor to prevent non-factory instantiation.
      */
-    private static final List<WorkPackage> AVAILABLE_WP = Collections.synchronizedList(new LinkedList<WorkPackage>());
+    private WorkPackage() {
+        super();
+    }
 
     /**
      * Generate the size of the current WP cache list.
@@ -58,13 +64,6 @@ public class WorkPackage implements Runnable {
      */
     public static final int queueSize() {
         return AVAILABLE_WP.size();
-    }
-
-    /**
-     * Private constructor to prevent non-factory instantiation.
-     */
-    private WorkPackage() {
-        super();
     }
 
     /**

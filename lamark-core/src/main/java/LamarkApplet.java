@@ -18,7 +18,7 @@ public class LamarkApplet extends JApplet {
     /**
      * Wrapped gui object *
      */
-    private LamarkGui gui = new LamarkGui(getParameter("initialLocation"),getParameter("initialSelection"));
+    private LamarkGui gui = new LamarkGui(getParameter("initialLocation"), getParameter("initialSelection"));
 
     /**
      * Bootstraps the LamarkGUI, and if a resource was supplied, load it.

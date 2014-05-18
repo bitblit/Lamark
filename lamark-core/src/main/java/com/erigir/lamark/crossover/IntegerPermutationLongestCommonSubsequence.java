@@ -26,56 +26,6 @@ public class IntegerPermutationLongestCommonSubsequence extends AbstractLamarkCo
         ICrossover<List<Integer>> {
 
     /**
-     * @see com.erigir.lamark.ICrossover#parentCount()
-     */
-    public int parentCount() {
-        return 2;
-    }
-
-    /**
-     * @see com.erigir.lamark.ICrossover#crossover(java.util.List)
-     */
-    public Individual<List<Integer>> crossover(List<Individual<List<Integer>>> parents) {
-        List<Integer> p1 = parents.get(0).getGenome();
-        List<Integer> p2 = parents.get(1).getGenome();
-        int size = p1.size();
-
-        // Find the largest common substring in any order
-        List sub = computeLongestCommonSubsequence(p1, p2); // Get the longest common subsequence
-        ArrayList<Integer> p1r = new ArrayList<Integer>(p1);
-        ArrayList<Integer> p2r = new ArrayList<Integer>(p2);
-        Collections.reverse(p1r);
-        Collections.reverse(p2r);
-        List test = computeLongestCommonSubsequence(p1, p2r);
-        if (test.size() > sub.size()) {
-            sub = test;
-        }
-        test = computeLongestCommonSubsequence(p1r, p2);
-        if (test.size() > sub.size()) {
-            sub = test;
-        }
-        test = computeLongestCommonSubsequence(p1r, p2r);
-        if (test.size() > sub.size()) {
-            sub = test;
-        }
-
-        ArrayList<Integer> child = new ArrayList<Integer>(size);
-
-        // Put the LCS into the child
-        child.addAll(sub);
-
-        List<Integer> remainder = new ArrayList<Integer>(size);
-        remainder.addAll(p1);
-        remainder.removeAll(sub);
-        while (remainder.size() > 0) {
-            child.add(remainder.remove(getLamark().getRandom().nextInt(remainder.size())));
-        }
-
-        return new Individual<List<Integer>>(child);
-    }
-
-
-    /**
      * Computes the longest common subsequence of two lists, assuming equal length.
      *
      * @param l1 List 1 to search
@@ -163,6 +113,55 @@ public class IntegerPermutationLongestCommonSubsequence extends AbstractLamarkCo
             }
         }
 
+    }
+
+    /**
+     * @see com.erigir.lamark.ICrossover#parentCount()
+     */
+    public int parentCount() {
+        return 2;
+    }
+
+    /**
+     * @see com.erigir.lamark.ICrossover#crossover(java.util.List)
+     */
+    public Individual<List<Integer>> crossover(List<Individual<List<Integer>>> parents) {
+        List<Integer> p1 = parents.get(0).getGenome();
+        List<Integer> p2 = parents.get(1).getGenome();
+        int size = p1.size();
+
+        // Find the largest common substring in any order
+        List sub = computeLongestCommonSubsequence(p1, p2); // Get the longest common subsequence
+        ArrayList<Integer> p1r = new ArrayList<Integer>(p1);
+        ArrayList<Integer> p2r = new ArrayList<Integer>(p2);
+        Collections.reverse(p1r);
+        Collections.reverse(p2r);
+        List test = computeLongestCommonSubsequence(p1, p2r);
+        if (test.size() > sub.size()) {
+            sub = test;
+        }
+        test = computeLongestCommonSubsequence(p1r, p2);
+        if (test.size() > sub.size()) {
+            sub = test;
+        }
+        test = computeLongestCommonSubsequence(p1r, p2r);
+        if (test.size() > sub.size()) {
+            sub = test;
+        }
+
+        ArrayList<Integer> child = new ArrayList<Integer>(size);
+
+        // Put the LCS into the child
+        child.addAll(sub);
+
+        List<Integer> remainder = new ArrayList<Integer>(size);
+        remainder.addAll(p1);
+        remainder.removeAll(sub);
+        while (remainder.size() > 0) {
+            child.add(remainder.remove(getLamark().getRandom().nextInt(remainder.size())));
+        }
+
+        return new Individual<List<Integer>>(child);
     }
 
 

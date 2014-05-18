@@ -3,21 +3,11 @@
  */
 package com.erigir.lamark.example.tsp;
 
-import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.EFitnessType;
-import com.erigir.lamark.IFitnessFunction;
-import com.erigir.lamark.IValidatable;
-import com.erigir.lamark.Individual;
-import org.slf4j.LoggerFactory;
+import com.erigir.lamark.*;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -85,29 +75,6 @@ public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunct
     }
 
     /**
-     * Mutator method.
-     * NOTE: Calling this method will reset all cache values.
-     *
-     * @param filename String containing the new value
-     */
-    public void setTspFile(String filename) {
-        if (filename != null) {
-            if (!filename.equals(tspFile)) {
-                tspFile = filename;
-                points = null;
-                minX = Double.MAX_VALUE;
-                maxX = Double.MIN_VALUE;
-                minY = Double.MAX_VALUE;
-                maxY = Double.MIN_VALUE;
-            }
-        } else {
-            tspFile = null;
-        }
-
-
-    }
-
-    /**
      * If tspFile is set, this function loads the file into memory and creates
      * the point set.
      */
@@ -127,11 +94,10 @@ public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunct
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error on TSP load points from {}",tspFile,e);
+            LOG.error("Error on TSP load points from {}", tspFile, e);
             getLamark().logSevere("Error loading tspFile:" + e);
         }
     }
-
 
     /**
      * Calculates the length of a given permutation.
@@ -177,7 +143,6 @@ public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunct
         return rval;
     }
 
-
     /**
      * Calculates the distance between points at the two indexes.
      *
@@ -190,7 +155,6 @@ public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunct
         MyPoint p2 = (MyPoint) points.get(idx2);
         return p1.distance(p2);
     }
-
 
     /**
      * Loads the TSP from the supplied Reader.
@@ -281,7 +245,6 @@ public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunct
         return rval;
     }
 
-
     /**
      * @see com.erigir.lamark.IFitnessFunction#fitnessType()
      */
@@ -319,5 +282,28 @@ public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunct
 
     public String getTspFile() {
         return tspFile;
+    }
+
+    /**
+     * Mutator method.
+     * NOTE: Calling this method will reset all cache values.
+     *
+     * @param filename String containing the new value
+     */
+    public void setTspFile(String filename) {
+        if (filename != null) {
+            if (!filename.equals(tspFile)) {
+                tspFile = filename;
+                points = null;
+                minX = Double.MAX_VALUE;
+                maxX = Double.MIN_VALUE;
+                minY = Double.MAX_VALUE;
+                maxY = Double.MIN_VALUE;
+            }
+        } else {
+            tspFile = null;
+        }
+
+
     }
 }

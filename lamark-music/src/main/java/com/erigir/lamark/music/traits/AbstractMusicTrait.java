@@ -6,12 +6,12 @@ import jm.music.data.Score;
 public abstract class AbstractMusicTrait implements IMusicTrait {
     private ScoreAnalysis analysis;
 
-    public void setScoreAnalysis(ScoreAnalysis sa) {
-        analysis = sa;
-    }
-
     public ScoreAnalysis getScoreAnalysis() {
         return analysis;
+    }
+
+    public void setScoreAnalysis(ScoreAnalysis sa) {
+        analysis = sa;
     }
 
     public Score getScore() {

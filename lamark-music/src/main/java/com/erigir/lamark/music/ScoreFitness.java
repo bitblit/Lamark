@@ -1,21 +1,6 @@
 package com.erigir.lamark.music;
 
-import com.erigir.lamark.music.traits.CenterInTrebleCleffTrait;
-import com.erigir.lamark.music.traits.GoodEndingTrait;
-import com.erigir.lamark.music.traits.MinimizeDirectionChangesTrait;
-import com.erigir.lamark.music.traits.PenalizeLargeJumpsTrait;
-import com.erigir.lamark.music.traits.PenalizeTooManyRepeatsTrait;
-import com.erigir.lamark.music.traits.PenalizeTooMuchTotalRepetitionTrait;
-import com.erigir.lamark.music.traits.PercentInScaleBigFiveTrait;
-import com.erigir.lamark.music.traits.PercentInScaleTrait;
-import com.erigir.lamark.music.traits.PercentInTimeSignatureTrait;
-import com.erigir.lamark.music.traits.ReduceStandardDeviationTrait;
-import com.erigir.lamark.music.traits.RepeatingThemeTrait;
-import com.erigir.lamark.music.traits.RepeatingTimingTrait;
-import com.erigir.lamark.music.traits.StandardTimingTrait;
-import com.erigir.lamark.music.traits.TimingStepsTrait;
-import com.erigir.lamark.music.traits.TraitWrapper;
-import com.erigir.lamark.music.traits.WithinStandardDeviationTrait;
+import com.erigir.lamark.music.traits.*;
 
 import java.util.HashSet;
 

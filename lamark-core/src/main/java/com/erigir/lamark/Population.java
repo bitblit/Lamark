@@ -37,6 +37,29 @@ public class Population<T> {
     private int targetSize;
 
     /**
+     * Constructor of a new population object.
+     * Creates a new population.  Retains a handle to the
+     * lamark instance, and if the previous population
+     * object is non-null, then the number of this population
+     * is set to one higher than the previous population; otherwise
+     * the population number is set to 0.
+     *
+     * @param lamark   Lamark object that created this population
+     * @param previous Population object previous to this one in the series
+     */
+    public Population(Lamark lamark, Population<T> previous) {
+        super();
+        if (previous == null) {
+            number = 0;
+        } else {
+            number = previous.getNumber() + 1;
+        }
+        this.lamark = lamark;
+        this.targetSize = lamark.getRuntimeParameters().getPopulationSize();
+        this.individuals = Collections.synchronizedList(new ArrayList<Individual<T>>(targetSize));
+    }
+
+    /**
      * Throws an error if the population is still growing when it is called.
      */
     private void errOnGrowing() {
@@ -68,30 +91,6 @@ public class Population<T> {
         finish = Math.min(finish, individuals.size());
         return individuals.subList(start, finish);
     }
-
-    /**
-     * Constructor of a new population object.
-     * Creates a new population.  Retains a handle to the
-     * lamark instance, and if the previous population
-     * object is non-null, then the number of this population
-     * is set to one higher than the previous population; otherwise
-     * the population number is set to 0.
-     *
-     * @param lamark   Lamark object that created this population
-     * @param previous Population object previous to this one in the series
-     */
-    public Population(Lamark lamark, Population<T> previous) {
-        super();
-        if (previous == null) {
-            number = 0;
-        } else {
-            number = previous.getNumber() + 1;
-        }
-        this.lamark = lamark;
-        this.targetSize = lamark.getRuntimeParameters().getPopulationSize();
-        this.individuals = Collections.synchronizedList(new ArrayList<Individual<T>>(targetSize));
-    }
-
 
     /**
      * Accessor method.

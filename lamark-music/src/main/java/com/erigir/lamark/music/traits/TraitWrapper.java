@@ -4,13 +4,13 @@ public class TraitWrapper {
     IMusicTrait trait;
     Double weight;
 
-    public String toString() {
-        return "Trait:" + trait.getClass() + " fitness=" + trait.getFitness() + " weight=" + weight;
-    }
-
     public TraitWrapper(IMusicTrait pTrait, Double pWeight) {
         this.trait = pTrait;
         this.weight = pWeight;
+    }
+
+    public String toString() {
+        return "Trait:" + trait.getClass() + " fitness=" + trait.getFitness() + " weight=" + weight;
     }
 
     public double getFitness() {

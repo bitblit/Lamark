@@ -1,7 +1,6 @@
 package com.erigir.lamark.music.phrase;
 
 import com.erigir.lamark.Individual;
-import com.erigir.lamark.Util;
 import com.erigir.lamark.music.NoteDurationEnum;
 import com.erigir.lamark.music.ScaleEnum;
 import com.erigir.lamark.music.TimeSignatureEnum;
@@ -71,7 +70,7 @@ public class PhraseUtils {
         }
         while (remainder > 0) // add a note
         {
-            NoteDurationEnum nd = NoteDurationEnum.newNoteValue(remainder,random);
+            NoteDurationEnum nd = NoteDurationEnum.newNoteValue(remainder, random);
             Integer noteTone = validNotes.get(random.nextInt(validNotes.size()));
             rval.add(new Note(noteTone, nd.getDuration()));
             remainder -= nd.getThirtySeconds();

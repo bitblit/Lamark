@@ -14,7 +14,7 @@ public class MozartMutator implements IMutator<Score> {
     private Lamark lamark;
 
     public void mutate(Individual<Score> arg0) {
-        Score s =arg0.getGenome();
+        Score s = arg0.getGenome();
         Phrase[] pha = s.getPart(0).getPhraseArray();
         pha[lamark.getRandom().nextInt(pha.length)] = PhrasePool.instance.getPhrase();
     }

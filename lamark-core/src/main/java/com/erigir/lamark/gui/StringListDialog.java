@@ -60,24 +60,6 @@ public class StringListDialog extends JDialog implements ActionListener, ListSel
 
 
     /**
-     * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
-     */
-    public void valueChanged(ListSelectionEvent arg0) {
-        StringSetTableModel ptm = (StringSetTableModel) listTable.getModel();
-        int row = listTable.getSelectedRow();
-        editValue.setText((String) ptm.getValueAt(row, 0));
-    }
-
-    /**
-     * Accessor method.
-     *
-     * @return List of strings from the dialog
-     */
-    public List<String> getData() {
-        return returnData;
-    }
-
-    /**
      * Constructs the dialog box with the given title and initial list of strings.
      *
      * @param title   String containing the title for the box
@@ -134,6 +116,24 @@ public class StringListDialog extends JDialog implements ActionListener, ListSel
         returnData = initial;
 
         pack();
+    }
+
+    /**
+     * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
+     */
+    public void valueChanged(ListSelectionEvent arg0) {
+        StringSetTableModel ptm = (StringSetTableModel) listTable.getModel();
+        int row = listTable.getSelectedRow();
+        editValue.setText((String) ptm.getValueAt(row, 0));
+    }
+
+    /**
+     * Accessor method.
+     *
+     * @return List of strings from the dialog
+     */
+    public List<String> getData() {
+        return returnData;
     }
 
     /**

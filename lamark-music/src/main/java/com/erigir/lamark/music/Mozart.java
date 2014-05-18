@@ -5,14 +5,7 @@ import com.erigir.lamark.LamarkConfigurationFailedException;
 import com.erigir.lamark.LamarkFactory;
 import com.erigir.lamark.Util;
 import com.erigir.lamark.config.LamarkGUIConfig;
-import com.erigir.lamark.events.AbortedEvent;
-import com.erigir.lamark.events.BetterIndividualFoundEvent;
-import com.erigir.lamark.events.ExceptionEvent;
-import com.erigir.lamark.events.LamarkEvent;
-import com.erigir.lamark.events.LamarkEventListener;
-import com.erigir.lamark.events.LastPopulationCompleteEvent;
-import com.erigir.lamark.events.PopulationCompleteEvent;
-import com.erigir.lamark.events.UniformPopulationEvent;
+import com.erigir.lamark.events.*;
 import com.erigir.lamark.music.phrase.PhrasePool;
 
 import javax.swing.*;
@@ -20,13 +13,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
@@ -49,6 +40,14 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
     private JTextField barCountEntry;
     private LamarkFactory lamarkFactory = new LamarkFactory();
 
+
+    public Mozart() {
+    }
+
+    public static void main(String[] args) {
+        Mozart instance = new Mozart();
+        SwingUtilities.invokeLater(instance);
+    }
 
     private void createAndShowGUI() {
         try {
@@ -151,26 +150,24 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
 
     }
 
-    private Lamark mozartInstance()
-    {
+    private Lamark mozartInstance() {
         return mozartInstance((String) keySelect.getSelectedItem()
-                , (String)signatureSelect.getSelectedItem()
-        , "ALL".equals(rangeSelect.getSelectedItem()),
-            Integer.valueOf(barCountEntry.getText()));
+                , (String) signatureSelect.getSelectedItem()
+                , "ALL".equals(rangeSelect.getSelectedItem()),
+                Integer.valueOf(barCountEntry.getText()));
     }
-
 
     public Lamark mozartInstance(String keyS, String timeSigS, boolean fullRange, int barCount) {
         try {
 
-            Map<String,LamarkGUIConfig> configs = lamarkFactory.jsonToConfig(getClass().getResourceAsStream("/mozart.json"));
+            Map<String, LamarkGUIConfig> configs = lamarkFactory.jsonToConfig(getClass().getResourceAsStream("/mozart.json"));
             Lamark rval = lamarkFactory.createLamarkFromConfig(configs.values().iterator().next());
 
-            MozartCreator creator = (MozartCreator)rval.getCreator();
+            MozartCreator creator = (MozartCreator) rval.getCreator();
 
             if (!keyS.equals("ANY")) {
                 creator.setScale(ScaleEnum.valueOf(keyS));
-                       }
+            }
 
             creator.setSignature(TimeSignatureEnum.valueOf(timeSigS));
 
@@ -187,13 +184,10 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
 
             return rval;
 
-        }
-        catch (LamarkConfigurationFailedException lcfe)
-        {
-            JOptionPane.showMessageDialog(null, "Failed to load config: "+lcfe.getReasons());
+        } catch (LamarkConfigurationFailedException lcfe) {
+            JOptionPane.showMessageDialog(null, "Failed to load config: " + lcfe.getReasons());
             return null;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             IllegalArgumentException e2 = new IllegalArgumentException("Couldnt load defaults");
             e2.initCause(e);
             throw e2;
@@ -257,14 +251,6 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
 
         }
         return mainPanel;
-    }
-
-    public static void main(String[] args) {
-        Mozart instance = new Mozart();
-        SwingUtilities.invokeLater(instance);
-    }
-
-    public Mozart() {
     }
 
     public void run() {

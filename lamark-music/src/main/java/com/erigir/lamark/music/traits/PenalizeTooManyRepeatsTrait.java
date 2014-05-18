@@ -12,8 +12,8 @@ import java.util.logging.Logger;
  */
 
 public class PenalizeTooManyRepeatsTrait extends AbstractMusicTrait {
-    private static Logger LOG = Logger.getLogger(PenalizeTooManyRepeatsTrait.class.getName());
     private static final int TOO_MANY = 3;
+    private static Logger LOG = Logger.getLogger(PenalizeTooManyRepeatsTrait.class.getName());
 
     @Override
     public double guardedFitness() {

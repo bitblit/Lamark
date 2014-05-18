@@ -3,11 +3,7 @@
  */
 package com.erigir.lamark.example.schedule;
 
-import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.EFitnessType;
-import com.erigir.lamark.IFitnessFunction;
-import com.erigir.lamark.IValidatable;
-import com.erigir.lamark.Individual;
+import com.erigir.lamark.*;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -24,6 +20,10 @@ import java.util.List;
  */
 public class ScheduleFitness extends AbstractLamarkComponent implements IFitnessFunction<List>, IValidatable {
     /**
+     * Holds the worst time found so we can track improvement.  Really should be done by a listeners *
+     */
+    static int worstFound = Integer.MIN_VALUE;
+    /**
      * The length of each job in units *
      */
     int[] times;
@@ -35,10 +35,6 @@ public class ScheduleFitness extends AbstractLamarkComponent implements IFitness
      * Cache holding of all job times summed *
      */
     int totalWeightedTime;
-    /**
-     * Holds the worst time found so we can track improvement.  Really should be done by a listeners *
-     */
-    static int worstFound = Integer.MIN_VALUE;
 
     /**
      * Defaults the times and weights to the ones specified by assignment

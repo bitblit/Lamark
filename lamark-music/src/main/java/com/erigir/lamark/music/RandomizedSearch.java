@@ -5,11 +5,7 @@ import com.erigir.lamark.Util;
 import com.erigir.lamark.music.phrase.PhrasePool;
 import com.erigir.lamark.music.traits.TraitWrapper;
 import jm.gui.cpn.Notate;
-import jm.music.data.Note;
-import jm.music.data.Part;
-import jm.music.data.Phrase;
-import jm.music.data.Score;
-import jm.music.data.Tempo;
+import jm.music.data.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +15,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import java.math.BigDecimal;
 import java.util.Random;
 
 public class RandomizedSearch implements Runnable, ActionListener {
@@ -29,6 +24,10 @@ public class RandomizedSearch implements Runnable, ActionListener {
     private JButton start;
     private JButton stop;
     private musicThread thread = null;
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new RandomizedSearch());
+    }
 
     /**
      * Create the GUI and show it.  For thread safety,
@@ -73,10 +72,6 @@ public class RandomizedSearch implements Runnable, ActionListener {
         }
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new RandomizedSearch());
-    }
-
     public void run() {
         createAndShowGUI();
     }
@@ -108,12 +103,11 @@ public class RandomizedSearch implements Runnable, ActionListener {
 
 
     static class musicThread implements Runnable {
-        private Random random = new Random();
-
-        private boolean running = true;
         private static final int SONG_LENGTH = 8;
         private static final double SCORE_DELTA = 5;
         private static final int MOVE_RANGE = 1;
+        private Random random = new Random();
+        private boolean running = true;
         private int cycle = 0;
         private MozartFitness fitness;
         private Score currentScore;
@@ -374,7 +368,7 @@ public class RandomizedSearch implements Runnable, ActionListener {
             ScaleEnum scale = ScaleEnum.C;
             TimeSignatureEnum signature = TimeSignatureEnum.FOUR_FOUR;
 
-            pp.initialize(random,signature, scale, 40, 81);
+            pp.initialize(random, signature, scale, 40, 81);
 
             Phrase[] song = new Phrase[SONG_LENGTH];
             for (int i = 0; i < song.length; i++) {

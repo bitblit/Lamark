@@ -1,6 +1,8 @@
 package com.erigir.lamark.gui;
 
 import com.erigir.lamark.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -10,9 +12,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 
 /**
@@ -26,11 +25,6 @@ import org.slf4j.LoggerFactory;
  */
 public class LamarkApplication implements ActionListener {
     /**
-     * Logger instance *
-     */
-    private static Logger LOG = LoggerFactory.getLogger(LamarkApplication.class);
-
-    /**
      * String label for the save action *
      */
     private static final String SAVE = "Save...";
@@ -38,7 +32,10 @@ public class LamarkApplication implements ActionListener {
      * String label for the open local jar file/property file action *
      */
     private static final String OPEN_LOCAL = "Open...";
-
+    /**
+     * Logger instance *
+     */
+    private static Logger LOG = LoggerFactory.getLogger(LamarkApplication.class);
     /**
      * Handle to the wrapping frame *
      */
@@ -148,7 +145,7 @@ public class LamarkApplication implements ActionListener {
                             gui.getConfigPanel().loadFromLocation(f.toURI().toString(), null);
                             lastFile = f;
                         } catch (Exception ioe) {
-                            LOG.warn("Error opening file",ioe);
+                            LOG.warn("Error opening file", ioe);
                             gui.clearOutput();
                             gui.appendOutput(ioe);
                             JOptionPane.showMessageDialog(frame, "Error reading file:" + ioe);

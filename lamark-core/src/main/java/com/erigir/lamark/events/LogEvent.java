@@ -42,12 +42,23 @@ public class LogEvent extends LamarkEvent {
     }
 
     /**
+     * Adapter method to handle a LogEvent with a java.util.logging.Logger object
+     *
+     * @param evt    LogEvent to handle
+     * @param logger Logger to log the event
+     */
+    public static void handleWithJavaLogger(LogEvent evt, Logger logger) {
+        if (evt.message != null) {
+            logger.log(evt.level, evt.message.toString());
+        }
+    }
+
+    /**
      * @see java.lang.Object#toString()
      */
     public String toString() {
         return "LogEvent[lamark=" + this.getLamark() + ",level=" + level + ",message=" + message + "]";
     }
-
 
     /**
      * Accessor method.
@@ -83,18 +94,6 @@ public class LogEvent extends LamarkEvent {
      */
     public void setMessage(Object message) {
         this.message = message;
-    }
-
-    /**
-     * Adapter method to handle a LogEvent with a java.util.logging.Logger object
-     *
-     * @param evt    LogEvent to handle
-     * @param logger Logger to log the event
-     */
-    public static void handleWithJavaLogger(LogEvent evt, Logger logger) {
-        if (evt.message != null) {
-            logger.log(evt.level, evt.message.toString());
-        }
     }
 
 }

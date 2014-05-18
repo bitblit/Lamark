@@ -39,6 +39,35 @@ public class RouletteWheel extends AbstractLamarkComponent implements ISelector 
     }
 
     /**
+     * Generates the sum of the fitness of a group of individuals.
+     *
+     * @param individuals List to sum the fitness of
+     * @return double containing the sum
+     */
+    public static double sumFitness(List<Individual<?>> individuals) {
+        double rval = 0;
+        for (Individual i : individuals) {
+            Double fit = i.getFitness();
+            rval += fit;
+        }
+        return rval;
+    }
+
+    /**
+     * Finds the max of the fitness of a group of individuals.
+     *
+     * @param individuals List to find the max fitness of
+     * @return double containing the max
+     */
+    public static double maxFitness(List<Individual<?>> individuals) {
+        double max = Double.MIN_VALUE;
+        for (Individual i : individuals) {
+            max = Math.max(max, i.getFitness());
+        }
+        return max;
+    }
+
+    /**
      * @see com.erigir.lamark.ISelector#select(java.util.List, int)
      */
     public List<Individual<?>> select(List<Individual<?>> individuals, int count) {
@@ -159,35 +188,6 @@ public class RouletteWheel extends AbstractLamarkComponent implements ISelector 
         getLamark().logFiner("sumfit=" + partSum + ", rval=" + rval);
 
         return rval;
-    }
-
-    /**
-     * Generates the sum of the fitness of a group of individuals.
-     *
-     * @param individuals List to sum the fitness of
-     * @return double containing the sum
-     */
-    public static double sumFitness(List<Individual<?>> individuals) {
-        double rval = 0;
-        for (Individual i : individuals) {
-            Double fit = i.getFitness();
-            rval += fit;
-        }
-        return rval;
-    }
-
-    /**
-     * Finds the max of the fitness of a group of individuals.
-     *
-     * @param individuals List to find the max fitness of
-     * @return double containing the max
-     */
-    public static double maxFitness(List<Individual<?>> individuals) {
-        double max = Double.MIN_VALUE;
-        for (Individual i : individuals) {
-            max = Math.max(max, i.getFitness());
-        }
-        return max;
     }
 
 

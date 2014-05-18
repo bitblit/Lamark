@@ -6,12 +6,7 @@ import jm.music.data.Part;
 import jm.music.data.Phrase;
 import jm.music.data.Score;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * This is a wrapper object that performs analysis on a given score,
@@ -37,6 +32,32 @@ public class ScoreAnalysis {
     private Double meanNote;
     private Double noteStandardDeviation;
     private Integer noteDirectionChanges;
+
+    public ScoreAnalysis(Score s) {
+        super();
+        setScore(s);
+    }
+
+
+    public ScoreAnalysis() {
+        super();
+    }
+
+    public static List<Note> partToNoteList(Part p) {
+        List<Note> rval = new ArrayList<Note>();
+        for (Phrase ph : p.getPhraseArray()) {
+            rval.addAll(Arrays.asList(ph.getNoteArray()));
+        }
+        return rval;
+    }
+
+    public static List<Integer> toDeltaList(List<Integer> ints) {
+        ArrayList<Integer> rval = new ArrayList<Integer>(ints.size() - 1);
+        for (int i = 1; i < ints.size(); i++) {
+            rval.add(ints.get(i) - ints.get(i - 1));
+        }
+        return rval;
+    }
 
     public String toString() {
         StringBuffer sb = new StringBuffer();
@@ -67,7 +88,6 @@ public class ScoreAnalysis {
         return sb.toString();
     }
 
-
     public Double getMeanNote() {
         return meanNote;
     }
@@ -78,15 +98,6 @@ public class ScoreAnalysis {
 
     public Double getNoteStandardDeviation() {
         return noteStandardDeviation;
-    }
-
-    public ScoreAnalysis(Score s) {
-        super();
-        setScore(s);
-    }
-
-    public ScoreAnalysis() {
-        super();
     }
 
     public ScaleEnum closestScaleFit() {
@@ -221,14 +232,6 @@ public class ScoreAnalysis {
         return cacheAllNotes;
     }
 
-    public static List<Note> partToNoteList(Part p) {
-        List<Note> rval = new ArrayList<Note>();
-        for (Phrase ph : p.getPhraseArray()) {
-            rval.addAll(Arrays.asList(ph.getNoteArray()));
-        }
-        return rval;
-    }
-
     private Double calculateStandardDeviation(List<Integer> values, Double meanValue) {
         if (values == null || meanValue == null || values.size() == 0) {
             throw new IllegalArgumentException("Cannot calculate stddev of empty list, or without mean value");
@@ -257,14 +260,6 @@ public class ScoreAnalysis {
 
     public List<Double> getTimeDeltaList() {
         return Collections.unmodifiableList(timeDeltaList);
-    }
-
-    public static List<Integer> toDeltaList(List<Integer> ints) {
-        ArrayList<Integer> rval = new ArrayList<Integer>(ints.size() - 1);
-        for (int i = 1; i < ints.size(); i++) {
-            rval.add(ints.get(i) - ints.get(i - 1));
-        }
-        return rval;
     }
 
 }

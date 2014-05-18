@@ -1,17 +1,7 @@
 package com.erigir.lamark.music.phrase;
 
 import com.erigir.lamark.music.MozartFitness;
-import com.erigir.lamark.music.traits.CenterInTrebleCleffTrait;
-import com.erigir.lamark.music.traits.MinimizeDirectionChangesTrait;
-import com.erigir.lamark.music.traits.PenalizeLargeJumpsTrait;
-import com.erigir.lamark.music.traits.PenalizeTooManyRepeatsTrait;
-import com.erigir.lamark.music.traits.PenalizeTooMuchTotalRepetitionTrait;
-import com.erigir.lamark.music.traits.PercentInScaleBigFiveTrait;
-import com.erigir.lamark.music.traits.PercentInScaleTrait;
-import com.erigir.lamark.music.traits.PercentInTimeSignatureTrait;
-import com.erigir.lamark.music.traits.StandardTimingTrait;
-import com.erigir.lamark.music.traits.TimingStepsTrait;
-import com.erigir.lamark.music.traits.TraitWrapper;
+import com.erigir.lamark.music.traits.*;
 
 import java.util.HashSet;
 
