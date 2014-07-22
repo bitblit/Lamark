@@ -12,12 +12,13 @@ import jm.music.data.Score;
 import jm.util.View;
 
 import java.awt.*;
+import java.awt.event.WindowEvent;
 
 public class DrawScoreListener implements GUIEventListener {
-    private Notate scoreFrame;
+    private MyNotate scoreFrame;
 
     public DrawScoreListener() {
-        //scoreFrame = new Notate((Score)null,50,50);
+//        scoreFrame = new Notate((Score)null,50,50);
     }
 
 
@@ -25,12 +26,19 @@ public class DrawScoreListener implements GUIEventListener {
         if (arg0 instanceof BetterIndividualFoundEvent) {
             BetterIndividualFoundEvent bife = (BetterIndividualFoundEvent) arg0;
             Individual i = bife.getNewBest();
+
+            if (scoreFrame!=null)
+            {
+                scoreFrame.windowClosing(new WindowEvent(null,0));
+            }
             Score s = (Score) i.getGenome();
 
-            View.notate(s);
-            //scoreFrame.
+            scoreFrame = new MyNotate(s, 100, 200);
+
+
+            //View.notate(s);
         }
-    
+
 
 
             /*

@@ -7,6 +7,7 @@ import com.erigir.lamark.Util;
 import com.erigir.lamark.config.LamarkGUIConfig;
 import com.erigir.lamark.events.*;
 import com.erigir.lamark.music.phrase.PhrasePool;
+import jm.music.data.Score;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,6 +34,8 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
     private JLabel generationNumber;
     private JLabel bestScore;
     private Lamark currentRunner;
+
+    private MyNotate notate;
 
     private JComboBox keySelect;
     private JComboBox signatureSelect;
@@ -101,6 +104,8 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
 
         frame.getContentPane().add(toolPanel, BorderLayout.NORTH);
         frame.getContentPane().add(getMainPanel(), BorderLayout.CENTER);
+        notate = new MyNotate(new Score(),0,0);
+        frame.getContentPane().add(notate,BorderLayout.SOUTH);
 
         JMenuBar menuBar = new JMenuBar();
 
