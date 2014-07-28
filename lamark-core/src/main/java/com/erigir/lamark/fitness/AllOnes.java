@@ -4,6 +4,8 @@ import com.erigir.lamark.AbstractLamarkComponent;
 import com.erigir.lamark.EFitnessType;
 import com.erigir.lamark.IFitnessFunction;
 import com.erigir.lamark.Individual;
+import com.erigir.lamark.annotation.FitnessFunction;
+import com.erigir.lamark.annotation.LamarkComponent;
 
 /**
  * A simple fitness function to find a string with all ones in it.
@@ -13,6 +15,7 @@ import com.erigir.lamark.Individual;
  * @author cweiss
  * @since 04/2006
  */
+@LamarkComponent
 public class AllOnes extends AbstractLamarkComponent implements IFitnessFunction<String> {
 
     /**
@@ -20,6 +23,18 @@ public class AllOnes extends AbstractLamarkComponent implements IFitnessFunction
      */
     public double fitnessValue(Individual div) {
         String test = (String) div.getGenome();
+        double rval = 0;
+        for (int i = 0; i < test.length(); i++) {
+            if (test.charAt(i) == '1') {
+                rval++;
+            }
+        }
+        return rval;
+    }
+
+    @FitnessFunction(fitnessType = EFitnessType.MAXIMUM_BEST)
+    public double allOnesFitness(String test)
+    {
         double rval = 0;
         for (int i = 0; i < test.length(); i++) {
             if (test.charAt(i) == '1') {

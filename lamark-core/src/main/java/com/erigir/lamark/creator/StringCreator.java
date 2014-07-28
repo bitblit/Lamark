@@ -7,6 +7,8 @@ import com.erigir.lamark.AbstractLamarkComponent;
 import com.erigir.lamark.IPreloadableCreator;
 import com.erigir.lamark.IValidatable;
 import com.erigir.lamark.Individual;
+import com.erigir.lamark.annotation.Creator;
+import com.erigir.lamark.annotation.LamarkComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.List;
  * @author cweiss
  * @since 04/2006
  */
+@LamarkComponent
 public class StringCreator extends AbstractLamarkComponent implements IPreloadableCreator<String>, IValidatable {
     /**
      * List of characters to create new strings from *
@@ -87,6 +90,24 @@ public class StringCreator extends AbstractLamarkComponent implements IPreloadab
         Individual<String> i = new Individual<String>();
         i.setGenome(sb.toString());
         return i;
+    }
+
+    @Creator
+    public String createString()
+    {
+        if (validCharacters == null || validCharacters.size() == 0) {
+            throw new IllegalStateException("Not initialized, or no valid characters");
+        }
+        if (size == null) {
+            throw new IllegalStateException("Cannot process, 'size' not set");
+        }
+
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < size; i++) {
+            sb.append(validCharacters.get(getLamark().getRandom().nextInt(validCharacters
+                    .size())));
+        }
+        return sb.toString();
     }
 
 

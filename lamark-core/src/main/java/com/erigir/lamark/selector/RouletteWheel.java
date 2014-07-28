@@ -7,6 +7,8 @@ import com.erigir.lamark.AbstractLamarkComponent;
 import com.erigir.lamark.ISelector;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.Lamark;
+import com.erigir.lamark.annotation.LamarkComponent;
+import com.erigir.lamark.annotation.Selector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +22,7 @@ import java.util.List;
  * @author cweiss
  * @since 04/2005
  */
+@LamarkComponent
 public class RouletteWheel extends AbstractLamarkComponent implements ISelector {
     /**
      * Default constructor.
@@ -70,6 +73,7 @@ public class RouletteWheel extends AbstractLamarkComponent implements ISelector 
     /**
      * @see com.erigir.lamark.ISelector#select(java.util.List, int)
      */
+    @Selector
     public List<Individual<?>> select(List<Individual<?>> individuals, int count) {
         double sumFit = sumFitness(individuals);
         List<Individual<?>> rval = new ArrayList<Individual<?>>(count);
@@ -81,6 +85,8 @@ public class RouletteWheel extends AbstractLamarkComponent implements ISelector 
         return rval;
 
     }
+
+
 
     /**
      * Selects an individual, using the cached sumFitness.

@@ -46,6 +46,7 @@
             <artifactId>jackson-databind</artifactId>
             <version>${jackson-2-version}</version>
         </dependency>
+
     </dependencies>
 
     <properties>

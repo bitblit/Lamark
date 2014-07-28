@@ -7,6 +7,8 @@ import com.erigir.lamark.AbstractLamarkComponent;
 import com.erigir.lamark.ICreator;
 import com.erigir.lamark.IValidatable;
 import com.erigir.lamark.Individual;
+import com.erigir.lamark.annotation.Creator;
+import com.erigir.lamark.annotation.LamarkComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.List;
  * @author cweiss
  * @since 04/2006
  */
+@LamarkComponent
 public class RangedIntegerListCreator extends AbstractLamarkComponent implements ICreator<List<Integer>>, IValidatable {
     /**
      * Lower bound for the integers to be created *
@@ -68,6 +71,21 @@ public class RangedIntegerListCreator extends AbstractLamarkComponent implements
         Individual i = new Individual();
         i.setGenome(rval);
         return i;
+    }
+
+    @Creator
+    public List<Integer> createIntegerList()
+    {
+        int range = upperBoundInclusive - lowerBoundInclusive;
+        if (size == null) {
+            throw new IllegalStateException("Cannot process, 'size' not set");
+        }
+        List<Integer> rval = new ArrayList<Integer>(size);
+        for (int i = 0; i < size; i++) {
+            rval.add(new Integer(getLamark().getRandom().nextInt(range)
+                    + lowerBoundInclusive));
+        }
+        return rval;
     }
 
     /**
