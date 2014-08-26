@@ -1,5 +1,8 @@
 package com.erigir.lamark;
 
+import com.erigir.lamark.annotation.IndividualFormatter;
+import com.erigir.lamark.annotation.LamarkComponent;
+
 import java.util.Collection;
 
 /**
@@ -9,6 +12,7 @@ import java.util.Collection;
  *
  * @author cweiss
  */
+@LamarkComponent
 public class DefaultIndividualFormatter implements IIndividualFormatter<Object> {
 
     /**
@@ -21,6 +25,7 @@ public class DefaultIndividualFormatter implements IIndividualFormatter<Object> 
     /**
      * @see com.erigir.lamark.IIndividualFormatter#format(Collection)
      */
+    @IndividualFormatter
     public String format(Collection<Individual<Object>> toFormat) {
         StringBuffer sb = new StringBuffer();
 

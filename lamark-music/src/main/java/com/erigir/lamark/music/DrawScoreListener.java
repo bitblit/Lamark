@@ -15,10 +15,10 @@ import java.awt.*;
 import java.awt.event.WindowEvent;
 
 public class DrawScoreListener implements GUIEventListener {
-    private MyNotate scoreFrame;
+    private Notate scoreFrame;
 
     public DrawScoreListener() {
-//        scoreFrame = new Notate((Score)null,50,50);
+        //scoreFrame = new Notate((Score)null,50,50);
     }
 
 
@@ -27,13 +27,20 @@ public class DrawScoreListener implements GUIEventListener {
             BetterIndividualFoundEvent bife = (BetterIndividualFoundEvent) arg0;
             Individual i = bife.getNewBest();
 
+            Score s = (Score) i.getGenome();
+
+            if (scoreFrame==null)
+            {
+                scoreFrame = new Notate(s,250,250);
+            }
+
+            /*
             if (scoreFrame!=null)
             {
                 scoreFrame.windowClosing(new WindowEvent(null,0));
-            }
-            Score s = (Score) i.getGenome();
+            }*/
 
-            scoreFrame = new MyNotate(s, 100, 200);
+            scoreFrame.setVisible(true);
 
 
             //View.notate(s);

@@ -46,6 +46,12 @@
             <artifactId>jackson-databind</artifactId>
             <version>${jackson-2-version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.9-RC1</version>
+            <scope>provided</scope>
+        </dependency>
 
     </dependencies>
 
