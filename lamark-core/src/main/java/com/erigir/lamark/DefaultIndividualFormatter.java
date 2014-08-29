@@ -1,9 +1,6 @@
 package com.erigir.lamark;
 
 import com.erigir.lamark.annotation.IndividualFormatter;
-import com.erigir.lamark.annotation.LamarkComponent;
-
-import java.util.Collection;
 
 /**
  * Default formatter for individuals.

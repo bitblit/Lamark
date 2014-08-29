@@ -2,11 +2,8 @@ package com.erigir.lamark;
 
 import com.erigir.lamark.annotation.*;
 import com.erigir.lamark.config.ERuntimeParameters;
-import com.erigir.lamark.config.LamarkRuntimeParameters;
-import com.erigir.lamark.creator.GeneralStringCreator;
 import com.erigir.lamark.creator.StringCreator;
-import com.erigir.lamark.crossover.StringSinglePoint;
-import com.erigir.lamark.crossover.StringSinglePoint2;
+import com.erigir.lamark.crossover.StringCrossover;
 import com.erigir.lamark.events.ExceptionEvent;
 import com.erigir.lamark.events.LamarkEvent;
 import com.erigir.lamark.events.LastPopulationCompleteEvent;
@@ -34,40 +31,10 @@ public class MyFirstLamark {
     private static final Logger LOG = LoggerFactory.getLogger(MyFirstLamark.class);
 
     private StringFinderFitness fitness = new StringFinderFitness();
-    private StringSinglePoint2 crossover = new StringSinglePoint2();
+    private StringCrossover crossover = new StringCrossover();
     private RouletteWheel selector = new RouletteWheel();
     private StringSimpleMutator mutator = new StringSimpleMutator();
-    private GeneralStringCreator creator = new GeneralStringCreator();
-
-    @FitnessFunction
-    public double calculateFitness(@Param("target")String target, String input)
-    {
-        return fitness.fitnessValue(target,input);
-    }
-
-    @Creator
-    public String createIndividual(@Param("target")String target,@Param("random")Random random)
-    {
-        return creator.createAlphaString(target.length(),random);
-    }
-
-    @Crossover
-    public String crossover(@Parent String p1, @Parent String p2, @Param("random")Random random)
-    {
-        return crossover.crossoverString(p1,p2,random);
-    }
-
-    @Mutator
-    public String mutate(String input, @Param("random")Random random)
-    {
-        return mutator.mutate(input,random);
-    }
-
-    @IndividualFormatter
-    public String format(String input)
-    {
-        return input;
-    }
+    private StringCreator creator = new StringCreator();
 
     /**
      * Bootstrap main to run from command line.
@@ -78,6 +45,31 @@ public class MyFirstLamark {
         MyFirstLamark e = new MyFirstLamark();
         e.go();
         System.exit(0);
+    }
+
+    @FitnessFunction
+    public double calculateFitness(@Param("target") String target, String input) {
+        return fitness.fitnessValue(target, input);
+    }
+
+    @Creator
+    public String createIndividual(@Param("target") String target, @Param("random") Random random) {
+        return creator.createAlphaString(target.length(), random);
+    }
+
+    @Crossover
+    public String crossover(@Parent String p1, @Parent String p2, @Param("random") Random random) {
+        return crossover.crossoverString(p1, p2, random);
+    }
+
+    @Mutator
+    public String mutate(String input, @Param("random") Random random) {
+        return mutator.mutate(input, random);
+    }
+
+    @IndividualFormatter
+    public String format(String input) {
+        return input;
     }
 
     /**
@@ -98,32 +90,28 @@ public class MyFirstLamark {
     }
 
     @PreloadIndividuals
-    public List<String> preloadedIndividuals()
-    {
+    public List<String> preloadedIndividuals() {
         return Arrays.asList("AAAAAA");
     }
 
     @Param("workerThreadCount")
-    public int getWorkerThreadCount()
-    {
+    public int getWorkerThreadCount() {
         return 400;
     }
 
     @Param("populationSize")
-    public int getPopulationSize()
-    {
+    public int getPopulationSize() {
         return 50;
     }
 
     @Param("targetScore")
-    public Map<String,Object> getMultiParams()
-    {
-        Map<String,Object> multi = new TreeMap<>();
-        multi.put("targetScore",1.0);
-        multi.put("mutationProbability",.01);
-        multi.put("lowerElitism",0.0);
-        multi.put("upperElitism",0.0);
-        multi.put("target","LAMARK");
+    public Map<String, Object> getMultiParams() {
+        Map<String, Object> multi = new TreeMap<>();
+        multi.put("targetScore", 1.0);
+        multi.put("mutationProbability", .01);
+        multi.put("lowerElitism", 0.0);
+        multi.put("upperElitism", 0.0);
+        multi.put("target", "LAMARK");
 
         return multi;
     }

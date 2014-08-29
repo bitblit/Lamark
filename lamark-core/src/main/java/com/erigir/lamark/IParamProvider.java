@@ -5,5 +5,6 @@ package com.erigir.lamark;
  */
 public interface IParamProvider {
     Object getParameter(String name);
+
     <T> T getParameter(String name, Class<T> clazz);
 }

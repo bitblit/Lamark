@@ -33,8 +33,7 @@ public class AllOnes extends AbstractLamarkComponent implements IFitnessFunction
     }
 
     @FitnessFunction(fitnessType = EFitnessType.MAXIMUM_BEST)
-    public double allOnesFitness(String test)
-    {
+    public double allOnesFitness(String test) {
         double rval = 0;
         for (int i = 0; i < test.length(); i++) {
             if (test.charAt(i) == '1') {

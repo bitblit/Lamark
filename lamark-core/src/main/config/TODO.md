@@ -8,3 +8,6 @@
 ** Fitness function returns double
 ** All types in harmony
 ** Mutator returns same type as accepts
+
+* Implement preloads
+* Implement "force individual" queue?

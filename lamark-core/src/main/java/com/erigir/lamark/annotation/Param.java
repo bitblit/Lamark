@@ -17,13 +17,14 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * * Fitness (value=fitnessFunction)
  * * Creator (value=creator)
  * * Object with name (value=name)
- *
+ * <p/>
  * Created by chrweiss on 7/22/14.
  */
-@Target( { PARAMETER, METHOD })
+@Target({PARAMETER, METHOD})
 @Retention(RUNTIME)
 @Documented
 public @interface Param {
     String value();
+
     boolean required() default true;
 }

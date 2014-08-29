@@ -6,7 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by chrweiss on 8/24/14.
@@ -32,13 +35,10 @@ public class LamarkComponentFinder {
     }
 
     public void setLocationsToScan(List<String> locationsToScan) {
-        if (locationsToScan==null)
-        {
+        if (locationsToScan == null) {
             LOG.warn("Warning : Scanning full classpath for annotations.  Consider providing a package list to increase performance");
             locationsToScan = Arrays.asList("/");
-        }
-        else
-        {
+        } else {
             this.locationsToScan = locationsToScan;
         }
         reflections = new Reflections(locationsToScan);

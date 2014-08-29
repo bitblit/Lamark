@@ -1,8 +1,10 @@
 package com.erigir.lamark.config;
 
-import com.erigir.lamark.*;
+import com.erigir.lamark.ICreator;
+import com.erigir.lamark.ICrossover;
+import com.erigir.lamark.IFitnessFunction;
+import com.erigir.lamark.IMutator;
 import com.erigir.lamark.events.LamarkEventListener;
-import com.erigir.lamark.selector.RouletteWheel;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -61,11 +63,11 @@ public class LamarkConfig extends LamarkRuntimeParameters {
     /**
      * Handle to the selector component, defaulted to RouletteWheel *
      */
-   // private Class<? extends ISelector> selectorClass = RouletteWheel.class;
+    // private Class<? extends ISelector> selectorClass = RouletteWheel.class;
     /**
      * Handle to the individual formatter, used for printing individuals into messages *
      */
-   // private Class<? extends IIndividualFormatter> individualFormatterClass = DefaultIndividualFormatter.class;
+    // private Class<? extends IIndividualFormatter> individualFormatterClass = DefaultIndividualFormatter.class;
 
     /**
      * Specific configuration for creator class
@@ -183,7 +185,7 @@ public class LamarkConfig extends LamarkRuntimeParameters {
      * @return Class containing the property
      *
     public Class<? extends ISelector> getSelectorClass() {
-        return selectorClass;
+    return selectorClass;
     }
 
     /**
@@ -192,7 +194,7 @@ public class LamarkConfig extends LamarkRuntimeParameters {
      * @param selectorClass new value for the property
      *
     public void setSelectorClass(Class<? extends ISelector> selectorClass) {
-        this.selectorClass = selectorClass;
+    this.selectorClass = selectorClass;
     }
 
     /**
@@ -201,7 +203,7 @@ public class LamarkConfig extends LamarkRuntimeParameters {
      * @return Class containing the property
      *
     public Class<? extends IIndividualFormatter> getIndividualFormatterClass() {
-        return individualFormatterClass;
+    return individualFormatterClass;
     }
 
     /**
@@ -209,7 +211,7 @@ public class LamarkConfig extends LamarkRuntimeParameters {
      *
      * @param individualFormatterClass new value for the property
     public void setIndividualFormatterClass(Class<? extends IIndividualFormatter> individualFormatterClass) {
-        this.individualFormatterClass = individualFormatterClass;
+    this.individualFormatterClass = individualFormatterClass;
     }*/
 
     /**

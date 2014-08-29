@@ -24,7 +24,7 @@ public class TestStringSinglePoint {
         parents.add(i1);
         parents.add(i2);
 
-        StringSinglePoint ssp = new StringSinglePoint();
+        StringCrossover ssp = new StringCrossover();
         ssp.setLamark(new Lamark(null));
         int case1 = 0;
         int case2 = 0;

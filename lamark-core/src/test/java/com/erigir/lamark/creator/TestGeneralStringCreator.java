@@ -1,9 +1,7 @@
 package com.erigir.lamark.creator;
 
-import com.erigir.lamark.AnnotationUtil;
 import com.erigir.lamark.DynamicMethodWrapper;
 import com.erigir.lamark.annotation.Creator;
-import com.erigir.lamark.annotation.Param;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +18,7 @@ import java.util.TreeMap;
  */
 public class TestGeneralStringCreator {
     private static final Logger LOG = LoggerFactory.getLogger(TestGeneralStringCreator.class);
-    private GeneralStringCreator creator = new GeneralStringCreator();
+    private StringCreator creator = new StringCreator();
 
     @Test
     public void testCreate()
@@ -40,7 +38,7 @@ public class TestGeneralStringCreator {
         context.put("random", new Random(1));
         context.put("validCharacters","0123");
 
-        Method m = GeneralStringCreator.class.getMethod("createString",new Class[]{Integer.class, Random.class, String.class});
+        Method m = StringCreator.class.getMethod("createString",new Class[]{Integer.class, Random.class, String.class});
         DynamicMethodWrapper<Creator> dmw = new DynamicMethodWrapper<>(creator, m, m.getAnnotation(Creator.class));
 
         LOG.info("Found param list: {}", Arrays.asList(dmw.getParameterList()));

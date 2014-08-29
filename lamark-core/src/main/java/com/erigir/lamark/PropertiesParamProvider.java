@@ -27,11 +27,9 @@ public class PropertiesParamProvider implements IParamProvider {
     public PropertiesParamProvider(InputStream is) {
         try {
             this.properties.load(is);
-        }
-        catch (IOException ioe)
-        {
-            LOG.warn("Couldn't read inputstream",ioe);
-            throw new RuntimeException("Failed to read property input stream",ioe);
+        } catch (IOException ioe) {
+            LOG.warn("Couldn't read inputstream", ioe);
+            throw new RuntimeException("Failed to read property input stream", ioe);
         }
     }
 
@@ -44,20 +42,15 @@ public class PropertiesParamProvider implements IParamProvider {
     public <T> T getParameter(String name, Class<T> clazz) {
         String prop = properties.getProperty(name);
         T rval = null;
-        if (prop!=null)
-        {
+        if (prop != null) {
             try {
                 Constructor<T> cons = clazz.getConstructor(String.class);
                 rval = cons.newInstance(prop);
-            }
-            catch (NoSuchMethodException nsm)
-            {
+            } catch (NoSuchMethodException nsm) {
                 LOG.warn("No string-only constructor for type {} (failed to convert property {}, value {}", clazz, name, prop);
                 throw new RuntimeException(nsm);
-            }
-            catch (InstantiationException | IllegalAccessException | InvocationTargetException e)
-            {
-                LOG.warn("Failed to call constructor for type {}",clazz,e);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                LOG.warn("Failed to call constructor for type {}", clazz, e);
                 throw new RuntimeException(e);
             }
         }

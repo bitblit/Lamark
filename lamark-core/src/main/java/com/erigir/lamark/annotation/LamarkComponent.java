@@ -9,12 +9,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * A marker interface for a class - designates the class should be scanned for other annotations.
- *
+ * <p/>
  * These classes should have a null constructor
- *
+ * <p/>
  * Created by chrweiss on 7/22/14.
  */
-@Target( { TYPE })
+@Target({TYPE})
 @Retention(RUNTIME)
 @Documented
 public @interface LamarkComponent {

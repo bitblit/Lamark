@@ -93,20 +93,17 @@ public class Util {
     /**
      * This method is here because IMO these should have all been runtime exceptions
      * anyway...
+     *
      * @param obj
      * @param m
      * @param args
      * @return
      */
-    public static <T> T qExec(Class clazz, Object obj, Method m, Object... args)
-    {
-        try
-        {
-             return (T)m.invoke(obj, args);
-        }
-        catch (IllegalAccessException | InvocationTargetException e)
-        {
-            LOG.warn("Error trying to invoke method {} on {} : {}",m,obj,args,e);
+    public static <T> T qExec(Class clazz, Object obj, Method m, Object... args) {
+        try {
+            return (T) m.invoke(obj, args);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            LOG.warn("Error trying to invoke method {} on {} : {}", m, obj, args, e);
             throw new RuntimeException(e);
         }
     }

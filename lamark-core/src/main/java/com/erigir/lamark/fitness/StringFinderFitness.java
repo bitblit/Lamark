@@ -1,6 +1,7 @@
 package com.erigir.lamark.fitness;
 
-import com.erigir.lamark.*;
+import com.erigir.lamark.EFitnessType;
+import com.erigir.lamark.Individual;
 import com.erigir.lamark.annotation.FitnessFunction;
 import com.erigir.lamark.annotation.Param;
 
@@ -20,10 +21,10 @@ public class StringFinderFitness {
      */
     @FitnessFunction
             (
-                    fitnessType =  EFitnessType.MAXIMUM_BEST,
+                    fitnessType = EFitnessType.MAXIMUM_BEST,
                     description = "Calculates a value that increases as the string approaches the target string"
             )
-    public double fitnessValue(@Param("target")String target, String s) {
+    public double fitnessValue(@Param("target") String target, String s) {
         double rval = 0;
         if (s.length() == target.length()) {
             for (int j = 0; j < s.length(); j++) {

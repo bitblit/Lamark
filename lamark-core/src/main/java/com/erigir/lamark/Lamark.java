@@ -8,13 +8,11 @@ package com.erigir.lamark;
 import com.erigir.lamark.annotation.*;
 import com.erigir.lamark.annotation.LamarkEventListener;
 import com.erigir.lamark.config.ERuntimeParameters;
-import com.erigir.lamark.config.LamarkRuntimeParameters;
 import com.erigir.lamark.events.*;
 import com.erigir.lamark.selector.RouletteWheel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -52,9 +50,10 @@ public class Lamark implements Callable<Population> {
     private static final Logger LOG = LoggerFactory.getLogger(Lamark.class);
     /**
      * Holder for all runtime parameters
+     *
      * @see com.erigir.lamark.config.ERuntimeParameters
      */
-    private Map<String,Object> runtimeParameters = new TreeMap<>();
+    private Map<String, Object> runtimeParameters = new TreeMap<>();
     /**
      * Shared instance of the random class
      */
@@ -152,48 +151,37 @@ public class Lamark implements Callable<Population> {
      */
     private List<Individual> toBeInserted = new LinkedList<Individual>();
 
-    public Lamark(Object toIntrospect)
-    {
+    public Lamark(Object toIntrospect) {
         super();
         // Introspect the object provided and setup from it
         setupViaIntrospection(toIntrospect);
     }
 
-    public Lamark(Class clazz)
-    {
+    public Lamark(Class clazz) {
         super();
         try {
             setupViaIntrospection(clazz.newInstance());
-        }
-        catch (InstantiationException | IllegalAccessException e)
-        {
+        } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
     // TODO: add other selector options
 
-    private void setupViaIntrospection(Object obj)
-    {
+    private void setupViaIntrospection(Object obj) {
         Class clz = obj.getClass();
         // Iterate over all the methods and find the key ones
         List<Method> paramGenerationMethods = AnnotationUtil.findMethodsByAnnotation(clz, Param.class);
-        for (Method m:paramGenerationMethods)
-        {
+        for (Method m : paramGenerationMethods) {
             Param p = m.getAnnotation(Param.class);
-            if (m.getParameterTypes().length==0) {
+            if (m.getParameterTypes().length == 0) {
                 LOG.debug("Calling {} for parameter {}", m, p.value());
-                if (Map.class.isAssignableFrom(m.getReturnType()))
-                {
-                    runtimeParameters.putAll((Map)Util.qExec(Map.class,obj, m));
+                if (Map.class.isAssignableFrom(m.getReturnType())) {
+                    runtimeParameters.putAll((Map) Util.qExec(Map.class, obj, m));
+                } else {
+                    runtimeParameters.put(p.value(), Util.qExec(Object.class, obj, m));
                 }
-                else
-                {
-                    runtimeParameters.put(p.value(), Util.qExec(Object.class,obj, m));
-                }
-            }
-            else
-            {
-                throw new IllegalArgumentException("Invalid param method "+m+" - no parameters allowed");
+            } else {
+                throw new IllegalArgumentException("Invalid param method " + m + " - no parameters allowed");
             }
         }
 
@@ -206,16 +194,15 @@ public class Lamark implements Callable<Population> {
         crossover = new DynamicMethodWrapper<>(obj, crossoverMethod, crossoverMethod.getAnnotation(Crossover.class));
 
         Method fitnessFunctionMethod = AnnotationUtil.findSingleMethodByAnnotation(clz, FitnessFunction.class, true);
-        fitnessFunction = new DynamicMethodWrapper(obj,fitnessFunctionMethod, fitnessFunctionMethod.getAnnotation(FitnessFunction.class));
+        fitnessFunction = new DynamicMethodWrapper(obj, fitnessFunctionMethod, fitnessFunctionMethod.getAnnotation(FitnessFunction.class));
 
         Method formatMethod = AnnotationUtil.findSingleMethodByAnnotation(clz, IndividualFormatter.class, false);
-        if (formatMethod==null) {
+        if (formatMethod == null) {
             LOG.info("No format method defined, using default");
             DefaultIndividualFormatter def = new DefaultIndividualFormatter();
             formatMethod = AnnotationUtil.findSingleMethodByAnnotation(DefaultIndividualFormatter.class, IndividualFormatter.class);
             formatter = new DynamicMethodWrapper(def, formatMethod, formatMethod.getAnnotation(IndividualFormatter.class));
-        }
-        else {
+        } else {
             formatter = new DynamicMethodWrapper(obj, formatMethod, formatMethod.getAnnotation(IndividualFormatter.class));
         }
 
@@ -223,14 +210,13 @@ public class Lamark implements Callable<Population> {
         mutator = new DynamicMethodWrapper(obj, mutateMethod, mutateMethod.getAnnotation(Mutator.class));
 
         Method preloadMethod = AnnotationUtil.findSingleMethodByAnnotation(clz, PreloadIndividuals.class, false);
-        if (preloadMethod!=null) {
+        if (preloadMethod != null) {
             preloader = new DynamicMethodWrapper(obj, preloadMethod, preloadMethod.getAnnotation(PreloadIndividuals.class));
         }
 
         List<Method> listenerMethods = AnnotationUtil.findMethodsByAnnotation(clz, LamarkEventListener.class);
         LOG.info("Found {} listener methods", listenerMethods.size());
-        for (Method m:listenerMethods)
-        {
+        for (Method m : listenerMethods) {
             listeners.add(new DynamicMethodWrapper(obj, m, m.getAnnotation(LamarkEventListener.class)));
         }
 
@@ -239,14 +225,14 @@ public class Lamark implements Callable<Population> {
 
         // If we made it here, build the random object
         Long randSeed = ERuntimeParameters.RANDOM_SEED.read(runtimeParameters, Long.class);
-        randSeed = (randSeed==null)?System.currentTimeMillis():randSeed;
+        randSeed = (randSeed == null) ? System.currentTimeMillis() : randSeed;
         Random random = new Random(randSeed);
-        runtimeParameters.put("random",random);
+        runtimeParameters.put("random", random);
         runtimeParameters.put("lamark", this); // TODO: Is this really a good idea?
         runtimeParameters.put("fitnessType", getFitnessType());
 
         // Make the selector use the same RNG
-        selector.initialize(random,getFitnessType());
+        selector.initialize(random, getFitnessType());
 
     }
 
@@ -331,7 +317,7 @@ public class Lamark implements Callable<Population> {
      * @return String containing the human-readable version
      */
     public final String format(Individual i) {
-        return formatter.execute(String.class,i.getGenome());
+        return formatter.execute(String.class, i.getGenome());
     }
 
     /**
@@ -341,17 +327,15 @@ public class Lamark implements Callable<Population> {
      * @return String containing the human-readable format
      */
     public final String format(Collection<Individual> c) {
-        
+
         List<String> l = new ArrayList<>(c.size());
-        for (Individual i:c)
-        {
+        for (Individual i : c) {
             l.add(format(i));
         }
         return l.toString();
     }
 
-    public EFitnessType getFitnessType()
-    {
+    public EFitnessType getFitnessType() {
         return fitnessFunction.getKeyAnnotation().fitnessType();
     }
 
@@ -392,7 +376,7 @@ public class Lamark implements Callable<Population> {
             // Start a deadlock monitor
             new Thread(new DeadLockMonitor(this, Thread.currentThread())).start();
 
-            int lowerElitismCount = (int) Math.ceil(ERuntimeParameters.POPULATION_SIZE.read(runtimeParameters, Integer.class) 
+            int lowerElitismCount = (int) Math.ceil(ERuntimeParameters.POPULATION_SIZE.read(runtimeParameters, Integer.class)
                     * ERuntimeParameters.LOWER_ELITISM.read(runtimeParameters, Double.class));
             LOG.debug("Lower Elitism Percent=" + ERuntimeParameters.LOWER_ELITISM.read(runtimeParameters, Double.class) + " Size="
                     + ERuntimeParameters.POPULATION_SIZE.read(runtimeParameters, Integer.class));
@@ -598,7 +582,6 @@ public class Lamark implements Callable<Population> {
     }
 
 
-
     /**
      * Sends the event to all appropriate listeners, or enques it if instance not started.
      *
@@ -608,12 +591,10 @@ public class Lamark implements Callable<Population> {
     public final boolean event(LamarkEvent event) {
         boolean rval = false;
         if (event != null) {
-            for (DynamicMethodWrapper dmw:listeners)
-            {
+            for (DynamicMethodWrapper dmw : listeners) {
                 Class param = dmw.getMethod().getParameterTypes()[0];
-                if (param.isAssignableFrom(event.getClass()))
-                {
-                    dmw.execute(Object.class,event); // Dont care about return value
+                if (param.isAssignableFrom(event.getClass())) {
+                    dmw.execute(Object.class, event); // Dont care about return value
                     rval = true;
                 }
             }
@@ -771,7 +752,7 @@ public class Lamark implements Callable<Population> {
      *
      * @return LamarkRuntimeParameters containing the property
      */
-    public Map<String,Object> getRuntimeParameters() {
+    public Map<String, Object> getRuntimeParameters() {
         return runtimeParameters;
     }
 
@@ -780,7 +761,7 @@ public class Lamark implements Callable<Population> {
      *
      * @param runtimeParameters new value
      */
-    public void setRuntimeParameters(Map<String,Object> runtimeParameters) {
+    public void setRuntimeParameters(Map<String, Object> runtimeParameters) {
         checkRunning();
         this.runtimeParameters = runtimeParameters;
     }

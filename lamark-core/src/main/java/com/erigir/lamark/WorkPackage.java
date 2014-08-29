@@ -205,7 +205,7 @@ public class WorkPackage implements Runnable {
     public void run() {
         try {
             Individual rval;
-            LOG.debug("WP : {} processed by thread {}" , hashCode(), Thread.currentThread());
+            LOG.debug("WP : {} processed by thread {}", hashCode(), Thread.currentThread());
 
             // First, create
             switch (type) {
@@ -219,11 +219,10 @@ public class WorkPackage implements Runnable {
                     List<Individual<?>> source = crossoverSourcePopulation.getIndividuals();
                     Object[] crossoverParams = lamark.getCrossover().buildParameterArray(lamark.getRuntimeParameters());
                     List<Individual<?>> parents = new LinkedList<>();
-                    for (Integer i:lamark.getCrossover().getParameterWithAnnotationIndexes(Parent.class))
-                    {
+                    for (Integer i : lamark.getCrossover().getParameterWithAnnotationIndexes(Parent.class)) {
                         Individual<?> next = lamark.getSelector().select(source);
                         parents.add(next);
-                        crossoverParams[i]=next.getGenome();
+                        crossoverParams[i] = next.getGenome();
                     }
 
                     if (lamark.crossoverFlip()) {

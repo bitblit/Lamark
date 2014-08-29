@@ -56,8 +56,7 @@ public class StringSimpleMutator extends AbstractLamarkComponent implements IMut
     }
 
     @Mutator
-    public String mutate(String chromosome,@Param("random")Random random)
-    {
+    public String mutate(String chromosome, @Param("random") Random random) {
 
         StringBuilder sb = new StringBuilder();
 

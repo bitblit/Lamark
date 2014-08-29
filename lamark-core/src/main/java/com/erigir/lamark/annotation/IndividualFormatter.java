@@ -9,10 +9,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Annotates a method that is passed an individual and returns a string describing it
- *
+ * <p/>
  * Created by chrweiss on 7/22/14.
  */
-@Target( { METHOD })
+@Target({METHOD})
 @Retention(RUNTIME)
 @Documented
 public @interface IndividualFormatter {

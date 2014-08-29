@@ -9,13 +9,13 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Annotates a method that is passed an individual and returns a mutated version of it
- *
+ * <p/>
  * Note - this method should ALWAYS return a new object, never modify the original
  * Method should take the form T fnName(T input, {optional params})
- *
+ * <p/>
  * Created by chrweiss on 7/22/14.
  */
-@Target( { METHOD })
+@Target({METHOD})
 @Retention(RUNTIME)
 @Documented
 public @interface Mutator {

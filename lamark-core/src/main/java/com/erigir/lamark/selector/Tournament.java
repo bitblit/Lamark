@@ -6,7 +6,6 @@ import com.erigir.lamark.Individual;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -31,18 +30,18 @@ public class Tournament implements ISelector {
     public Individual<?> select(List<Individual<?>> individuals) {
         Individual<?> rval = null;
         int size = individuals.size();
-            Individual<?> first = individuals.get(random.nextInt(size));
-            Individual<?> second = individuals.get(random.nextInt(size));
+        Individual<?> first = individuals.get(random.nextInt(size));
+        Individual<?> second = individuals.get(random.nextInt(size));
 
-            if (first.getFitness().compareTo(second.getFitness()) > 0 && fitnessType==EFitnessType.MAXIMUM_BEST) {
-                rval = first;
-            } else {
-                rval = second;
-            }
+        if (first.getFitness().compareTo(second.getFitness()) > 0 && fitnessType == EFitnessType.MAXIMUM_BEST) {
+            rval = first;
+        } else {
+            rval = second;
+        }
         return rval;
     }
 
-    public void initialize(Random random,EFitnessType fitnessType) {
+    public void initialize(Random random, EFitnessType fitnessType) {
         this.random = random;
         this.fitnessType = fitnessType;
     }

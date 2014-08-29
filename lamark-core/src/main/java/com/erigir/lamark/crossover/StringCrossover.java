@@ -7,7 +7,6 @@ import com.erigir.lamark.annotation.Crossover;
 import com.erigir.lamark.annotation.Param;
 import com.erigir.lamark.annotation.Parent;
 
-import java.util.List;
 import java.util.Random;
 
 
@@ -17,13 +16,12 @@ import java.util.Random;
  * @author cweiss
  * @since 03/2005
  */
-public class StringSinglePoint2  {
+public class StringCrossover {
 
     @Crossover
     public String crossoverString(
             @Parent String p1,
-            @Parent String p2, @Param("random")Random random)
-    {
+            @Parent String p2, @Param("random") Random random) {
         // len = 4, pos = 0,1,2,3  valid = 1,2
 
         if (p1 == null || p2 == null) {

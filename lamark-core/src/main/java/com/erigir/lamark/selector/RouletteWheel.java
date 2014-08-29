@@ -69,7 +69,6 @@ public class RouletteWheel implements ISelector {
     }
 
 
-
     /**
      * Selects an individual, using the cached sumFitness.
      *
@@ -78,7 +77,7 @@ public class RouletteWheel implements ISelector {
      * @return Individual that was selected
      */
     private Individual<?> select(List<Individual<?>> individuals, double sumFitness, EFitnessType fitnessType) {
-        return individuals.get(selectIndex(extractFitness(individuals), sumFitness,random));
+        return individuals.get(selectIndex(extractFitness(individuals), sumFitness, random));
     }
 
     /**
@@ -91,9 +90,9 @@ public class RouletteWheel implements ISelector {
     private int selectIndex(List<Individual<?>> individuals, double sumFitness, EFitnessType fitnessType) {
         switch (fitnessType) {
             case MINIMUM_BEST:
-                return minimizeSelectIndex(individuals, sumFitness,random);
+                return minimizeSelectIndex(individuals, sumFitness, random);
             default:
-                return maximizeSelectIndex(individuals, sumFitness,random);
+                return maximizeSelectIndex(individuals, sumFitness, random);
         }
     }
 
@@ -115,7 +114,7 @@ public class RouletteWheel implements ISelector {
             vals[i] = (max - vals[i]) + 1;
             newSum += vals[i];
         }
-        return selectIndex(vals, newSum,random);
+        return selectIndex(vals, newSum, random);
     }
 
     /**
@@ -126,7 +125,7 @@ public class RouletteWheel implements ISelector {
      * @return int containing the index of the selected value
      */
     private int maximizeSelectIndex(List<Individual<?>> individuals, double sumFitness, Random random) {
-        return selectIndex(extractFitness(individuals), sumFitness,random);
+        return selectIndex(extractFitness(individuals), sumFitness, random);
     }
 
     /**
@@ -178,7 +177,7 @@ public class RouletteWheel implements ISelector {
         return rval;
     }
 
-    public void initialize(Random random,EFitnessType fitnessType) {
+    public void initialize(Random random, EFitnessType fitnessType) {
         this.random = random;
         this.fitnessType = fitnessType;
     }

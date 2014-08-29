@@ -37,10 +37,11 @@ public interface ISelector {
     /**
      * If the selector needs random numbers, it should use the random provided here (which will be set
      * as part of the lifecycle) and the fitness type determines whether higher or lower numbers are good
+     *
      * @param random
      * @param fitnessType
      */
-    void initialize(Random random,EFitnessType fitnessType);
+    void initialize(Random random, EFitnessType fitnessType);
 
 
 }

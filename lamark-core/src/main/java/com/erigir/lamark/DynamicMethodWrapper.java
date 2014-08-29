@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -23,8 +22,7 @@ public class DynamicMethodWrapper<T> {
     private String[] parameterList;
 
     public DynamicMethodWrapper(Object object, Method method, T keyAnnotation) {
-        if (method==null)
-        {
+        if (method == null) {
             throw new IllegalArgumentException("Method cannot be null");
         }
         this.object = object;
@@ -33,22 +31,17 @@ public class DynamicMethodWrapper<T> {
         this.parameterList = buildParameterList();
     }
 
-    public String[] getParameterList()
-    {
+    public String[] getParameterList() {
         return parameterList;
     }
 
-    public List<Integer> getParameterWithAnnotationIndexes(Class annotationClass)
-    {
+    public List<Integer> getParameterWithAnnotationIndexes(Class annotationClass) {
         List<Integer> rval = new LinkedList<>();
         Annotation[][] pAna = method.getParameterAnnotations();
 
-        for (int i=0;i<pAna.length;i++)
-        {
-            for (Annotation a:pAna[i])
-            {
-                if (annotationClass.isAssignableFrom(a.getClass()))
-                {
+        for (int i = 0; i < pAna.length; i++) {
+            for (Annotation a : pAna[i]) {
+                if (annotationClass.isAssignableFrom(a.getClass())) {
                     rval.add(i);
                 }
             }
@@ -57,40 +50,33 @@ public class DynamicMethodWrapper<T> {
         return rval;
     }
 
-    public Object[] buildParameterArray(Map<String,Object> paramMap)
-    {
+    public Object[] buildParameterArray(Map<String, Object> paramMap) {
         return buildParameterArray(paramMap, null);
     }
 
     /**
      * Builds an array of parameters from a map, filling any param gaps with the fillObject
+     *
      * @param paramMap
      * @param fillObject
      * @return
      */
-    public Object[] buildParameterArray(Map<String,Object> paramMap, Object fillObject)
-    {
+    public Object[] buildParameterArray(Map<String, Object> paramMap, Object fillObject) {
         Object[] rval = new Object[parameterList.length];
         Class[] expTypes = method.getParameterTypes();
 
-        for (int i=0;i<rval.length;i++)
-        {
+        for (int i = 0; i < rval.length; i++) {
             String p = parameterList[i];
-            if (p!=null)
-            {
-                rval[i]=paramMap.get(p);
-            }
-            else
-            {
-                rval[i]=fillObject;
+            if (p != null) {
+                rval[i] = paramMap.get(p);
+            } else {
+                rval[i] = fillObject;
             }
 
             // Check type
-            if (rval[i]!=null)
-            {
-                if (!expTypes[i].isAssignableFrom(rval[i].getClass()))
-                {
-                    throw new IllegalStateException("Parameter "+i+" of method "+method+" should be "+expTypes[i]+" but was "+rval[i].getClass());
+            if (rval[i] != null) {
+                if (!expTypes[i].isAssignableFrom(rval[i].getClass())) {
+                    throw new IllegalStateException("Parameter " + i + " of method " + method + " should be " + expTypes[i] + " but was " + rval[i].getClass());
                 }
             }
 
@@ -98,23 +84,18 @@ public class DynamicMethodWrapper<T> {
         return rval;
     }
 
-    private String[] buildParameterList()
-    {
+    private String[] buildParameterList() {
         Annotation[][] pAna = method.getParameterAnnotations();
         String[] rval = new String[pAna.length];
 
-        for (int i=0;i<pAna.length;i++)
-        {
-            for (Annotation a:pAna[i])
-            {
-                if (Param.class.isAssignableFrom(a.getClass()))
-                {
-                    if (rval[i]!=null)
-                    {
+        for (int i = 0; i < pAna.length; i++) {
+            for (Annotation a : pAna[i]) {
+                if (Param.class.isAssignableFrom(a.getClass())) {
+                    if (rval[i] != null) {
                         throw new IllegalStateException("Two param annotations on the same parameter is invalid");
                     }
-                    Param p = (Param)a;
-                    rval[i]=(p.value());
+                    Param p = (Param) a;
+                    rval[i] = (p.value());
                 }
             }
         }
@@ -122,21 +103,18 @@ public class DynamicMethodWrapper<T> {
         return rval;
     }
 
-    public <T> T buildAndExecute(Map<String,Object> params, Class<T> clazz)
-    {
+    public <T> T buildAndExecute(Map<String, Object> params, Class<T> clazz) {
         return execute(clazz, buildParameterArray(params));
     }
 
-    public <T> T buildAndExecute(Map<String,Object> params, Object singleFill, Class<T> clazz)
-    {
-        return execute(clazz, buildParameterArray(params,singleFill));
+    public <T> T buildAndExecute(Map<String, Object> params, Object singleFill, Class<T> clazz) {
+        return execute(clazz, buildParameterArray(params, singleFill));
     }
 
 
-    public <T> T execute(Class<T> clazz, Object... args)
-    {
+    public <T> T execute(Class<T> clazz, Object... args) {
         T rval = Util.qExec(clazz, object, method, args);
-        LOG.debug("Execute on {}/{} returning {}",object, Arrays.asList(args), rval);
+        LOG.debug("Execute on {}/{} returning {}", object, Arrays.asList(args), rval);
         return rval;
     }
 
@@ -164,11 +142,9 @@ public class DynamicMethodWrapper<T> {
         this.keyAnnotation = keyAnnotation;
     }
 
-    public String toString()
-    {
-        return "DMW [m:"+method+", ob:"+object+", an:"+keyAnnotation+"]";
+    public String toString() {
+        return "DMW [m:" + method + ", ob:" + object + ", an:" + keyAnnotation + "]";
     }
-
 
 
 }

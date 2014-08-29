@@ -3,7 +3,7 @@ package com.erigir.lamark.example;
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.WorkPackage;
 import com.erigir.lamark.config.LamarkRuntimeParameters;
-import com.erigir.lamark.crossover.StringSinglePoint;
+import com.erigir.lamark.crossover.StringCrossover;
 import com.erigir.lamark.events.ExceptionEvent;
 import com.erigir.lamark.events.LamarkEvent;
 import com.erigir.lamark.events.LamarkEventListener;
@@ -50,7 +50,7 @@ public class MyFirstLamark implements LamarkEventListener {
         Lamark lamark = new Lamark();
         LamarkFinderFitness fitness = new LamarkFinderFitness();
         lamark.setFitnessFunction(fitness);
-        lamark.setCrossover(new StringSinglePoint());
+        lamark.setCrossover(new StringCrossover());
         lamark.setSelector(new RouletteWheel());
         lamark.setMutator(new StringSimpleMutator());
         lamark.setCreator(new LamarkFinderCreator());

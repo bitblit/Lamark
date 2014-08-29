@@ -9,10 +9,10 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * A lamark configuration object marks a class that holds everything necessary to run a lamark instance
- *
+ * <p/>
  * Created by chrweiss on 7/22/14.
  */
-@Target( { TYPE })
+@Target({TYPE})
 @Retention(RUNTIME)
 @Documented
 public @interface LamarkConfiguration {

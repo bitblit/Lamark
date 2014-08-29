@@ -3,13 +3,14 @@
  */
 package com.erigir.lamark.creator;
 
-import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.ICreator;
-import com.erigir.lamark.IValidatable;
-import com.erigir.lamark.Individual;
+import com.erigir.lamark.annotation.Creator;
+import com.erigir.lamark.annotation.Param;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Creator that generates lists of integers.
@@ -17,56 +18,76 @@ import java.util.List;
  * @author cweiss
  * @since 03/2005
  */
-public class IntegerListCreator extends AbstractLamarkComponent implements ICreator, IValidatable {
-    /**
-     * Size of the list to generate (REQUIRED)*
-     */
-    private Integer size;
+public class IntegerListCreator {
+    private static final Logger LOG = LoggerFactory.getLogger(IntegerListCreator.class);
 
     /**
-     * Accessor method
-     *
-     * @return Integer containing the property
+     * Creates a list of random integers
      */
-    public Integer getSize() {
-        return size;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param size new value
-     */
-    public void setSize(Integer size) {
-        this.size = size;
-    }
-
-    /**
-     * @see com.erigir.lamark.ICreator#create()
-     */
-    public Individual create() {
+    @Creator
+    public List<Integer> createIntegerList(@Param("size") Integer size, @Param("random") Random random) {
         if (size == null) {
             throw new IllegalStateException("Cannot process, 'size' not set");
         }
 
         List<Integer> temp = new ArrayList<Integer>();
         for (int i = 0; i < size; i++) {
-            temp.add(getLamark().getRandom().nextInt());
+            temp.add(random.nextInt());
         }
-        Individual i = new Individual();
-        i.setGenome(temp);
-        return i;
+        return temp;
     }
 
     /**
-     * Checks if size was set.
+     * Creates a list of random integers between the two bounds
      *
-     * @see com.erigir.lamark.IValidatable#validate(List)
+     * @param size
+     * @param upperBoundInclusive
+     * @param lowerBoundInclusive
+     * @param random
+     * @return
      */
-    public void validate(List<String> errors) {
+    @Creator
+    public List<Integer> createRangedIntegerList(@Param("size") Integer size,
+                                                 @Param("upperBoundInclusive") Integer upperBoundInclusive,
+                                                 @Param("lowerBoundInclusive") Integer lowerBoundInclusive,
+                                                 @Param("random") Random random
+    ) {
+        int range = upperBoundInclusive - lowerBoundInclusive;
         if (size == null) {
-            errors.add("No 'size' set for the creator");
+            throw new IllegalStateException("Cannot process, 'size' not set");
         }
+        List<Integer> rval = new ArrayList<Integer>(size);
+        for (int i = 0; i < size; i++) {
+            rval.add(new Integer(random.nextInt(range)
+                    + lowerBoundInclusive));
+        }
+        return rval;
+    }
+
+    /**
+     * Creates a list of random integers that is a permutation (all integers from 0..n exactly once in random order)
+     */
+    @Creator
+    public List<Integer> createIntegerPermutation(@Param("size") Integer size, @Param("random") Random random) {
+        LOG.debug("create called");
+        if (size == null) {
+            throw new IllegalStateException("Cannot process, 'size' not set");
+        }
+
+        ArrayList<Integer> rval = new ArrayList<Integer>(size);
+        ArrayList<Integer> temp = new ArrayList<Integer>(size);
+
+        for (int i = 0; i < size; i++) {
+            temp.add(new Integer(i));
+        }
+
+        int loc = -1;
+        for (int i = 0; i < size; i++) {
+            loc = random.nextInt(temp.size());
+            rval.add(temp.get(loc));
+            temp.remove(loc);
+        }
+        return rval;
     }
 
 
