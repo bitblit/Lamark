@@ -1,10 +1,9 @@
 package com.erigir.lamark.config;
 
 import com.erigir.lamark.DefaultIndividualFormatter;
-import com.erigir.lamark.creator.AlphaStringCreator;
-import com.erigir.lamark.crossover.ListSinglePoint;
-import com.erigir.lamark.fitness.AllOnes;
-import com.erigir.lamark.mutator.ListSimpleMutator;
+import com.erigir.lamark.builtin.StringCreator;
+import com.erigir.lamark.builtin.ListCrossover;
+import com.erigir.lamark.builtin.ListSimpleMutator;
 import com.erigir.lamark.selector.Tournament;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +25,7 @@ public class TestLamarkComponentFinder {
     @Before
     public void setup()
     {
-        finder = new LamarkComponentFinder(Arrays.asList("com.erigir.lamark"));
+        finder = new LamarkComponentFinder(Arrays.asList("com.erigir"));
     }
 
     @Test
@@ -34,12 +33,9 @@ public class TestLamarkComponentFinder {
     {
         LOG.info("Found components {}\ncreators {}",finder.getComponentClasses(), finder.getCreators());
 
-        assertTrue(finder.getComponentClasses().contains(AlphaStringCreator.class));
-        assertTrue(finder.getComponentClasses().contains(ListSinglePoint.class));
-        assertTrue(finder.getComponentClasses().contains(AllOnes.class));
+        assertTrue(finder.getComponentClasses().contains(StringCreator.class));
         assertTrue(finder.getComponentClasses().contains(ListSimpleMutator.class));
-        assertTrue(finder.getComponentClasses().contains(Tournament.class));
         assertTrue(finder.getComponentClasses().contains(DefaultIndividualFormatter.class));
-        assertTrue(finder.getComponentClasses().contains(AlphaStringCreator.class));
+        assertTrue(finder.getComponentClasses().contains(ListCrossover.class));
     }
 }

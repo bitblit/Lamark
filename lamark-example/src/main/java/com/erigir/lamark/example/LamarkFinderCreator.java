@@ -1,6 +1,6 @@
 package com.erigir.lamark.example;
 
-import com.erigir.lamark.creator.StringCreator;
+import com.erigir.lamark.builtin.StringCreator;
 
 /**
  * A class extending StringCreator that creates strings of length 6.

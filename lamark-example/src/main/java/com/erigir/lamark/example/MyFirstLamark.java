@@ -3,12 +3,12 @@ package com.erigir.lamark.example;
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.WorkPackage;
 import com.erigir.lamark.config.LamarkRuntimeParameters;
-import com.erigir.lamark.crossover.StringCrossover;
+import com.erigir.lamark.builtin.StringCrossover;
 import com.erigir.lamark.events.ExceptionEvent;
 import com.erigir.lamark.events.LamarkEvent;
 import com.erigir.lamark.events.LamarkEventListener;
 import com.erigir.lamark.events.LastPopulationCompleteEvent;
-import com.erigir.lamark.mutator.StringSimpleMutator;
+import com.erigir.lamark.builtin.StringMutator;
 import com.erigir.lamark.selector.RouletteWheel;
 
 /**
@@ -52,7 +52,7 @@ public class MyFirstLamark implements LamarkEventListener {
         lamark.setFitnessFunction(fitness);
         lamark.setCrossover(new StringCrossover());
         lamark.setSelector(new RouletteWheel());
-        lamark.setMutator(new StringSimpleMutator());
+        lamark.setMutator(new StringMutator());
         lamark.setCreator(new LamarkFinderCreator());
 
         LamarkRuntimeParameters lrp = new LamarkRuntimeParameters();

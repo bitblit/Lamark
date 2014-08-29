@@ -6,9 +6,9 @@
 package com.erigir.lamark;
 
 import com.erigir.lamark.annotation.*;
-import com.erigir.lamark.annotation.LamarkEventListener;
 import com.erigir.lamark.config.ERuntimeParameters;
 import com.erigir.lamark.events.*;
+import com.erigir.lamark.selector.ISelector;
 import com.erigir.lamark.selector.RouletteWheel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,21 +151,19 @@ public class Lamark implements Callable<Population> {
      */
     private List<Individual> toBeInserted = new LinkedList<Individual>();
 
-    public Lamark(Object toIntrospect) {
-        super();
-        // Introspect the object provided and setup from it
+    public void configureViaIntrospection(Object toIntrospect)
+    {
         setupViaIntrospection(toIntrospect);
     }
 
-    public Lamark(Class clazz) {
-        super();
+    public void configureViaIntrospection(Class toIntrospect)
+    {
         try {
-            setupViaIntrospection(clazz.newInstance());
+            setupViaIntrospection(toIntrospect.newInstance());
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
-    // TODO: add other selector options
 
     private void setupViaIntrospection(Object obj) {
         Class clz = obj.getClass();
@@ -219,20 +217,6 @@ public class Lamark implements Callable<Population> {
         for (Method m : listenerMethods) {
             listeners.add(new DynamicMethodWrapper(obj, m, m.getAnnotation(LamarkEventListener.class)));
         }
-
-        // Validate the parameters
-        ERuntimeParameters.validate(runtimeParameters);
-
-        // If we made it here, build the random object
-        Long randSeed = ERuntimeParameters.RANDOM_SEED.read(runtimeParameters, Long.class);
-        randSeed = (randSeed == null) ? System.currentTimeMillis() : randSeed;
-        Random random = new Random(randSeed);
-        runtimeParameters.put("random", random);
-        runtimeParameters.put("lamark", this); // TODO: Is this really a good idea?
-        runtimeParameters.put("fitnessType", getFitnessType());
-
-        // Make the selector use the same RNG
-        selector.initialize(random, getFitnessType());
 
     }
 
@@ -349,12 +333,37 @@ public class Lamark implements Callable<Population> {
         return (ERuntimeParameters.MAXIMUM_POPULATIONS.read(runtimeParameters, Integer.class) != null && p != null && p.getNumber() >= ERuntimeParameters.MAXIMUM_POPULATIONS.read(runtimeParameters, Integer.class));
     }
 
+    private void preRunValidation()
+    {
+        assert(creator!=null);
+        assert(crossover!=null);
+        assert(fitnessFunction!=null);
+        assert(formatter!=null);
+        assert(mutator!=null);
+
+        ERuntimeParameters.validate(runtimeParameters);
+    }
+
     /**
      * Main method for the lamark instance, which configures and runs the GA.
      *
      * @see Runnable#run()
      */
     public final Population call() {
+        // Validate the system
+        preRunValidation();
+
+        // If we made it here, build the random object
+        Long randSeed = ERuntimeParameters.RANDOM_SEED.read(runtimeParameters, Long.class);
+        randSeed = (randSeed == null) ? System.currentTimeMillis() : randSeed;
+        Random random = new Random(randSeed);
+        runtimeParameters.put("random", random);
+        runtimeParameters.put("lamark", this); // TODO: Is this really a good idea?
+        runtimeParameters.put("fitnessType", getFitnessType());
+
+        // Make the selector use the same RNG
+        selector.initialize(random, getFitnessType());
+
         // Calc exit type and notify listeners
         LastPopulationCompleteEvent.Type exitType = LastPopulationCompleteEvent.Type.BY_POPULATION_NUMBER;
 
@@ -815,6 +824,38 @@ public class Lamark implements Callable<Population> {
 
     public Set<DynamicMethodWrapper<LamarkEventListener>> getListeners() {
         return listeners;
+    }
+
+    public void setCreator(DynamicMethodWrapper<Creator> creator) {
+        this.creator = creator;
+    }
+
+    public void setCrossover(DynamicMethodWrapper<Crossover> crossover) {
+        this.crossover = crossover;
+    }
+
+    public void setFitnessFunction(DynamicMethodWrapper<FitnessFunction> fitnessFunction) {
+        this.fitnessFunction = fitnessFunction;
+    }
+
+    public void setMutator(DynamicMethodWrapper<Mutator> mutator) {
+        this.mutator = mutator;
+    }
+
+    public void setSelector(ISelector selector) {
+        this.selector = selector;
+    }
+
+    public void setFormatter(DynamicMethodWrapper<IndividualFormatter> formatter) {
+        this.formatter = formatter;
+    }
+
+    public void setPreloader(DynamicMethodWrapper<PreloadIndividuals> preloader) {
+        this.preloader = preloader;
+    }
+
+    public void setListeners(Set<DynamicMethodWrapper<LamarkEventListener>> listeners) {
+        this.listeners = listeners;
     }
 
     /**

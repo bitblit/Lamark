@@ -2,6 +2,7 @@ package com.erigir.lamark.creator;
 
 import com.erigir.lamark.DynamicMethodWrapper;
 import com.erigir.lamark.annotation.Creator;
+import com.erigir.lamark.builtin.StringCreator;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

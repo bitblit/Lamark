@@ -1,14 +1,14 @@
 package com.erigir.lamark;
 
 import com.erigir.lamark.annotation.*;
+import com.erigir.lamark.builtin.StringCreator;
+import com.erigir.lamark.builtin.StringCrossover;
+import com.erigir.lamark.builtin.StringFinderFitness;
+import com.erigir.lamark.builtin.StringMutator;
 import com.erigir.lamark.config.ERuntimeParameters;
-import com.erigir.lamark.creator.StringCreator;
-import com.erigir.lamark.crossover.StringCrossover;
 import com.erigir.lamark.events.ExceptionEvent;
 import com.erigir.lamark.events.LamarkEvent;
 import com.erigir.lamark.events.LastPopulationCompleteEvent;
-import com.erigir.lamark.fitness.StringFinderFitness;
-import com.erigir.lamark.mutator.StringSimpleMutator;
 import com.erigir.lamark.selector.RouletteWheel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +27,13 @@ import java.util.*;
  * @author cweiss
  * @since 11/2007
  */
+@LamarkConfiguration
 public class MyFirstLamark {
     private static final Logger LOG = LoggerFactory.getLogger(MyFirstLamark.class);
 
     private StringFinderFitness fitness = new StringFinderFitness();
     private StringCrossover crossover = new StringCrossover();
-    private RouletteWheel selector = new RouletteWheel();
-    private StringSimpleMutator mutator = new StringSimpleMutator();
+    private StringMutator mutator = new StringMutator();
     private StringCreator creator = new StringCreator();
 
     /**
@@ -64,7 +64,7 @@ public class MyFirstLamark {
 
     @Mutator
     public String mutate(String input, @Param("random") Random random) {
-        return mutator.mutate(input, random);
+        return mutator.singlePointMutate(input, random);
     }
 
     @IndividualFormatter
@@ -85,7 +85,8 @@ public class MyFirstLamark {
      */
     public void go() {
         // lamark will introspect this object and point to all the correct functions
-        Lamark lamark = new Lamark(this);
+        Lamark lamark = new Lamark();
+        lamark.configureViaIntrospection(this);
         lamark.call();
     }
 
@@ -121,7 +122,6 @@ public class MyFirstLamark {
      * In this simple case, we just output events recieved to the
      * standard logger
      *
-     * @see com.erigir.lamark.events.LamarkEventListener#handleEvent(LamarkEvent)
      */
     @LamarkEventListener
     public void handleEvent(LamarkEvent je) {

@@ -1,9 +1,10 @@
 /*
  * Created on Mar 29, 2005
  */
-package com.erigir.lamark.creator;
+package com.erigir.lamark.builtin;
 
 import com.erigir.lamark.annotation.Creator;
+import com.erigir.lamark.annotation.LamarkComponent;
 import com.erigir.lamark.annotation.Param;
 
 import java.util.Random;
@@ -14,6 +15,7 @@ import java.util.Random;
  * @author cweiss
  * @since 04/2006
  */
+@LamarkComponent
 public class StringCreator {
     private static String ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static String ALPHA_WITH_SPACE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ ";

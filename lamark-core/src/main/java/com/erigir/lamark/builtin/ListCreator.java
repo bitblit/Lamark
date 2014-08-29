@@ -1,9 +1,10 @@
 /*
  * Created on Mar 29, 2005
  */
-package com.erigir.lamark.creator;
+package com.erigir.lamark.builtin;
 
 import com.erigir.lamark.annotation.Creator;
+import com.erigir.lamark.annotation.LamarkComponent;
 import com.erigir.lamark.annotation.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,13 +14,14 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Creator that generates lists of integers.
+ * Creator that generates lists of things.
  *
  * @author cweiss
  * @since 03/2005
  */
-public class IntegerListCreator {
-    private static final Logger LOG = LoggerFactory.getLogger(IntegerListCreator.class);
+@LamarkComponent
+public class ListCreator {
+    private static final Logger LOG = LoggerFactory.getLogger(ListCreator.class);
 
     /**
      * Creates a list of random integers
@@ -86,6 +88,18 @@ public class IntegerListCreator {
             loc = random.nextInt(temp.size());
             rval.add(temp.get(loc));
             temp.remove(loc);
+        }
+        return rval;
+    }
+
+    @Creator
+    public List<Byte> createByteList(@Param("size") Integer size, @Param("random") Random random) {
+        byte[] temp = new byte[size];
+        random.nextBytes(temp);
+
+        List<Byte> rval = new ArrayList<Byte>(size);
+        for (byte b : temp) {
+            rval.add(b);
         }
         return rval;
     }

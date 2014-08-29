@@ -2,6 +2,7 @@ package com.erigir.lamark.fitness;
 
 import com.erigir.lamark.DynamicMethodWrapper;
 import com.erigir.lamark.annotation.FitnessFunction;
+import com.erigir.lamark.builtin.StringFinderFitness;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

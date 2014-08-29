@@ -1,7 +1,6 @@
 package com.erigir.lamark.selector;
 
 import com.erigir.lamark.EFitnessType;
-import com.erigir.lamark.ISelector;
 import com.erigir.lamark.Individual;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +24,7 @@ public class Tournament implements ISelector {
     private EFitnessType fitnessType;
 
     /**
-     * @see com.erigir.lamark.ISelector#select(java.util.List)
+     * @see ISelector#select(java.util.List)
      */
     public Individual<?> select(List<Individual<?>> individuals) {
         Individual<?> rval = null;

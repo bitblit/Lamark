@@ -1,6 +1,6 @@
 package com.erigir.lamark.example;
 
-import com.erigir.lamark.fitness.StringFinderFitness;
+import com.erigir.lamark.builtin.StringFinderFitness;
 
 /**
  * A fitness function that tries to find the word 'LAMARK'

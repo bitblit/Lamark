@@ -1,9 +1,10 @@
 /*
  * Created on Feb 17, 2005
  */
-package com.erigir.lamark.crossover;
+package com.erigir.lamark.builtin;
 
 import com.erigir.lamark.annotation.Crossover;
+import com.erigir.lamark.annotation.LamarkComponent;
 import com.erigir.lamark.annotation.Param;
 import com.erigir.lamark.annotation.Parent;
 
@@ -16,6 +17,7 @@ import java.util.Random;
  * @author cweiss
  * @since 03/2005
  */
+@LamarkComponent
 public class StringCrossover {
 
     @Crossover

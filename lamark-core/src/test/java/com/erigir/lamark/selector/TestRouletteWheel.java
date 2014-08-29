@@ -3,7 +3,6 @@ package com.erigir.lamark.selector;
 import com.erigir.lamark.EFitnessType;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.Lamark;
-import com.erigir.lamark.fitness.AllOnes;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;

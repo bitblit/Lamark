@@ -4,10 +4,9 @@ import com.erigir.lamark.annotation.Creator;
 import com.erigir.lamark.annotation.Crossover;
 import com.erigir.lamark.annotation.FitnessFunction;
 import com.erigir.lamark.annotation.Mutator;
-import com.erigir.lamark.creator.StringCreator;
-import com.erigir.lamark.crossover.StringCrossover;
-import com.erigir.lamark.fitness.AllOnes;
-import com.erigir.lamark.mutator.StringSimpleMutator;
+import com.erigir.lamark.builtin.StringCreator;
+import com.erigir.lamark.builtin.StringCrossover;
+import com.erigir.lamark.builtin.StringMutator;
 import com.erigir.lamark.selector.RouletteWheel;
 import com.erigir.lamark.selector.Tournament;
 import org.slf4j.Logger;
@@ -32,7 +31,7 @@ public class LamarkComponentScanner {
             LOG.info("Found components:" + lcs.findComponents("com.erigir.lamark"));
 
 
-            Set components = new HashSet<>(Arrays.asList(RouletteWheel.class, Tournament.class, AllOnes.class, StringSimpleMutator.class, StringCrossover.class, StringCreator.class, StringCreator.class));
+            Set components = new HashSet<>(Arrays.asList(RouletteWheel.class, Tournament.class, StringMutator.class, StringCrossover.class, StringCreator.class, StringCreator.class));
             Set<Method> creators = lcs.findCreators(components);
             Set<Method> crossovers = lcs.findCrossovers(components);
             Set<Method> mutators = lcs.findMutators(components);

@@ -5,7 +5,10 @@
  * 
  * Created on Aug 9, 2005
  */
-package com.erigir.lamark;
+package com.erigir.lamark.selector;
+
+import com.erigir.lamark.EFitnessType;
+import com.erigir.lamark.Individual;
 
 import java.util.List;
 import java.util.Random;

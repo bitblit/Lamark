@@ -1,6 +1,7 @@
 package com.erigir.lamark;
 
 import com.erigir.lamark.annotation.IndividualFormatter;
+import com.erigir.lamark.annotation.LamarkComponent;
 
 /**
  * Default formatter for individuals.
@@ -9,14 +10,12 @@ import com.erigir.lamark.annotation.IndividualFormatter;
  *
  * @author cweiss
  */
+@LamarkComponent
 public class DefaultIndividualFormatter {
 
-    /**
-     * @see com.erigir.lamark.IIndividualFormatter#format(Individual)
-     */
     @IndividualFormatter
     public String format(Individual<Object> toFormat) {
-        return toFormat.getGenome().toString();
+        return String.valueOf(toFormat.getGenome());
     }
 
 }

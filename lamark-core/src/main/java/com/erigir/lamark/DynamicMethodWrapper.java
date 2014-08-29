@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * A wrapper around a component method meant to be called dynamically, and the object to call it on
  * Created by chrweiss on 8/27/14.
  */
 public class DynamicMethodWrapper<T> {

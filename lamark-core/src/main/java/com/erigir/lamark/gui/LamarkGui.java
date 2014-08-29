@@ -6,6 +6,7 @@ package com.erigir.lamark.gui;
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.LamarkConfigurationFailedException;
 import com.erigir.lamark.Util;
+import com.erigir.lamark.annotation.LamarkEventListener;
 import com.erigir.lamark.events.*;
 
 import javax.imageio.ImageIO;
@@ -34,7 +35,7 @@ import java.util.concurrent.Executors;
  * @since 02-2005
  */
 
-public class LamarkGui extends JPanel implements LamarkEventListener, ActionListener {
+public class LamarkGui extends JPanel implements ActionListener {
     /**
      * String containing the label of the open url button *
      */
@@ -111,7 +112,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
      */
     public LamarkGui(String initialLocation, String initialSelection) {
 
-        configPanel = new LamarkConfigPanel(initialLocation, initialSelection);
+        configPanel = new LamarkConfigPanel(initialLocation);
 
         setLayout(new BorderLayout());
 
@@ -265,7 +266,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
 
 
         } else if (e.getSource() == show) {
-            output.setText(configPanel.toGUIConfigString());
+            output.setText("TODO: impl");//configPanel.toGUIConfigString());
 
 
         } else if (e.getSource() == cancel) {
@@ -299,11 +300,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
                 null,
                 null,
                 null);
-        configPanel.loadFromLocation(url, null);
-    }
-
-    public String configJSON() {
-        return configPanel.toGUIConfigString();
+        configPanel.loadFromLocation(url);
     }
 
 
@@ -405,8 +402,8 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
     /**
      * This handleEvent updates the toolbar, not the output pane, which is handled by the custom handler below.
      *
-     * @see com.erigir.lamark.events.LamarkEventListener#handleEvent(com.erigir.lamark.events.LamarkEvent)
      */
+    @LamarkEventListener
     public void handleEvent(LamarkEvent je) {
         if (BetterIndividualFoundEvent.class.isAssignableFrom(je.getClass())) {
             bestScore.setText("Best: " + Util.format(((BetterIndividualFoundEvent) je).getNewBest().getFitness()));
@@ -464,7 +461,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
      * @author cweiss
      * @since 10/2007
      */
-    class OutputListener implements LamarkEventListener {
+    class OutputListener{
         /**
          * Handle to the output area *
          */
@@ -484,8 +481,8 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
         /**
          * Writes appropriate events to the output pane.
          *
-         * @see com.erigir.lamark.events.LamarkEventListener#handleEvent(com.erigir.lamark.events.LamarkEvent)
          */
+        @LamarkEventListener
         public void handleEvent(LamarkEvent je) {
             if (ExceptionEvent.class.isAssignableFrom(je.getClass())) {
                 Throwable t = ((ExceptionEvent) je).getException();

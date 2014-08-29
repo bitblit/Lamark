@@ -1,30 +1,104 @@
 /*
  * Created on Feb 17, 2005
  */
-package com.erigir.lamark.crossover;
-
-import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.ICrossover;
-import com.erigir.lamark.Individual;
+package com.erigir.lamark.builtin;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+public class LongestCommonUtils {
 
-/**
- * Crosses over two lists of integers preserving both the permutation and longest common substring property.
- * <p/>
- * This crossover finds the longest common substring of the two parent lists, assuming that the lists have
- * a symmetrical nature (ie, can be reversed without effect on the underlying problem space, so a LCS match on
- * the reverse of a list is as good as a LCS match on it front-ways).  It then copies this LCS into the child,
- * and fills the remainder of the list randomly from the remnants.
- *
- * @author cweiss
- * @since 03/2005
- */
-public class IntegerPermutationLongestCommonSubstring extends AbstractLamarkComponent implements ICrossover<List<Integer>> {
+    /**
+     * Computes the longest common subsequence of two lists, assuming equal length.
+     *
+     * @param l1 List 1 to search
+     * @param l2 List 2 to search
+     * @return List containing the longest common subsequence
+     */
+    public static List computeLongestCommonSubsequence(List l1, List l2) {
+        // Build the c table
+        if (l1 == null || l2 == null || l1.size() == 0 || l2.size() == 0) {
+            return Collections.EMPTY_LIST;
+        }
+        if (l1.size() != l2.size()) {
+            throw new IllegalArgumentException("CANT HAPPEN: Different sizes: This is not a generalized LCS implementation");
+        }
+
+        int size = l1.size();
+        int[][] c = new int[size][size];
+
+        int maxVal = -1;
+        int maxX = -1;
+        int maxY = -1;
+
+        // Build the c table
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                if (l1.get(x) == l2.get(y)) {
+                    if (x == 0 || y == 0) {
+                        c[x][y] = 1;
+                    } else {
+                        c[x][y] = c[x - 1][y - 1] + 1;
+                    }
+                    // Update the tracked largest value
+                    if (c[x][y] > maxVal) {
+                        maxVal = c[x][y];
+                        maxX = x;
+                        maxY = y;
+                    }
+                } else {
+                    if (x == 0 || y == 0) {
+                        c[x][y] = 0;
+                    } else {
+                        c[x][y] = Math.max(c[x][y - 1], c[x - 1][y]);
+                    }
+                }
+            }
+        }
+
+        // Now backtrack out the LCS
+
+        if (maxX == -1 || maxY == -1 || maxVal == 1) // longest is 1 .. invalid, just return
+        {
+            return Collections.EMPTY_LIST;
+        }
+        return backTrack(c, l1, l2, size - 1, size - 1);
+    }
+
+    /**
+     * Backtracks the cost matrix of the longest common subsequence to build the LCS.
+     * NOTE: This function is called recursively to build the list.
+     *
+     * @param c int array containing cost matrix
+     * @param x List 1 of integers
+     * @param y List 2 of integers
+     * @param i int position in first list
+     * @param j int position in second list
+     * @return List of integers representing the lcs
+     */
+    private static List backTrack(int[][] c, List x, List y, int i, int j) {
+        if (i == -1 || j == -1) {
+            return Collections.EMPTY_LIST;
+        }
+
+        if (x.get(i) == y.get(j)) {
+            ArrayList rval = new ArrayList();
+            rval.addAll(backTrack(c, x, y, i - 1, j));
+            rval.add(x.get(i));
+            return rval;
+        } else {
+            if (i < 1 || j < 1) {
+                return Collections.EMPTY_LIST;
+            } else if (c[i][j - 1] > c[i - 1][j]) {
+                return backTrack(c, x, y, i, j - 1);
+            } else {
+                return backTrack(c, x, y, i - 1, j);
+            }
+        }
+
+    }
 
     /**
      * Construct the longest common substring between two strings if such
@@ -47,7 +121,7 @@ public class IntegerPermutationLongestCommonSubstring extends AbstractLamarkComp
      * at least one of the arguments are <code>null</code>, empty,
      * or there is no match.
      */
-    public static List<Integer> lcs(List<Integer> arr1, List<Integer> arr2) {
+    public static List<? extends Comparable> lcs(List<? extends Comparable> arr1, List<? extends Comparable> arr2) {
         ArrayList empty = new ArrayList();
        /* BEFORE WE ALLOCATE ANY DATA STORAGE, VALIDATE ARGS */
         if (null == arr1 || 0 == arr1.size())
@@ -60,10 +134,10 @@ public class IntegerPermutationLongestCommonSubstring extends AbstractLamarkComp
         }
 
        /* ALLOCATE VARIABLES WE'LL NEED FOR THE ROUTINE */
-        ArrayList<Integer> bestMatch = new ArrayList<Integer>();
-        ArrayList<Integer> currentMatch = new ArrayList<Integer>();
-        ArrayList<List<Integer>> dataSuffixList = new ArrayList<List<Integer>>();
-        ArrayList<List<Integer>> lineSuffixList = new ArrayList<List<Integer>>();
+        ArrayList bestMatch = new ArrayList();
+        ArrayList currentMatch = new ArrayList();
+        ArrayList<List<? extends Comparable>> dataSuffixList = new ArrayList<List<? extends Comparable>>();
+        ArrayList<List<? extends Comparable>> lineSuffixList = new ArrayList<List<? extends Comparable>>();
 
        /* FIRST, COMPUTE SUFFIX ARRAYS */
         for (int i = 0; i < arr1.size(); i++) {
@@ -74,7 +148,7 @@ public class IntegerPermutationLongestCommonSubstring extends AbstractLamarkComp
         }
 
        /* STANDARD SORT SUFFIX ARRAYS */
-        IntegerListComparator comp = new IntegerListComparator();
+        ListComparator comp = new ListComparator();
         Collections.sort(dataSuffixList, comp);
         Collections.sort(lineSuffixList, comp);
 
@@ -147,76 +221,21 @@ public class IntegerPermutationLongestCommonSubstring extends AbstractLamarkComp
     }
 
     /**
-     * @see com.erigir.lamark.ICrossover#parentCount()
-     */
-    public int parentCount() {
-        return 2;
-    }
-
-    /**
-     * @see com.erigir.lamark.ICrossover#crossover(java.util.List)
-     */
-    public Individual<List<Integer>> crossover(List<Individual<List<Integer>>> parents) {
-        List<Integer> p1 = parents.get(0).getGenome();
-        List<Integer> p2 = parents.get(1).getGenome();
-        int size = p1.size();
-
-        // Find the largest common substring in any order
-        List sub = lcs(p1, p2); // Get the longest common subsequence
-        ArrayList<Integer> p1r = new ArrayList<Integer>(p1);
-        ArrayList<Integer> p2r = new ArrayList<Integer>(p2);
-        Collections.reverse(p1r);
-        Collections.reverse(p2r);
-        List test = lcs(p1, p2r);
-        if (test.size() > sub.size()) {
-            sub = test;
-        }
-        test = lcs(p1r, p2);
-        if (test.size() > sub.size()) {
-            sub = test;
-        }
-        test = lcs(p1r, p2r);
-        if (test.size() > sub.size()) {
-            sub = test;
-        }
-
-        ArrayList<Integer> c1 = new ArrayList<Integer>(size);
-
-        // Build child 1
-        int otherParentIdx = 0;
-        for (int i = 0; i < size; i++) {
-            if (sub.contains(p1.get(i))) {
-                c1.add((Integer) p1.get(i));
-            } else {
-                while (sub.contains(p2.get(otherParentIdx % size))) {
-                    otherParentIdx++;
-                }
-                c1.add((Integer) p2.get(otherParentIdx % size));
-                otherParentIdx++;
-            }
-        }
-
-        Collections.reverse(c1);
-
-        return new Individual<List<Integer>>(c1);
-    }
-
-    /**
      * An implementation of comparator for lists that sorts them by the first unequal element smallest to top
      *
      * @author cweiss
      * @since 03/2005
      */
-    static class IntegerListComparator implements Comparator<List<Integer>> {
+    static class ListComparator implements Comparator<List<? extends Comparable>> {
         /**
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */
-        public int compare(List<Integer> o1, List<Integer> o2) {
+        public int compare(List<? extends Comparable> o1, List<? extends Comparable> o2) {
             int rval = 0;
 
             for (int i = 0; i < o1.size() && i < o2.size() && rval == 0; i++) {
-                Integer c1 = o1.get(i);
-                Integer c2 = o2.get(i);
+                Comparable c1 = o1.get(i);
+                Comparable c2 = o2.get(i);
                 rval = c1.compareTo(c2);
             }
 
@@ -227,5 +246,6 @@ public class IntegerPermutationLongestCommonSubstring extends AbstractLamarkComp
             return rval;
         }
     }
+
 
 }

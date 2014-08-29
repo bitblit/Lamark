@@ -1,5 +1,6 @@
 package com.erigir.lamark.crossover;
 
+import com.erigir.lamark.builtin.LongestCommonUtils;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class TestIntegerPermutationLongestCommonSubsequence {
         l2.add(8);
         l2.add(6);
 
-        List<Integer> rval = IntegerPermutationLongestCommonSubsequence.computeLongestCommonSubsequence(l1, l2);
+        List<Integer> rval = LongestCommonUtils.computeLongestCommonSubsequence(l1, l2);
         List<Integer> expected = Arrays.asList(2, 3, 7, 8);
         assertThat(rval, is(expected));
     }

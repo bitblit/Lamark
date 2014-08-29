@@ -1,15 +1,13 @@
 package com.erigir.lamark.config;
 
 import com.erigir.lamark.annotation.*;
+import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by chrweiss on 8/24/14.
@@ -41,15 +39,43 @@ public class LamarkComponentFinder {
         } else {
             this.locationsToScan = locationsToScan;
         }
+        LOG.info("About to scan {}", locationsToScan);
+
+        /*
+        ConfigurationBuilder cb = new ConfigurationBuilder();
+        for (String s:locationsToScan)
+        {
+            cb = cb.filterInputsBy(new FilterBuilder().includePackage(s));
+        }
+        cb = cb.setScanners(new SubTypesScanner(), new TypeAnnotationsScanner(), new MethodAnnotationsScanner());
+
+
+        reflections = new Reflections(cb);
+        */
+
         reflections = new Reflections(locationsToScan);
+
+
     }
+
+    public Set<Method> findAnnotatedMethod(Class methodAnnotation) {
+        HashSet<Method> rval = new HashSet<>();
+
+        for (Class c : reflections.getTypesAnnotatedWith(LamarkComponent.class)) {
+            rval.addAll(ReflectionUtils.getAllMethods(c,
+                    ReflectionUtils.withAnnotation(methodAnnotation)));
+
+        }
+        return rval;
+    }
+
 
     public Set<Class<?>> getComponentClasses() {
         return Collections.unmodifiableSet(reflections.getTypesAnnotatedWith(LamarkComponent.class));
     }
 
     public Set<Method> getCreators() {
-        return Collections.unmodifiableSet(reflections.getMethodsAnnotatedWith(Creator.class));
+        return Collections.unmodifiableSet(findAnnotatedMethod(Creator.class));
     }
 
     public Set<Method> getCrossovers() {
