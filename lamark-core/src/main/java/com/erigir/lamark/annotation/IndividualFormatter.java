@@ -1,7 +1,5 @@
 package com.erigir.lamark.annotation;
 
-import com.erigir.lamark.EFitnessType;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

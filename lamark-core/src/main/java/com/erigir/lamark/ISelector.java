@@ -8,6 +8,7 @@
 package com.erigir.lamark;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * ISelector is implemented by classes serving as selectors for Lamark.
@@ -23,15 +24,23 @@ import java.util.List;
  * @author cweiss
  * @since 4-1-06
  */
-public interface ISelector extends ILamarkComponent {
+public interface ISelector {
 
     /**
      * Selects <code>count</code> individuals from the given list and returns them as a list.
      *
      * @param individuals List of individuals to select from
-     * @param count       int containing the number of individuals to return
      * @return List containing the selected individuals
      */
-    List<Individual<?>> select(List<Individual<?>> individuals, int count);
+    Individual<?> select(List<Individual<?>> individuals);
+
+    /**
+     * If the selector needs random numbers, it should use the random provided here (which will be set
+     * as part of the lifecycle) and the fitness type determines whether higher or lower numbers are good
+     * @param random
+     * @param fitnessType
+     */
+    void initialize(Random random,EFitnessType fitnessType);
+
 
 }

@@ -40,55 +40,49 @@ public class DynamicLamarkConfig<T> {
         return null;
     }
 
-    @Selector
-    public List<T> select(List<T> input, int size)
-    {
-        return null;
-    }
-
-    @ParamProvider("maximumPopulations")
+    @Param("maximumPopulations")
     public Integer getMaximumPopulations()
     {
         return null;
     }
 
-    @ParamProvider("populationSize")
+    @Param("populationSize")
     public Integer getPopulationSize()
     {
         return null;
     }
 
-    @ParamProvider("upperElitism")
+    @Param("upperElitism")
     public double getUpperElitism()
     {
         return 0.0;
     }
 
-    @ParamProvider("lowerElitism")
+    @Param("lowerElitism")
     public double getLowerElitism()
     {
         return 0.0;
     }
 
-    @ParamProvider("crossoverProbability")
+    @Param("crossoverProbability")
     public double getCrossoverProbability()
     {
         return 0.0;
     }
 
-    @ParamProvider("mutationProbability")
+    @Param("mutationProbability")
     public double getMutationProbability()
     {
         return 0.0;
     }
 
-    @ParamProvider("numberOfWorkerThreads")
+    @Param("numberOfWorkerThreads")
     public Integer getNumberOfWorkerThreads()
     {
         return null;
     }
 
-    @ParamProvider("targetScore")
+    @Param("targetScore")
     public Double getTargetScore()
     {
         return null;

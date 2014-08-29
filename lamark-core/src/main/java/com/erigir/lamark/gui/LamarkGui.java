@@ -216,6 +216,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
                 // First, generate a new currentRunner
                 currentRunner = configPanel.createLamarkInstance(this);
 
+                /*
                 // Add this as a generic listener for timers
                 currentRunner.addGenericListener(this);
 
@@ -245,7 +246,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
                 if (configPanel.listenUniformPop()) {
                     currentRunner.addUniformPopulationListener(ol);
                 }
-
+*/
                 output.setText("");
                 start.setEnabled(false);
                 cancel.setEnabled(true);

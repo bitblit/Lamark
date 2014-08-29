@@ -1,11 +1,10 @@
 package com.erigir.lamark.selector;
 
-import com.erigir.lamark.AbstractLamarkComponent;
+import com.erigir.lamark.EFitnessType;
 import com.erigir.lamark.ISelector;
 import com.erigir.lamark.Individual;
-import com.erigir.lamark.annotation.LamarkComponent;
-import com.erigir.lamark.annotation.Param;
-import com.erigir.lamark.annotation.Selector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,45 +19,32 @@ import java.util.Random;
  * @author cweiss
  * @since 11/2007
  */
-@LamarkComponent
-public class Tournament extends AbstractLamarkComponent implements ISelector {
+public class Tournament implements ISelector {
+    private static final Logger LOG = LoggerFactory.getLogger(Tournament.class);
+
+    private Random random;
+    private EFitnessType fitnessType;
 
     /**
-     * @see com.erigir.lamark.ISelector#select(java.util.List, int)
+     * @see com.erigir.lamark.ISelector#select(java.util.List)
      */
-    public List<Individual<?>> select(List<Individual<?>> individuals, int count) {
-        ArrayList<Individual<?>> rval = new ArrayList<Individual<?>>(count);
-
+    public Individual<?> select(List<Individual<?>> individuals) {
+        Individual<?> rval = null;
         int size = individuals.size();
-        for (int i = 0; i < count; i++) {
-            Individual<?> first = individuals.get(getLamark().getRandom().nextInt(size));
-            Individual<?> second = individuals.get(getLamark().getRandom().nextInt(size));
-            if (first.getFitness().compareTo(second.getFitness()) > 0) {
-                rval.add(first);
-            } else {
-                rval.add(second);
-            }
-        }
+            Individual<?> first = individuals.get(random.nextInt(size));
+            Individual<?> second = individuals.get(random.nextInt(size));
 
+            if (first.getFitness().compareTo(second.getFitness()) > 0 && fitnessType==EFitnessType.MAXIMUM_BEST) {
+                rval = first;
+            } else {
+                rval = second;
+            }
         return rval;
     }
 
-    @Selector
-    public List<Individual<?>> tournamentSelect(List<Individual<?>> individuals, int count, @Param("random")Random random) {
-        ArrayList<Individual<?>> rval = new ArrayList<Individual<?>>(count);
-
-        int size = individuals.size();
-        for (int i = 0; i < count; i++) {
-            Individual<?> first = individuals.get(random.nextInt(size));
-            Individual<?> second = individuals.get(random.nextInt(size));
-            if (first.getFitness().compareTo(second.getFitness()) > 0) {
-                rval.add(first);
-            } else {
-                rval.add(second);
-            }
-        }
-
-        return rval;
+    public void initialize(Random random,EFitnessType fitnessType) {
+        this.random = random;
+        this.fitnessType = fitnessType;
     }
 
 }

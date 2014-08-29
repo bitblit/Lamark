@@ -68,11 +68,5 @@ public class LamarkComponentFinder {
         return Collections.unmodifiableSet(reflections.getMethodsAnnotatedWith(Mutator.class));
     }
 
-    public Set<Method> getSelectors() {
-        return Collections.unmodifiableSet(reflections.getMethodsAnnotatedWith(Selector.class));
-    }
 
-    public Set<Method> getParamProviders() {
-        return Collections.unmodifiableSet(reflections.getMethodsAnnotatedWith(ParamProvider.class));
-    }
 }

@@ -12,32 +12,14 @@ import java.util.Collection;
  *
  * @author cweiss
  */
-@LamarkComponent
-public class DefaultIndividualFormatter implements IIndividualFormatter<Object> {
+public class DefaultIndividualFormatter {
 
     /**
      * @see com.erigir.lamark.IIndividualFormatter#format(Individual)
      */
+    @IndividualFormatter
     public String format(Individual<Object> toFormat) {
         return toFormat.getGenome().toString();
-    }
-
-    /**
-     * @see com.erigir.lamark.IIndividualFormatter#format(Collection)
-     */
-    @IndividualFormatter
-    public String format(Collection<Individual<Object>> toFormat) {
-        StringBuffer sb = new StringBuffer();
-
-        boolean first = true;
-        for (Individual i : toFormat) {
-            if (!first) {
-                sb.append(", ");
-            }
-            sb.append(format(i));
-            first = false;
-        }
-        return sb.toString();
     }
 
 }

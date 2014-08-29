@@ -5,6 +5,11 @@
  */
 package com.erigir.lamark;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 
 /**
@@ -14,6 +19,7 @@ import java.text.DecimalFormat;
  * @since 04/2006
  */
 public class Util {
+    private static final Logger LOG = LoggerFactory.getLogger(Util.class);
     /**
      * Static constant *
      */
@@ -82,6 +88,27 @@ public class Util {
         }
         buf.append(milliseconds);
         return buf.toString();
+    }
+
+    /**
+     * This method is here because IMO these should have all been runtime exceptions
+     * anyway...
+     * @param obj
+     * @param m
+     * @param args
+     * @return
+     */
+    public static <T> T qExec(Class clazz, Object obj, Method m, Object... args)
+    {
+        try
+        {
+             return (T)m.invoke(obj, args);
+        }
+        catch (IllegalAccessException | InvocationTargetException e)
+        {
+            LOG.warn("Error trying to invoke method {} on {} : {}",m,obj,args,e);
+            throw new RuntimeException(e);
+        }
     }
 
     /**

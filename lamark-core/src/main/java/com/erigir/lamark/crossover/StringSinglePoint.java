@@ -7,7 +7,6 @@ import com.erigir.lamark.AbstractLamarkComponent;
 import com.erigir.lamark.ICrossover;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.annotation.Crossover;
-import com.erigir.lamark.annotation.LamarkComponent;
 
 import java.util.List;
 
@@ -18,7 +17,6 @@ import java.util.List;
  * @author cweiss
  * @since 03/2005
  */
-@LamarkComponent
 public class StringSinglePoint extends AbstractLamarkComponent implements ICrossover<String> {
 
     /**
@@ -42,7 +40,6 @@ public class StringSinglePoint extends AbstractLamarkComponent implements ICross
         return new Individual<String>(p1.substring(0, point) + p2.substring(point));
     }
 
-    @Crossover(parentCount = 2)
     public String crossoverString(List<String> parents)
     {
         assert(parents!=null);

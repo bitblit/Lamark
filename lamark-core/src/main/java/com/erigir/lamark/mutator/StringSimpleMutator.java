@@ -7,7 +7,6 @@ package com.erigir.lamark.mutator;
 import com.erigir.lamark.AbstractLamarkComponent;
 import com.erigir.lamark.IMutator;
 import com.erigir.lamark.Individual;
-import com.erigir.lamark.annotation.LamarkComponent;
 import com.erigir.lamark.annotation.Mutator;
 import com.erigir.lamark.annotation.Param;
 
@@ -17,7 +16,6 @@ import java.util.Random;
 /**
  * @author cweiss
  */
-@LamarkComponent
 public class StringSimpleMutator extends AbstractLamarkComponent implements IMutator<String> {
 
     /**

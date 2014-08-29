@@ -54,7 +54,7 @@ public class LamarkGUIConfig extends LamarkConfig {
     }
 
     public Class<? extends ISelector> defaultSelector() {
-        return (getSelectorClass() == null) ? selectorClasses.get(0) : getSelectorClass();
+        return null;//TODO: (getSelectorClass() == null) ? selectorClasses.get(0) : getSelectorClass();
     }
 
     public Class<? extends IMutator> defaultMutator() {

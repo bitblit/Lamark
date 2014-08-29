@@ -25,7 +25,7 @@ public class TestStringSinglePoint {
         parents.add(i2);
 
         StringSinglePoint ssp = new StringSinglePoint();
-        ssp.setLamark(new Lamark());
+        ssp.setLamark(new Lamark(null));
         int case1 = 0;
         int case2 = 0;
         int case3 = 0;

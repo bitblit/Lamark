@@ -1,5 +1,8 @@
 package com.erigir.lamark;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,7 +11,7 @@ import java.util.List;
  * Objects of this class represent one "generation" in a
  * genetic algorithm.  Basically a thin wrapper around
  * a list of Individual objects with some statistical
- * helpers thrown in.  This also acts as the syncronizing
+ * helpers thrown in.  This also acts as the synchronizing
  * lock holder for the main thread's wait on population
  * completion.
  * <br />
@@ -19,10 +22,12 @@ import java.util.List;
  * @since 04/2006
  */
 public class Population<T> {
+    private static final Logger LOG = LoggerFactory.getLogger(Population.class);
     /**
      * Handle to the generating Lamark instance *
      */
-    private Lamark lamark;
+    private EFitnessType fitnessType;
+    //private Lamark lamark;
     /**
      * List of individuals for the generation *
      */
@@ -44,18 +49,17 @@ public class Population<T> {
      * is set to one higher than the previous population; otherwise
      * the population number is set to 0.
      *
-     * @param lamark   Lamark object that created this population
      * @param previous Population object previous to this one in the series
      */
-    public Population(Lamark lamark, Population<T> previous) {
+    public Population(EFitnessType fitnessType, int targetSize, Population<T> previous) {
         super();
         if (previous == null) {
             number = 0;
         } else {
             number = previous.getNumber() + 1;
         }
-        this.lamark = lamark;
-        this.targetSize = lamark.getRuntimeParameters().getPopulationSize();
+        this.fitnessType = fitnessType;
+        this.targetSize = targetSize;
         this.individuals = Collections.synchronizedList(new ArrayList<Individual<T>>(targetSize));
     }
 
@@ -114,7 +118,7 @@ public class Population<T> {
      * @param newIndividual Individual object to add to the population
      */
     public void addIndividual(Individual<T> newIndividual) {
-        lamark.logFine("Adding individual " + newIndividual);
+        LOG.debug("Adding individual " + newIndividual);
 
         if (newIndividual == null) {
             throw new IllegalArgumentException("Cannot add a null new individual:" + newIndividual);
@@ -124,7 +128,7 @@ public class Population<T> {
 
         if (individuals.size() == targetSize) {
             // Sort the list
-            Collections.sort(individuals, lamark.getFitnessFunction().fitnessType().getComparator());
+            Collections.sort(individuals, fitnessType.getComparator());
             endWait();
         }
     }

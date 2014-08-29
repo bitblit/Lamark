@@ -34,11 +34,13 @@ public class TestRouletteWheel {
     @Test
     public void testIncreasing() {
         RouletteWheel rw = new RouletteWheel();
+        /*
         rw.setLamark(new Lamark());
         rw.getLamark().setFitnessFunction(new AllOnes());
+        */
 
         Collections.sort(source, EFitnessType.MAXIMUM_BEST.getComparator());
-        rw.select(source, 100);
+        //rw.select(source, 100);
 
         double sum = RouletteWheel.sumFitness(source);
         for (Individual i : source) {
@@ -55,11 +57,11 @@ public class TestRouletteWheel {
     @Test
     public void testDecreasing() {
         RouletteWheel rw = new RouletteWheel();
-        rw.setLamark(new Lamark());
-        rw.getLamark().setFitnessFunction(new AllOnes());
+        //rw.setLamark(new Lamark());
+        //rw.getLamark().setFitnessFunction(new AllOnes());
 
         Collections.sort(source, EFitnessType.MINIMUM_BEST.getComparator());
-        rw.select(source, 100);
+        //rw.select(source, 100);
 
         double max = RouletteWheel.maxFitness(source);
         double newSum = 0;

@@ -759,7 +759,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         p.setCrossoverClass(classFromCombo(crossover));
         p.setFitnessFunctionClass(classFromCombo(fitness));
         p.setMutatorClass(classFromCombo(mutator));
-        p.setSelectorClass(classFromCombo(selector));
+        //p.setSelectorClass(classFromCombo(selector));
 
         p.setUpperElitism(percentToDouble(upperElitism.getText()));
         p.setLowerElitism(percentToDouble(lowerElitism.getText()));

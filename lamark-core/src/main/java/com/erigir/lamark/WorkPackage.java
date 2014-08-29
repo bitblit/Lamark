@@ -1,5 +1,9 @@
 package com.erigir.lamark;
 
+import com.erigir.lamark.annotation.Parent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -24,6 +28,7 @@ import java.util.List;
  * @since 09/2007
  */
 public class WorkPackage implements Runnable {
+    private static final Logger LOG = LoggerFactory.getLogger(WorkPackage.class);
 
     /**
      * Static cached list of workpackage objects held to prevent repeated instantiation *
@@ -91,9 +96,9 @@ public class WorkPackage implements Runnable {
         WorkPackage rval = null;
         if (!AVAILABLE_WP.isEmpty()) {
             rval = AVAILABLE_WP.remove(0);
-            lamark.logFine("Reusing workpackage object, " + AVAILABLE_WP.size() + " remaining");
+            LOG.debug("Reusing workpackage object, " + AVAILABLE_WP.size() + " remaining");
         } else {
-            lamark.logFine("Creating new workpackage object, ");
+            LOG.debug("Creating new workpackage object, ");
             rval = new WorkPackage();
         }
 
@@ -200,23 +205,30 @@ public class WorkPackage implements Runnable {
     public void run() {
         try {
             Individual rval;
-            lamark.logFine("WP : " + hashCode() + " processed by thread " + Thread.currentThread());
+            LOG.debug("WP : {} processed by thread {}" , hashCode(), Thread.currentThread());
 
             // First, create
             switch (type) {
                 case NEW:
-                    rval = lamark.getCreator().create();
+                    rval = new Individual(lamark.getCreator().buildAndExecute(lamark.getRuntimeParameters(), Object.class));
                     break;
                 case COPY:
                     rval = new Individual(toCopy.getGenome());
                     break;
                 case CROSSOVER:
-                    int parCount = lamark.getCrossover().parentCount();
                     List<Individual<?>> source = crossoverSourcePopulation.getIndividuals();
-                    List<Individual<?>> parents = lamark.getSelector().select(source, parCount);
+                    Object[] crossoverParams = lamark.getCrossover().buildParameterArray(lamark.getRuntimeParameters());
+                    List<Individual<?>> parents = new LinkedList<>();
+                    for (Integer i:lamark.getCrossover().getParameterWithAnnotationIndexes(Parent.class))
+                    {
+                        Individual<?> next = lamark.getSelector().select(source);
+                        parents.add(next);
+                        crossoverParams[i]=next.getGenome();
+                    }
+
                     if (lamark.crossoverFlip()) {
                         // Create the individual
-                        rval = lamark.getCrossover().crossover(parents);
+                        rval = new Individual(lamark.getCrossover().execute(Object.class, crossoverParams));
                         // Possibly register the parentage
                         lamark.registerParentage(rval, parents);
                     } else {
@@ -230,12 +242,12 @@ public class WorkPackage implements Runnable {
 
             // Now, potentially mutate
             if (lamark.mutationFlip()) {
-                lamark.getMutator().mutate(rval);
+                rval.setGenome(lamark.getMutator().buildAndExecute(lamark.getRuntimeParameters(), rval.getGenome(), Object.class));
                 rval.setMutated(true);
             }
 
             // Now, calc the fitness value
-            rval.setFitness(lamark.getFitnessFunction().fitnessValue(rval));
+            rval.setFitness(lamark.getFitnessFunction().buildAndExecute(lamark.getRuntimeParameters(), rval.getGenome(), Double.class));
 
             // Verify it got in there
             if (rval.getFitness() == null) {

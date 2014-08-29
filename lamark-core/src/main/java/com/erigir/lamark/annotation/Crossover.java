@@ -16,6 +16,5 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Documented
 public @interface Crossover {
-    int parentCount() default 2;
     String description() default "Crossover";
 }

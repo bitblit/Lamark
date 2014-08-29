@@ -70,6 +70,7 @@ public class LamarkFactory {
         return rval;
     }
 
+    /*
     public LamarkConfig extractConfigFromLamark(Lamark lamark) {
         LamarkConfig rval = cleanFromJSONString(convertToJson(lamark.getRuntimeParameters()), LamarkConfig.class);
         rval.setCreatorClass(lamark.getCreator().getClass());
@@ -86,7 +87,7 @@ public class LamarkFactory {
         rval.setIndividualFormatterConfiguration(cleanFromJSONString(convertToJson(lamark.getFormatter()), Map.class));
 
         return rval;
-    }
+    }*/
 
     public Lamark createLamarkFromConfig(LamarkConfig lc)
             throws LamarkConfigurationFailedException {
@@ -95,10 +96,11 @@ public class LamarkFactory {
 
     public Lamark createLamarkFromConfig(LamarkConfig lc, Component optionalParentComponent)
             throws LamarkConfigurationFailedException {
-        Lamark rval = new Lamark();
+        Lamark rval = new Lamark(null);
 
         List<String> errors = new LinkedList<String>();
 
+        /*
         ICreator creator = factoryCreate(lc.getCreatorClass(), lc.getCreatorConfiguration());
         rval.setCreator(creator);
         require(creator, "Creator", errors);
@@ -117,6 +119,7 @@ public class LamarkFactory {
         IIndividualFormatter formatter = factoryCreate(lc.getIndividualFormatterClass(), lc.getIndividualFormatterConfiguration());
         rval.setFormatter(formatter);
         require(formatter, "Individual Formatter", errors);
+        */
 
         ExecutorService executor = null;
         if (lc.getNumberOfWorkerThreads() == null) {
@@ -157,6 +160,7 @@ public class LamarkFactory {
             }
         }
 
+        /*
         List<Individual> preloads = new LinkedList<Individual>();
         if (lc.getPreCreatedIndividuals() != null && lc.getPreCreatedIndividuals().size() > 0) {
             if (IPreloadableCreator.class.isAssignableFrom(creator.getClass())) {
@@ -183,6 +187,8 @@ public class LamarkFactory {
 
             return rval;
         }
+        */
+        return rval;
     }
 
     private void require(Object value, String name, List<String> error) {

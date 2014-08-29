@@ -37,13 +37,11 @@ public class LamarkComponentScanner {
             Set<Method> crossovers = lcs.findCrossovers(components);
             Set<Method> mutators = lcs.findMutators(components);
             Set<Method> fitnessFunctions = lcs.findFitnessFunctions(components);
-            Set<Method> selectors = lcs.findSelectors(components);
 
             LOG.info("Found creators: {}",creators);
             LOG.info("Found crossovers: {}",crossovers);
             LOG.info("Found mutators: {}",mutators);
             LOG.info("Found fitness: {}",fitnessFunctions);
-            LOG.info("Found selectors: {}",selectors);
 
         }
         catch (Exception e)
@@ -95,11 +93,6 @@ public class LamarkComponentScanner {
     public Set<Method> findMutators(Set<Class> lamarkComponents)
     {
         return findMethods(lamarkComponents, Mutator.class);
-    }
-
-    public Set<Method> findSelectors(Set<Class> lamarkComponents)
-    {
-        return findMethods(lamarkComponents, Selector.class);
     }
 
     public<T extends Annotation> Set<Method> findMethods(Set<Class> lamarkComponents, Class<T> annotationClass)
