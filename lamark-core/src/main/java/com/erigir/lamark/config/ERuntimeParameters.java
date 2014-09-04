@@ -72,7 +72,25 @@ public enum ERuntimeParameters {
         return (T) read(params);
     }
 
+    public String getPropertyName() {
+        return propertyName;
+    }
 
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Class getType() {
+        return type;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
 }
 
 

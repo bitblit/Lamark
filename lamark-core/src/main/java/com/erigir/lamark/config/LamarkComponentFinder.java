@@ -1,11 +1,16 @@
 package com.erigir.lamark.config;
 
+import com.erigir.lamark.AnnotationUtil;
+import com.erigir.lamark.DynamicMethodWrapper;
+import com.erigir.lamark.Util;
 import com.erigir.lamark.annotation.*;
+import com.erigir.lamark.selector.ISelector;
 import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -58,11 +63,11 @@ public class LamarkComponentFinder {
 
     }
 
-    public Set<Method> findAnnotatedMethod(Class methodAnnotation) {
-        HashSet<Method> rval = new HashSet<>();
+    public Map<Class,Set<Method>> findAnnotatedMethod(Class methodAnnotation) {
+        HashMap<Class,Set<Method>> rval = new HashMap<>();
 
         for (Class c : reflections.getTypesAnnotatedWith(LamarkComponent.class)) {
-            rval.addAll(ReflectionUtils.getAllMethods(c,
+            rval.put(c, ReflectionUtils.getAllMethods(c,
                     ReflectionUtils.withAnnotation(methodAnnotation)));
 
         }
@@ -74,24 +79,47 @@ public class LamarkComponentFinder {
         return Collections.unmodifiableSet(reflections.getTypesAnnotatedWith(LamarkComponent.class));
     }
 
-    public Set<Method> getCreators() {
-        return Collections.unmodifiableSet(findAnnotatedMethod(Creator.class));
+    public Map<Class,Set<Method>> getCreators() {
+        return Collections.unmodifiableMap(findAnnotatedMethod(Creator.class));
     }
 
-    public Set<Method> getCrossovers() {
-        return Collections.unmodifiableSet(reflections.getMethodsAnnotatedWith(Crossover.class));
+    public Map<Class,Set<Method>> getCrossovers() {
+        return Collections.unmodifiableMap(findAnnotatedMethod(Crossover.class));
     }
 
-    public Set<Method> getFitnessFunctions() {
-        return Collections.unmodifiableSet(reflections.getMethodsAnnotatedWith(FitnessFunction.class));
+    public Map<Class,Set<Method>> getFitnessFunctions() {
+        return Collections.unmodifiableMap(findAnnotatedMethod(FitnessFunction.class));
     }
 
-    public Set<Method> getFormatters() {
-        return Collections.unmodifiableSet(reflections.getMethodsAnnotatedWith(IndividualFormatter.class));
+    public Map<Class,Set<Method>> getFormatters() {
+        return Collections.unmodifiableMap(findAnnotatedMethod(IndividualFormatter.class));
     }
 
-    public Set<Method> getMutators() {
-        return Collections.unmodifiableSet(reflections.getMethodsAnnotatedWith(Mutator.class));
+    public Map<Class,Set<Method>> getMutators() {
+        return Collections.unmodifiableMap(findAnnotatedMethod(Mutator.class));
+    }
+
+    public Set<Class<? extends ISelector>> getSelectors()
+    {
+        return reflections.getSubTypesOf(ISelector.class);
+    }
+
+
+    public <T> List<DynamicMethodWrapper<T>> listAsWrappers(Class<T> annotationClass)
+    {
+        Map<Class,Set<Method>> vals = findAnnotatedMethod(annotationClass);
+        List<DynamicMethodWrapper<T>> rval = new LinkedList<>();
+
+        for (Map.Entry<Class, Set<Method>> e:vals.entrySet())
+        {
+            Object holder = Util.qNewInstance(e.getKey());
+            for (Method m:e.getValue())
+            {
+                T annotation = (T) m.getAnnotation((Class) annotationClass);
+                rval.add(new DynamicMethodWrapper<T>(holder, m, annotation));
+            }
+        }
+        return rval;
     }
 
 

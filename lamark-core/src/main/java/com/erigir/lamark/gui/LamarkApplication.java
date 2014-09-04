@@ -1,6 +1,10 @@
 package com.erigir.lamark.gui;
 
+import com.erigir.lamark.MyFirstLamarkCLI;
 import com.erigir.lamark.Util;
+import com.erigir.lamark.builtin.MyFirstLamarkConfig;
+import com.erigir.lamark.config.IntrospectLamarkFactory;
+import com.erigir.lamark.gui.action.SetFactoryToIntrospect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,11 +31,23 @@ public class LamarkApplication implements ActionListener {
     /**
      * String label for the save action *
      */
-    private static final String SAVE = "Save...";
+    private static final String SAVE_MENU_LABEL = "Save...";
+    /**
+     * String label for the save action *
+     */
+    private static final String EXIT_MENU_LABEL = "Exit";
     /**
      * String label for the open local jar file/property file action *
      */
-    private static final String OPEN_LOCAL = "Open...";
+    private static final String DYNAMIC_CONFIG_MENU_LABEL = "Dynamic Lamark Configuration...";
+    /**
+     * String label for the open local jar file/property file action *
+     */
+    private static final String LOAD_CONFIG_CLASS_MENU_LABEL = "Load @LamarkConfiguration Class...";
+    /**
+     * String label for the open local jar file/property file action *
+     */
+    private static final String OPEN_CONFIG_FILE_MENU_LABEL = "Open file...";
     /**
      * Logger instance *
      */
@@ -51,6 +67,12 @@ public class LamarkApplication implements ActionListener {
 
     /**
      * Standard bootstrapper from CLI.
+     *
+     * Args could be one of:
+     * 1) Nothing - start with the default system
+     * 2) class://classname - Load this class (must be @LamarkConfiguration) and use that class as the startup
+     * 3) file://file - deSerialize this configuration that object and startup
+     * 4) scan://csv of packages - scan these packages with reflections and add them to the list of available configs
      *
      * @param args String[] command line arguments
      */
@@ -80,6 +102,13 @@ public class LamarkApplication implements ActionListener {
         //Make sure we have nice window decorations.
         JFrame.setDefaultLookAndFeelDecorated(true);
 
+        // Add and init the lamarkgui
+        String initialLocation = (lastFile == null) ? null : lastFile.toURI().toString();
+        String initialSelection = null; // TODO: implement
+        //IntrospectLamarkFactory ilf = new IntrospectLamarkFactory(new MyFirstLamarkConfig());
+        LamarkConfigPanel ilf = new LamarkConfigPanel();
+        gui = new LamarkGui(ilf);
+
         //Create and set up the window.
         frame = new JFrame("Lamark - " + Util.getVersion());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -89,30 +118,24 @@ public class LamarkApplication implements ActionListener {
         JMenu file = new JMenu("File");
         file.setMnemonic(KeyEvent.VK_F);
         menuBar.add(file);
-        JMenuItem fileNew = new JMenuItem("New");
-        JMenuItem fileOpenLocal = new JMenuItem(OPEN_LOCAL);
-        JMenuItem fileOpenRemote = new JMenuItem(LamarkGui.OPEN_REMOTE);
-        JMenuItem fileSave = new JMenuItem(SAVE);
-        JMenuItem fileExit = new JMenuItem("Exit");
+        JMenuItem fileDynamic = new JMenuItem(DYNAMIC_CONFIG_MENU_LABEL);
+        JMenuItem fileOpenClass = new JMenuItem(LOAD_CONFIG_CLASS_MENU_LABEL);
+        JMenuItem fileOpenFile = new JMenuItem(OPEN_CONFIG_FILE_MENU_LABEL);
+        JMenuItem fileSave = new JMenuItem(SAVE_MENU_LABEL);
+        JMenuItem fileExit = new JMenuItem(EXIT_MENU_LABEL);
         fileExit.addActionListener(this);
-        fileOpenLocal.addActionListener(this);
-        fileOpenRemote.addActionListener(this);
+        fileDynamic.addActionListener(new SetFactoryToIntrospect(gui));
+        fileOpenClass.addActionListener(this);
+        fileOpenFile.addActionListener(this);
         fileSave.addActionListener(this);
-        fileNew.addActionListener(this);
-        file.add(fileNew);
-        file.add(fileOpenLocal);
-        file.add(fileOpenRemote);
+        file.add(fileDynamic);
+        file.add(fileOpenClass);
+        file.add(fileOpenFile);
         file.add(fileSave);
         file.addSeparator();
         file.add(fileExit);
         frame.setJMenuBar(menuBar);
 
-        // Add and init the lamarkgui
-
-        String initialLocation = (lastFile == null) ? null : lastFile.toURI().toString();
-        String initialSelection = null; // TODO: implement
-
-        gui = new LamarkGui(initialLocation, initialSelection);
 
         frame.add(gui, BorderLayout.CENTER);
 
@@ -132,7 +155,7 @@ public class LamarkApplication implements ActionListener {
                 frame.dispose();
             } else if (src.getText().equals("New")) {
                 gui.resetToNew();
-            } else if (src.getText().equals(OPEN_LOCAL)) {
+            } else if (src.getText().equals(DYNAMIC_CONFIG_MENU_LABEL)) {
                 JFileChooser fc = new JFileChooser(lastFile);
                 fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 fc.setFileFilter(JsonAndJarsFilter.INSTANCE);
@@ -142,7 +165,7 @@ public class LamarkApplication implements ActionListener {
                     if (f.exists()) {
                         try {
                             gui.appendOutput("\n\nOpening file " + f + "...\n");
-                            gui.getConfigPanel().loadFromLocation(f.toURI().toString());
+                            //gui.getConfigPanel().loadFromLocation(f.toURI().toString());
                             lastFile = f;
                         } catch (Exception ioe) {
                             LOG.warn("Error opening file", ioe);
@@ -156,7 +179,7 @@ public class LamarkApplication implements ActionListener {
                 }
             } else if (src.getText().equals(LamarkGui.OPEN_REMOTE)) {
                 gui.openUrlDialog();
-            } else if (src.getText().equals(SAVE)) {
+            } else if (src.getText().equals(SAVE_MENU_LABEL)) {
                 JFileChooser fc = new JFileChooser();
                 fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 int rval = fc.showSaveDialog(frame);

@@ -22,18 +22,11 @@ import java.util.concurrent.Executors;
 /**
  * Lamark is the central class that runs a generic genetic algorithm.
  * <p/>
- * Assuming you have already written any classes necessary to implement the 4 main
- * components (creator, crossover, fitness function, mutator), then the standard usage
- * of a Lamark object is as follows:
- * <ol>
- * <li>Create a lamark instance</li>
- * <li>Instantiate a copy of each of the 4 main components</li>
- * <li>Set any applicable parameters on each of the components</li>
- * <li>Set the component into Lamark using the appropriate set method</li>
- * <li>Optionally set the 5th component (selector) if this is useful for you</li>
- * <li>Optionally instantiate and set a custom individual formatter</li>
- * <li>Create a LamarkRuntimeParameters object and set it into the lamark instance</li>
- * <li>Instantiate and add any listeners as appropriate</li>
+ * Lamark objects are created by a ILamarkFactory, which is responsible for setting up
+ * all of the required fields (Lamark itself will check for  a valid installation before
+ * running, but actually creation of a Lamark instance is complex enough that it is pulled
+ * out as a seperate concern)
+ *
  * <li>Run Lamark
  * <ul><li>Either call the call() method on the instance to run within your current thread, <em>or</em></li>
  * <li>submit the lamark instance to an executor from java.util.concurrent,
@@ -151,75 +144,6 @@ public class Lamark implements Callable<Population> {
      */
     private List<Individual> toBeInserted = new LinkedList<Individual>();
 
-    public void configureViaIntrospection(Object toIntrospect)
-    {
-        setupViaIntrospection(toIntrospect);
-    }
-
-    public void configureViaIntrospection(Class toIntrospect)
-    {
-        try {
-            setupViaIntrospection(toIntrospect.newInstance());
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void setupViaIntrospection(Object obj) {
-        Class clz = obj.getClass();
-        // Iterate over all the methods and find the key ones
-        List<Method> paramGenerationMethods = AnnotationUtil.findMethodsByAnnotation(clz, Param.class);
-        for (Method m : paramGenerationMethods) {
-            Param p = m.getAnnotation(Param.class);
-            if (m.getParameterTypes().length == 0) {
-                LOG.debug("Calling {} for parameter {}", m, p.value());
-                if (Map.class.isAssignableFrom(m.getReturnType())) {
-                    runtimeParameters.putAll((Map) Util.qExec(Map.class, obj, m));
-                } else {
-                    runtimeParameters.put(p.value(), Util.qExec(Object.class, obj, m));
-                }
-            } else {
-                throw new IllegalArgumentException("Invalid param method " + m + " - no parameters allowed");
-            }
-        }
-
-        LOG.info("Configuration : {}", runtimeParameters);
-
-        Method createMethod = AnnotationUtil.findSingleMethodByAnnotation(clz, Creator.class, true);
-        creator = new DynamicMethodWrapper<>(obj, createMethod, createMethod.getAnnotation(Creator.class));
-
-        Method crossoverMethod = AnnotationUtil.findSingleMethodByAnnotation(clz, Crossover.class, true);
-        crossover = new DynamicMethodWrapper<>(obj, crossoverMethod, crossoverMethod.getAnnotation(Crossover.class));
-
-        Method fitnessFunctionMethod = AnnotationUtil.findSingleMethodByAnnotation(clz, FitnessFunction.class, true);
-        fitnessFunction = new DynamicMethodWrapper(obj, fitnessFunctionMethod, fitnessFunctionMethod.getAnnotation(FitnessFunction.class));
-
-        Method formatMethod = AnnotationUtil.findSingleMethodByAnnotation(clz, IndividualFormatter.class, false);
-        if (formatMethod == null) {
-            LOG.info("No format method defined, using default");
-            DefaultIndividualFormatter def = new DefaultIndividualFormatter();
-            formatMethod = AnnotationUtil.findSingleMethodByAnnotation(DefaultIndividualFormatter.class, IndividualFormatter.class);
-            formatter = new DynamicMethodWrapper(def, formatMethod, formatMethod.getAnnotation(IndividualFormatter.class));
-        } else {
-            formatter = new DynamicMethodWrapper(obj, formatMethod, formatMethod.getAnnotation(IndividualFormatter.class));
-        }
-
-        Method mutateMethod = AnnotationUtil.findSingleMethodByAnnotation(clz, Mutator.class, true);
-        mutator = new DynamicMethodWrapper(obj, mutateMethod, mutateMethod.getAnnotation(Mutator.class));
-
-        Method preloadMethod = AnnotationUtil.findSingleMethodByAnnotation(clz, PreloadIndividuals.class, false);
-        if (preloadMethod != null) {
-            preloader = new DynamicMethodWrapper(obj, preloadMethod, preloadMethod.getAnnotation(PreloadIndividuals.class));
-        }
-
-        List<Method> listenerMethods = AnnotationUtil.findMethodsByAnnotation(clz, LamarkEventListener.class);
-        LOG.info("Found {} listener methods", listenerMethods.size());
-        for (Method m : listenerMethods) {
-            listeners.add(new DynamicMethodWrapper(obj, m, m.getAnnotation(LamarkEventListener.class)));
-        }
-
-    }
-
     /**
      * Records the parents for a given child in the parent registry.
      * <p/>
@@ -247,7 +171,7 @@ public class Lamark implements Callable<Population> {
      */
     public List<Individual<?>> getParentage(Individual child) {
         if (!ERuntimeParameters.TRACK_PARENTAGE.read(runtimeParameters, Boolean.class)) {
-            throw new IllegalStateException("Can't call 'getParentage' if trackParentage is off");
+            throw new UnsupportedOperationException("Can't call 'getParentage' if trackParentage is off");
         }
         if (child == null) {
             throw new IllegalArgumentException("Can't call 'getParentage' on null child");
@@ -341,6 +265,8 @@ public class Lamark implements Callable<Population> {
         assert(formatter!=null);
         assert(mutator!=null);
 
+        // TODO : verify all types are the same
+
         ERuntimeParameters.validate(runtimeParameters);
     }
 
@@ -370,7 +296,7 @@ public class Lamark implements Callable<Population> {
         startTime = new Long(System.currentTimeMillis());
         try {
 
-            LOG.info("top, ab=" + aborted);
+            LOG.info("Top, aborted={}" , aborted);
 
             totalWaitTime = 0L;
             // Init the workpackage queue
@@ -379,7 +305,7 @@ public class Lamark implements Callable<Population> {
             if (ERuntimeParameters.RANDOM_SEED.read(runtimeParameters, Long.class) != null) {
                 random.setSeed(ERuntimeParameters.RANDOM_SEED.read(runtimeParameters, Long.class));
             }
-            LOG.info("Started Lamark run at time " + new Date());
+            LOG.info("Started Lamark run at time {}" , new Date());
             running = true;
 
             // Start a deadlock monitor

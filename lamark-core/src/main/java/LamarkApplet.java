@@ -1,3 +1,5 @@
+import com.erigir.lamark.MyFirstLamarkCLI;
+import com.erigir.lamark.config.IntrospectLamarkFactory;
 import com.erigir.lamark.gui.LamarkGui;
 
 import javax.swing.*;
@@ -17,8 +19,9 @@ import javax.swing.*;
 public class LamarkApplet extends JApplet {
     /**
      * Wrapped gui object *
+     * TODO: impl dynamic feature
      */
-    private LamarkGui gui = new LamarkGui(getParameter("initialLocation"), getParameter("initialSelection"));
+    private LamarkGui gui = new LamarkGui(new IntrospectLamarkFactory(new MyFirstLamarkCLI()));
 
     /**
      * Bootstraps the LamarkGUI, and if a resource was supplied, load it.

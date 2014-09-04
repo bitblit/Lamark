@@ -49,4 +49,20 @@ public class AnnotationUtil {
         return (l.size() == 1) ? l.get(0) : null;
     }
 
+    public static Annotation findFirstMethodAnnotationByClass(Method m, Class annotationClass)
+    {
+        Annotation rval = null;
+        Annotation[] annotations = m.getAnnotations();
+        for (int i=0;i<annotations.length && rval==null;i++)
+        {
+            Class mAnnClass = annotations[i].getClass();
+
+            if (mAnnClass.equals(annotationClass))
+            {
+                rval=annotations[i];
+            }
+        }
+        return rval;
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.erigir.lamark.example;
 
 import com.erigir.lamark.Lamark;
+import com.erigir.lamark.MyFirstLamarkCLI;
 import com.erigir.lamark.WorkPackage;
 import com.erigir.lamark.config.LamarkRuntimeParameters;
 import com.erigir.lamark.builtin.StringCrossover;
@@ -30,7 +31,7 @@ public class MyFirstLamark implements LamarkEventListener {
      * @param ignored String[]
      */
     public static void main(String[] ignored) {
-        com.erigir.lamark.MyFirstLamark e = new com.erigir.lamark.MyFirstLamark();
+        MyFirstLamarkCLI e = new MyFirstLamarkCLI();
         e.go();
         System.exit(0);
     }

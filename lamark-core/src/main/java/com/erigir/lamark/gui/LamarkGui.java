@@ -3,10 +3,9 @@
  */
 package com.erigir.lamark.gui;
 
-import com.erigir.lamark.Lamark;
-import com.erigir.lamark.LamarkConfigurationFailedException;
-import com.erigir.lamark.Util;
+import com.erigir.lamark.*;
 import com.erigir.lamark.annotation.LamarkEventListener;
+import com.erigir.lamark.config.ILamarkFactory;
 import com.erigir.lamark.events.*;
 
 import javax.imageio.ImageIO;
@@ -16,8 +15,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Executors;
 
 /**
@@ -44,6 +45,10 @@ public class LamarkGui extends JPanel implements ActionListener {
      * Handle to the central panel *
      */
     private JPanel mainPanel;
+    /**
+     * Handle to the factory panel *
+     */
+    private FactoryPanel factoryPanel;
     /**
      * Button for starting the GA *
      */
@@ -100,19 +105,19 @@ public class LamarkGui extends JPanel implements ActionListener {
      * Handle to the current instnace of Lamark, if any *
      */
     private Lamark currentRunner;
-    /**
-     * Panel holding the current configuration *
-     */
-    private LamarkConfigPanel configPanel;
-
 
     /**
      * Default constructor.
      * Lays out all the controls.
      */
-    public LamarkGui(String initialLocation, String initialSelection) {
+    public LamarkGui(ILamarkFactory lamarkFactory) {
 
-        configPanel = new LamarkConfigPanel(initialLocation);
+        if (lamarkFactory==null)
+        {
+            throw new IllegalStateException("Cant start with a null lamark factory");
+        }
+
+        this.factoryPanel = new FactoryPanel(lamarkFactory);
 
         setLayout(new BorderLayout());
 
@@ -172,6 +177,10 @@ public class LamarkGui extends JPanel implements ActionListener {
 
     }
 
+    public FactoryPanel getFactoryPanel() {
+        return factoryPanel;
+    }
+
     /**
      * Loads one of the built-in images as an icon.
      *
@@ -199,14 +208,6 @@ public class LamarkGui extends JPanel implements ActionListener {
     }
 
     /**
-     * Empty the current runner from memory and reset labels.
-     */
-    private void clearCurrent() {
-        currentRunner = null;
-        updateClassLoaderLabel();
-    }
-
-    /**
      * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     public void actionPerformed(ActionEvent e) {
@@ -215,14 +216,16 @@ public class LamarkGui extends JPanel implements ActionListener {
 
             try {
                 // First, generate a new currentRunner
-                currentRunner = configPanel.createLamarkInstance(this);
+                currentRunner = factoryPanel.createConfiguredLamarkInstance();
+
+                // Wire this object in as a listener
+                for (Method m:AnnotationUtil.findMethodsByAnnotation(LamarkGui.class, LamarkEventListener.class))
+                {
+                    LamarkEventListener annotation = m.getAnnotation(LamarkEventListener.class);
+                    currentRunner.getListeners().add(new DynamicMethodWrapper<LamarkEventListener>(this, m, annotation));
+                }
 
                 /*
-                // Add this as a generic listener for timers
-                currentRunner.addGenericListener(this);
-
-                // Add any defined listeners
-                OutputListener ol = new OutputListener(output);
                 if (configPanel.listenAbort()) {
                     currentRunner.addAbortListener(ol);
                 }
@@ -235,9 +238,6 @@ public class LamarkGui extends JPanel implements ActionListener {
                 if (configPanel.listenLastPopDone()) {
                     currentRunner.addLastPopulationCompleteListener(ol);
                 }
-                if (configPanel.listenLog()) {
-                    currentRunner.addLogListener(ol);
-                }
                 if (configPanel.listenPopPlanDone()) {
                     currentRunner.addPopulationPlanCompleteListener(ol);
                 }
@@ -247,14 +247,14 @@ public class LamarkGui extends JPanel implements ActionListener {
                 if (configPanel.listenUniformPop()) {
                     currentRunner.addUniformPopulationListener(ol);
                 }
-*/
+                */
+
                 output.setText("");
                 start.setEnabled(false);
                 cancel.setEnabled(true);
                 reset.setEnabled(false);
                 openUrl.setEnabled(false);
                 show.setEnabled(false);
-                configPanel.setEnabled(false);
                 Executors.newSingleThreadExecutor().submit(currentRunner);
             } catch (LamarkConfigurationFailedException lcfe) {
                 for (String s : lcfe.getReasons()) {
@@ -279,7 +279,6 @@ public class LamarkGui extends JPanel implements ActionListener {
                 reset.setEnabled(true);
                 openUrl.setEnabled(true);
                 show.setEnabled(true);
-                configPanel.setEnabled(true);
             }
         } else if (e.getSource() == openUrl) {
             openUrlDialog();
@@ -300,7 +299,7 @@ public class LamarkGui extends JPanel implements ActionListener {
                 null,
                 null,
                 null);
-        configPanel.loadFromLocation(url);
+        //configPanel.loadFromLocation(url);
     }
 
 
@@ -325,7 +324,7 @@ public class LamarkGui extends JPanel implements ActionListener {
             textPane.add(outputScrollPane, BorderLayout.CENTER);
             output.setText("Lamark\nGraphical User Interface\nVersion " + Util.getVersion() + "\n");
 
-            mainPanel.add(configPanel, BorderLayout.NORTH);
+            mainPanel.add(factoryPanel, BorderLayout.NORTH);
             mainPanel.add(textPane, BorderLayout.CENTER);
             /**
              TODO: Add stats panel when its built
@@ -334,6 +333,19 @@ public class LamarkGui extends JPanel implements ActionListener {
 
         }
         return mainPanel;
+    }
+
+    public void updateFactoryPanel(FactoryPanel factoryPanel)
+    {
+        if (factoryPanel==null)
+        {
+            throw new IllegalStateException("Can't update to a null factoryPanel");
+        }
+        if (currentRunner.isRunning())
+        {
+            throw new IllegalStateException("Can't update while running");
+        }
+        this.factoryPanel = factoryPanel;
     }
 
     /**
@@ -347,7 +359,6 @@ public class LamarkGui extends JPanel implements ActionListener {
             reset.setEnabled(true);
             openUrl.setEnabled(true);
             show.setEnabled(true);
-            configPanel.setEnabled(true);
         }
     }
 
@@ -356,8 +367,8 @@ public class LamarkGui extends JPanel implements ActionListener {
      */
     public void resetToNew() {
         abortIfRunning();
-        clearCurrent();
-        configPanel.reset();
+        currentRunner = factoryPanel.createConfiguredLamarkInstance();
+        //clearCurrent();
         updateClassLoaderLabel();
     }
 
@@ -404,7 +415,7 @@ public class LamarkGui extends JPanel implements ActionListener {
      *
      */
     @LamarkEventListener
-    public void handleEvent(LamarkEvent je) {
+    public void updateIndicatorsOnEvent(LamarkEvent je) {
         if (BetterIndividualFoundEvent.class.isAssignableFrom(je.getClass())) {
             bestScore.setText("Best: " + Util.format(((BetterIndividualFoundEvent) je).getNewBest().getFitness()));
         } else if (LastPopulationCompleteEvent.class.isAssignableFrom(je.getClass())) {
@@ -413,7 +424,6 @@ public class LamarkGui extends JPanel implements ActionListener {
             reset.setEnabled(true);
             openUrl.setEnabled(true);
             show.setEnabled(true);
-            configPanel.setEnabled(true);
         } else if (PopulationCompleteEvent.class.isAssignableFrom(je.getClass())) {
             generationNumber.setText("Generation: " + ((PopulationCompleteEvent) je).getPopulation().getNumber());
         } else if (ExceptionEvent.class.isAssignableFrom(je.getClass())) {
@@ -422,7 +432,6 @@ public class LamarkGui extends JPanel implements ActionListener {
             reset.setEnabled(true);
             openUrl.setEnabled(true);
             show.setEnabled(true);
-            configPanel.setEnabled(true);
         }
         currentRuntime.setText("Runtime: "
                 + Util.formatISO(je.getLamark().currentRuntimeMS()));
@@ -430,6 +439,22 @@ public class LamarkGui extends JPanel implements ActionListener {
                 + Util.formatISO(je.getLamark().estimatedRuntimeMS()));
 
         updateMemoryLabels();
+    }
+
+    @LamarkEventListener
+    public void updateOutputOnEvent(LamarkEvent je)
+    {
+        if (ExceptionEvent.class.isAssignableFrom(je.getClass())) {
+            Throwable t = ((ExceptionEvent) je).getException();
+            StringWriter sw = new StringWriter();
+            t.printStackTrace(new PrintWriter(sw));
+            String msg = "\nAn error occurred while attempting to run the algorithm:\n\n" + t + "\n\n" + sw.toString() + "\n";
+            output.insert(msg, 0);
+            start.setEnabled(true);
+            cancel.setEnabled(false);
+        } else {
+            output.insert(je.toString() + " \n\n", 0);
+        }
     }
 
     /**
@@ -442,59 +467,5 @@ public class LamarkGui extends JPanel implements ActionListener {
                 (Runtime.getRuntime().freeMemory() / (1024 * 1024)) + " Mb");
     }
 
-    /**
-     * Return a handle to the configuration panel
-     * The config panel can be used to force loading of a new configuration
-     *
-     * @return LamarkConfigPanel handle to the config panel
-     */
-    public LamarkConfigPanel getConfigPanel() {
-        return configPanel;
-    }
 
-    /**
-     * A class to wrap a lamarklistener around the output panel of the gui.
-     * <p/>
-     * This class catches the selected events and outputs their
-     * string representation into the output panel.
-     *
-     * @author cweiss
-     * @since 10/2007
-     */
-    class OutputListener{
-        /**
-         * Handle to the output area *
-         */
-        private JTextArea output;
-
-
-        /**
-         * Constructor that passes handle to the output pane
-         *
-         * @param pOutput JTextArea output pane
-         */
-        public OutputListener(JTextArea pOutput) {
-            super();
-            output = pOutput;
-        }
-
-        /**
-         * Writes appropriate events to the output pane.
-         *
-         */
-        @LamarkEventListener
-        public void handleEvent(LamarkEvent je) {
-            if (ExceptionEvent.class.isAssignableFrom(je.getClass())) {
-                Throwable t = ((ExceptionEvent) je).getException();
-                StringWriter sw = new StringWriter();
-                t.printStackTrace(new PrintWriter(sw));
-                String msg = "\nAn error occurred while attempting to run the algorithm:\n\n" + t + "\n\n" + sw.toString() + "\n";
-                output.insert(msg, 0);
-                start.setEnabled(true);
-                cancel.setEnabled(false);
-            } else {
-                output.insert(je.toString() + " \n\n", 0);
-            }
-        }
-    }
 }

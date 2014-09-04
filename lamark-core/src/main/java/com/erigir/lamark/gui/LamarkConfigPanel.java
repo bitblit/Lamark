@@ -1,7 +1,14 @@
 package com.erigir.lamark.gui;
 
+import com.erigir.lamark.DynamicMethodWrapper;
 import com.erigir.lamark.Lamark;
-import com.erigir.lamark.LamarkComponentScanner;
+import com.erigir.lamark.annotation.Creator;
+import com.erigir.lamark.annotation.Crossover;
+import com.erigir.lamark.annotation.FitnessFunction;
+import com.erigir.lamark.annotation.Mutator;
+import com.erigir.lamark.config.ILamarkFactory;
+import com.erigir.lamark.config.LamarkComponentFinder;
+import com.erigir.lamark.selector.ISelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -29,50 +37,51 @@ import java.util.List;
  * @author cweiss
  * @since 10/2007
  */
-public class LamarkConfigPanel extends JPanel implements ActionListener {
+public class LamarkConfigPanel extends JPanel implements ActionListener,IGuiConfigurableLamarkFactory {
     /**
      * Logging instance *
      */
     private static final Logger LOG = LoggerFactory.getLogger(LamarkConfigPanel.class.getName());
-    /**
-     * Location of the default file
-     */
-    private static final String DEFAULT_CONFIG_LOCATION = "classpath:com/erigir/lamark/gui/default-lamark.json";
 
     /**
      * This can either be a loaded or dynamically built configuration
      */
-    private Object lamarkConfiguration;
+    private Lamark lamark = new Lamark();
 
-    private Properties lamarkProperties = new Properties();
+    private Map<String,Object> runtimeParameters = new TreeMap<>();
+
 
     private List<String> preloads = new LinkedList<>();
 
     /**
      * Scans the classpath for options for the drop-boxes
      */
-    private LamarkComponentScanner componentScanner;
+    private LamarkComponentFinder componentFinder = new LamarkComponentFinder(Arrays.asList("com.erigir"));
 
     /**
      * Button/Label for creator *
      */
-    private JButton creatorLabel = new JButton("Creator");
+    private JButton customPropertiesButton = new JButton("Custom Properties...");
+    /**
+     * Button/Label for creator *
+     */
+    private JLabel creatorLabel = new JLabel("Creator");
     /**
      * Button/Label for crossover *
      */
-    private JButton crossoverLabel = new JButton("Crossover");
+    private JLabel crossoverLabel = new JLabel("Crossover");
     /**
      * Button/Label for fitness *
      */
-    private JButton fitnessLabel = new JButton("Fitness Function");
+    private JLabel fitnessLabel = new JLabel("Fitness Function");
     /**
      * Button/Label for mutator *
      */
-    private JButton mutatorLabel = new JButton("Mutator");
+    private JLabel mutatorLabel = new JLabel("Mutator");
     /**
      * Button/Label for selector *
      */
-    private JButton selectorLabel = new JButton("Selector");
+    private JLabel selectorLabel = new JLabel("Selector");
     /**
      * Button/Label for preloads *
      */
@@ -213,7 +222,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * <p/>
      * Builds the layout.
      */
-    public LamarkConfigPanel(final String inConfigResource) {
+    public LamarkConfigPanel() {//final String configResource) {
         super();
 
         setLayout(new BorderLayout());
@@ -222,9 +231,30 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         add(panel2(), BorderLayout.SOUTH);
 
         // Finally, initialize
-        String configResource = (inConfigResource == null) ? DEFAULT_CONFIG_LOCATION : inConfigResource;
+       // loadFromLocation(configResource);
+    }
 
-        loadFromLocation(configResource);
+    @Override
+    public Lamark createConfiguredLamarkInstance() {
+        Lamark rval = new Lamark();
+
+
+        rval.setRuntimeParameters(runtimeParameters);
+        rval.setCreator((DynamicMethodWrapper) creator.getSelectedItem());
+        rval.setCrossover((DynamicMethodWrapper) crossover.getSelectedItem());
+        rval.setFitnessFunction((DynamicMethodWrapper) fitness.getSelectedItem());
+        rval.setMutator((DynamicMethodWrapper) mutator.getSelectedItem());
+        rval.setSelector((ISelector) selector.getSelectedItem());
+        //rval.setFormatter((DynamicMethodWrapper).getSelectedItem());
+        //rval.setPreloader((DynamicMethodWrapper)preloader);
+        //rval.setListeners((DynamicMethodWrapper)listeners);
+
+        return rval;
+    }
+
+    @Override
+    public String getShortDescription() {
+        return "ExplicitLamarkFactory";
     }
 
     public static Map<String, Object> propertiesToMap(Properties p) {
@@ -254,11 +284,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * @see javax.swing.JComponent#setEnabled(boolean)
      */
     public void setEnabled(boolean enable) {
-        creatorLabel.setEnabled(enable);
-        crossoverLabel.setEnabled(enable);
-        fitnessLabel.setEnabled(enable);
-        mutatorLabel.setEnabled(enable);
-        selectorLabel.setEnabled(enable);
+        customPropertiesButton.setEnabled(enable);
         preloadButton.setEnabled(enable);
         customListenerButton.setEnabled(enable);
 
@@ -289,7 +315,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     }
 
     public void reset() {
-        loadFromLocation(DEFAULT_CONFIG_LOCATION);
+        lamark = new Lamark();
     }
 
     private String readStreamToString(InputStream ios)
@@ -308,6 +334,11 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
 
         }
         return rval;
+    }
+
+    @Override
+    public void configure(Component parent) {
+        JOptionPane.showMessageDialog(parent,"CONFIG!");
     }
 
     /**
@@ -391,7 +422,37 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
             LOG.error("Error reading location {}", location, ioe);
         }
 
+        initializeConfig();
+
     }
+
+    private void initializeConfig()
+    {
+        List<DynamicMethodWrapper<Creator>> creators = componentFinder.listAsWrappers(Creator.class);
+        setComboBoxValues(creator, creators, creators.get(0), Creator.class);
+
+        List<DynamicMethodWrapper<Crossover>> crossovers = componentFinder.listAsWrappers(Crossover.class);
+        setComboBoxValues(crossover, crossovers, crossovers.get(0), Crossover.class);
+
+        List<DynamicMethodWrapper<FitnessFunction>> fitnessFunctions = componentFinder.listAsWrappers(FitnessFunction.class);
+        setComboBoxValues(fitness, fitnessFunctions, fitnessFunctions.get(0), FitnessFunction.class);
+
+        List<DynamicMethodWrapper<Mutator>> mutators = componentFinder.listAsWrappers(Mutator.class);
+        setComboBoxValues(mutator, mutators, mutators.get(0), Mutator.class);
+
+        selector.setEditable(true);
+
+        selector.removeAllItems();
+        for (Class<? extends ISelector> c:componentFinder.getSelectors())
+        {
+            selector.addItem(c.getSimpleName());
+        }
+
+
+    }
+
+
+
 
     private URL safeURL(String input) {
         try {
@@ -408,21 +469,18 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      */
     private JPanel panel1() {
         JPanel rval = new JPanel();
-        rval.setLayout(new GridLayout(0, 6));
+        rval.setLayout(new GridLayout(0, 5));
         rval.add(populationSizeLabel);
         rval.add(crossoverProbabilityLabel);
         rval.add(mutationProbabilityLabel);
         rval.add(maximumPopulationsLabel);
         rval.add(targetScoreLabel);
-        rval.add(customListenerButton);
         rval.add(populationSize);
         rval.add(crossoverProbability);
         rval.add(mutationProbability);
         rval.add(maximumPopulations);
         rval.add(targetScore);
-        rval.add(preloadButton);
-        customListenerButton.addActionListener(this);
-        preloadButton.addActionListener(this);
+
         return rval;
 
     }
@@ -446,6 +504,15 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         north.add(lowerElitism);
         north.add(numberOfWorkerThreads);
         north.add(randomSeed);
+
+        north.add(customListenerButton);
+        north.add(customPropertiesButton);
+        north.add(preloadButton);
+
+        customPropertiesButton.addActionListener(this);
+        customListenerButton.addActionListener(this);
+        preloadButton.addActionListener(this);
+
 
         JPanel south = new JPanel();
         south.setBorder(BorderFactory.createTitledBorder("Listeners"));
@@ -483,7 +550,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      */
     private JPanel classPanel() {
         JPanel rval = new JPanel();
-        rval.setBorder(BorderFactory.createTitledBorder("Classes"));
+        rval.setBorder(BorderFactory.createTitledBorder("Components"));
         rval.setLayout(new GridLayout(0, 5));
         rval.add(creatorLabel);
         rval.add(crossoverLabel);
@@ -496,12 +563,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         rval.add(mutator);
         rval.add(selector);
 
-        creatorLabel.addActionListener(this);
-        crossoverLabel.addActionListener(this);
-        fitnessLabel.addActionListener(this);
-        mutatorLabel.addActionListener(this);
-        selectorLabel.addActionListener(this);
-
         return rval;
     }
 
@@ -510,8 +571,8 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      */
     public void actionPerformed(ActionEvent arg0) {
         JButton src = (JButton) arg0.getSource();
-        if (src == creatorLabel) {
-            lamarkProperties = editProperties(lamarkProperties, src.getText());
+        if (src == customPropertiesButton) {
+            //runtimeParameters = editProperties(mapToProperties(runtimeParameters), src.getText());
         } else if (src == preloadButton) {
             preloads = editStringList(preloads, src.getText());
         }
@@ -544,27 +605,25 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     }
 
     /**
-     * Sets the values in the frop for a combo box from a properties object.
-     * All properties whos key starts with the given prefix will be loaded as
-     * options into the combo box.
+     * Sets the values in the drop for a combo box.
      *
      * @param box     JComboBox to load from the properties object
-     * @param classes List of class objects to load from
-     * @param def     Class to default select
+     * @param wrappers List of DynamicMethodWrapper objects to load from
+     * @param def     DynamicMethodWrapper to default select
      */
-    private void setComboBoxValues(JComboBox box, List<? extends Class> classes, Class def) {
+    private <T> void setComboBoxValues(JComboBox box, List<DynamicMethodWrapper<T>> wrappers, DynamicMethodWrapper def, Class<T> annotationClass) {
         box.setEditable(true);
 
         box.removeAllItems();
-        if (classes != null) {
-            for (Class c : classes) {
-                box.addItem(formatClassName(c));
+        if (wrappers != null) {
+            for (DynamicMethodWrapper c : wrappers) {
+                box.addItem(formatDynamicMethodWrapper(c));
             }
         } else if (def != null) {
-            box.addItem(formatClassName(def));
+            box.addItem(formatDynamicMethodWrapper(def));
         }
 
-        box.setSelectedItem(formatClassName(def));
+        box.setSelectedItem(formatDynamicMethodWrapper(def));
     }
 
 
@@ -644,30 +703,17 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     /**
      * Converts a classname to combobox format (CLASS[PACKAGE])
      *
-     * @param className String containing classname to convert
+     * @param dmw String containing DynamicMethodWrapper to convert
      * @return String containing name in combo format
      */
-    private String formatClassName(String className) {
-        if (className == null) {
+    private String formatDynamicMethodWrapper(DynamicMethodWrapper dmw) {
+        if (dmw == null) {
             return null;
         }
-        int idx = className.lastIndexOf(".");
-        if (idx == -1) {
-            return className;
-        }
-        return className.substring(idx + 1) + "[" + className.substring(0, idx) + "]";
-    }
 
-    /**
-     * Converts a classname to combobox format (CLASS[PACKAGE])
-     *
-     * @param clazz Class to convert
-     * @return String containing name in combo format
-     */
-    private String formatClassName(Class clazz) {
-        return (clazz == null) ? null : formatClassName(clazz.getName());
-    }
+        return dmw.getObject().getClass().getSimpleName()+" : "+dmw.getMethod().getName();
 
+    }
 
     /**
      * Returns true if the given listener should be used.
@@ -753,7 +799,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
 
     public Lamark createLamarkInstance(LamarkGui gui)
     {
-        return new Lamark();
+        return lamark;
     }
 
 

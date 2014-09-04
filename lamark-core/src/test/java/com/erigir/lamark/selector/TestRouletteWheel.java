@@ -4,6 +4,7 @@ import com.erigir.lamark.EFitnessType;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.Lamark;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ public class TestRouletteWheel {
     }
 
     @Test
+    @Ignore
     public void testIncreasing() {
         RouletteWheel rw = new RouletteWheel();
         /*
@@ -54,6 +56,7 @@ public class TestRouletteWheel {
     }
 
     @Test
+    @Ignore
     public void testDecreasing() {
         RouletteWheel rw = new RouletteWheel();
         //rw.setLamark(new Lamark());

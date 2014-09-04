@@ -11,3 +11,5 @@
 
 * Implement preloads
 * Implement "force individual" queue?
+
+* Multiparams shouldnt need a name?

@@ -108,6 +108,46 @@ public class Util {
         }
     }
 
+
+    /**
+     * This method is here because IMO these should have all been runtime exceptions
+     * anyway...
+     *
+     * @param clazz
+     * @return
+     */
+    public static <T> T qNewInstance(Class<T> clazz)
+    {
+        try
+        {
+            return clazz.newInstance();
+        }
+        catch (InstantiationException | IllegalAccessException e)
+        {
+            throw new RuntimeException("Couldn't instantiate class"+clazz,e);
+        }
+    }
+
+    /**
+     * This method is here because IMO these should have all been runtime exceptions
+     * anyway...
+     *
+     * @param name
+     * @return
+     */
+    public static Class qForName(String name)
+    {
+        try
+        {
+            return Class.forName(name);
+        }
+        catch (ClassNotFoundException e)
+        {
+            throw new RuntimeException("Couldn't instantiate class"+name,e);
+        }
+    }
+
+
     /**
      * Builds a string describing the current version.
      *
