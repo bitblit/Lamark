@@ -1,4 +1,16 @@
 
+* An ILamarkFactory creates a Lamark instance:
+** IntrospectLamarkFactory does this by being passed an object whose class is annotated with the correct functions
+** ExplicitLamarkFactory does this by having all the pieces of the Lamark object set on it and then just creating the
+   Lamark instance (what is the advantage of this over just creating the Lamark object yourself?)
+
+
+** Can I use the "Creator" interface, but @Creator functions get a dynamic proxy wrapped around them?
+
+
+
+
+
 Interactive Mode
 ================
 1) Scan the classpath for all implementing methods
