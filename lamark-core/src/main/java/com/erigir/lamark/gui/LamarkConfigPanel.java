@@ -29,6 +29,18 @@ import java.util.*;
 import java.util.List;
 
 /**
+ * Allows selection of either:
+ * 1) A self-contained jar file with a defined LamarkConfiguration
+ * 2) A class annotated LamarkConfiguration that can be instantiated and introspected
+ * 3) Selection of all the appropriate classes and entry of runtime params to all a lamark to be instantiated
+ *
+ * Source: xxx
+ * cr  cr  sl  ff  mt
+ *
+ *
+ *
+ * Classes annotated with Lamark Components should NOT require
+ *
  * A panel for holding and organizing the various properties controls for LamarkGUI.
  * <p/>
  * Also wraps business logic for converting these controls into properties object

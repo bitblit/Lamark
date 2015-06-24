@@ -14,7 +14,7 @@ import java.util.*;
  * Creates a Lamark instance from an explicit set of DynamicMethodWrappers
  * Created by chrweiss on 9/1/14.
  */
-public class ExplicitLamarkFactory implements ILamarkFactory{
+public class ExplicitLamarkFactory {//} implements ILamarkFactory{
     private static final Logger LOG = LoggerFactory.getLogger(ExplicitLamarkFactory.class);
 
     /**
@@ -55,7 +55,7 @@ public class ExplicitLamarkFactory implements ILamarkFactory{
      */
     private Set<DynamicMethodWrapper<LamarkEventListener>> listeners = new HashSet<>();
 
-    @Override
+    //@Override
     public Lamark createConfiguredLamarkInstance() {
         Lamark rval = new Lamark();
         rval.setRuntimeParameters(runtimeParameters);
@@ -71,7 +71,7 @@ public class ExplicitLamarkFactory implements ILamarkFactory{
         return rval;
     }
 
-    @Override
+    //@Override
     public String getShortDescription() {
         return "ExplicitLamarkFactory";
     }
