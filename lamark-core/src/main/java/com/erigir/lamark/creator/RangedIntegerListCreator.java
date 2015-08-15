@@ -8,7 +8,6 @@ import com.erigir.lamark.ICreator;
 import com.erigir.lamark.IValidatable;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.annotation.Creator;
-import com.erigir.lamark.annotation.LamarkComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,6 @@ import java.util.List;
  * @author cweiss
  * @since 04/2006
  */
-@LamarkComponent
 public class RangedIntegerListCreator extends AbstractLamarkComponent implements ICreator<List<Integer>>, IValidatable {
     /**
      * Lower bound for the integers to be created *

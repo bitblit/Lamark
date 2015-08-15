@@ -3,6 +3,10 @@ package com.erigir.lamark.selector;
 import com.erigir.lamark.EFitnessType;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.Lamark;
+import com.erigir.lamark.annotation.FitnessFunction;
+import com.erigir.lamark.config.LamarkBootstrapper;
+import com.erigir.lamark.config.LamarkComponent;
+import com.erigir.lamark.config.LamarkComponentType;
 import com.erigir.lamark.fitness.AllOnes;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,7 +39,7 @@ public class TestRouletteWheel {
     public void testIncreasing() {
         RouletteWheel rw = new RouletteWheel();
         rw.setLamark(new Lamark());
-        rw.getLamark().setFitnessFunction(new AllOnes());
+        rw.getLamark().updateComponent(LamarkBootstrapper.extractComponentsFromObject(new AllOnes(), FitnessFunction.class).get(0));
 
         Collections.sort(source, EFitnessType.MAXIMUM_BEST.getComparator());
         rw.select(source, 100);
@@ -56,7 +60,7 @@ public class TestRouletteWheel {
     public void testDecreasing() {
         RouletteWheel rw = new RouletteWheel();
         rw.setLamark(new Lamark());
-        rw.getLamark().setFitnessFunction(new AllOnes());
+        rw.getLamark().updateComponent(LamarkBootstrapper.extractComponentsFromObject(new AllOnes(), FitnessFunction.class).get(0));
 
         Collections.sort(source, EFitnessType.MINIMUM_BEST.getComparator());
         rw.select(source, 100);

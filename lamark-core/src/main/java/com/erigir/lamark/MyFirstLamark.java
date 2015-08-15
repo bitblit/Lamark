@@ -1,5 +1,6 @@
 package com.erigir.lamark;
 
+import com.erigir.lamark.config.LamarkBootstrapper;
 import com.erigir.lamark.config.LamarkRuntimeParameters;
 import com.erigir.lamark.creator.StringCreator;
 import com.erigir.lamark.crossover.StringSinglePoint;
@@ -10,6 +11,9 @@ import com.erigir.lamark.events.LastPopulationCompleteEvent;
 import com.erigir.lamark.fitness.StringFinderFitness;
 import com.erigir.lamark.mutator.StringSimpleMutator;
 import com.erigir.lamark.selector.RouletteWheel;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * A simple command-line program that searches for the word LAMARK using a GA.
@@ -47,18 +51,22 @@ public class MyFirstLamark implements LamarkEventListener {
      * Since lamark implements Runnable.
      */
     public void go() {
-        Lamark lamark = new Lamark();
+        //Lamark lamark = new Lamark();
         StringFinderFitness fitness = new StringFinderFitness();
         fitness.setTarget("LAMARK");
-        lamark.setFitnessFunction(fitness);
-        lamark.setCrossover(new StringSinglePoint());
-        lamark.setSelector(new RouletteWheel());
-        lamark.setMutator(new StringSimpleMutator());
 
         StringCreator creator = new StringCreator();
         creator.setValidCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
         creator.setSize(6);
-        lamark.setCreator(creator);
+
+        List<Object> holder = new LinkedList<>();
+        holder.add(fitness);
+        holder.add(new StringSinglePoint());
+        holder.add(new RouletteWheel());
+        holder.add(new StringSimpleMutator());
+        holder.add(creator);
+
+        Lamark lamark = LamarkBootstrapper.createLamark(holder);
 
         LamarkRuntimeParameters lrp = new LamarkRuntimeParameters();
 

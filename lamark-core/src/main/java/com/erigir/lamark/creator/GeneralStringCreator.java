@@ -3,9 +3,7 @@
  */
 package com.erigir.lamark.creator;
 
-import com.erigir.lamark.Individual;
 import com.erigir.lamark.annotation.Creator;
-import com.erigir.lamark.annotation.LamarkComponent;
 import com.erigir.lamark.annotation.Param;
 
 import java.util.ArrayList;
@@ -18,7 +16,6 @@ import java.util.Random;
  * @author cweiss
  * @since 04/2006
  */
-@LamarkComponent
 public class GeneralStringCreator {
     private static List<Character> ALPHA = stringToCharacterList("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     private static List<Character> ALPHA_WITH_SPACE = stringToCharacterList("ABCDEFGHIJKLMNOPQRSTUVWXYZ ");

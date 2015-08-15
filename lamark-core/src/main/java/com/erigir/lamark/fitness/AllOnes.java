@@ -5,7 +5,6 @@ import com.erigir.lamark.EFitnessType;
 import com.erigir.lamark.IFitnessFunction;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.annotation.FitnessFunction;
-import com.erigir.lamark.annotation.LamarkComponent;
 
 /**
  * A simple fitness function to find a string with all ones in it.
@@ -15,7 +14,6 @@ import com.erigir.lamark.annotation.LamarkComponent;
  * @author cweiss
  * @since 04/2006
  */
-@LamarkComponent
 public class AllOnes extends AbstractLamarkComponent implements IFitnessFunction<String> {
 
     /**

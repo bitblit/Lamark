@@ -32,24 +32,21 @@
             <version>4.11</version>
         </dependency>
         <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
-            <scope>test</scope>
-            <version>1.3</version>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.6</version>
         </dependency>
+
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.6</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.2</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <modules>
         <module>lamark-core</module>
+        <module>lamark-config</module>
         <module>lamark-example</module>
         <module>lamark-web</module>
         <module>lamark-music</module>

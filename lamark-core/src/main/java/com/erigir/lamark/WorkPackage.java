@@ -1,5 +1,7 @@
 package com.erigir.lamark;
 
+import com.erigir.lamark.annotation.Crossover;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -205,18 +207,18 @@ public class WorkPackage implements Runnable {
             // First, create
             switch (type) {
                 case NEW:
-                    rval = lamark.getCreator().create();
+                    rval = (Individual)lamark.getCreator().execute(lamark);
                     break;
                 case COPY:
                     rval = new Individual(toCopy.getGenome());
                     break;
                 case CROSSOVER:
-                    int parCount = lamark.getCrossover().parentCount();
+                    int parCount = ((Crossover)lamark.getCrossover().getMethodAnnotation()).parentCount();
                     List<Individual<?>> source = crossoverSourcePopulation.getIndividuals();
-                    List<Individual<?>> parents = lamark.getSelector().select(source, parCount);
+                    List<Individual<?>> parents = (List)lamark.getSelector().execute(lamark);//  .select(source, parCount);
                     if (lamark.crossoverFlip()) {
                         // Create the individual
-                        rval = lamark.getCrossover().crossover(parents);
+                        rval = (Individual)lamark.getCrossover().execute(lamark);// .crossover(parents);
                         // Possibly register the parentage
                         lamark.registerParentage(rval, parents);
                     } else {
@@ -230,12 +232,12 @@ public class WorkPackage implements Runnable {
 
             // Now, potentially mutate
             if (lamark.mutationFlip()) {
-                lamark.getMutator().mutate(rval);
+                lamark.getMutator().execute(lamark);//  .mutate(rval);
                 rval.setMutated(true);
             }
 
             // Now, calc the fitness value
-            rval.setFitness(lamark.getFitnessFunction().fitnessValue(rval));
+            rval.setFitness((Double)lamark.getFitnessFunction().execute(lamark));//  .fitnessValue(rval));
 
             // Verify it got in there
             if (rval.getFitness() == null) {

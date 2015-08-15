@@ -71,7 +71,7 @@ public class LamarkFactory {
     }
 
     public LamarkConfig extractConfigFromLamark(Lamark lamark) {
-        LamarkConfig rval = cleanFromJSONString(convertToJson(lamark.getRuntimeParameters()), LamarkConfig.class);
+        /*LamarkConfig rval = cleanFromJSONString(convertToJson(lamark.getRuntimeParameters()), LamarkConfig.class);
         rval.setCreatorClass(lamark.getCreator().getClass());
         rval.setCreatorConfiguration(cleanFromJSONString(convertToJson(lamark.getCreator()), Map.class));
         rval.setCrossoverClass(lamark.getCrossover().getClass());
@@ -85,7 +85,8 @@ public class LamarkFactory {
         rval.setIndividualFormatterClass(lamark.getFormatter().getClass());
         rval.setIndividualFormatterConfiguration(cleanFromJSONString(convertToJson(lamark.getFormatter()), Map.class));
 
-        return rval;
+        return rval;*/
+        return null;
     }
 
     public Lamark createLamarkFromConfig(LamarkConfig lc)
@@ -98,7 +99,7 @@ public class LamarkFactory {
         Lamark rval = new Lamark();
 
         List<String> errors = new LinkedList<String>();
-
+/*
         ICreator creator = factoryCreate(lc.getCreatorClass(), lc.getCreatorConfiguration());
         rval.setCreator(creator);
         require(creator, "Creator", errors);
@@ -183,6 +184,8 @@ public class LamarkFactory {
 
             return rval;
         }
+        */
+        return null;
     }
 
     private void require(Object value, String name, List<String> error) {

@@ -124,7 +124,7 @@ public class Population<T> {
 
         if (individuals.size() == targetSize) {
             // Sort the list
-            Collections.sort(individuals, lamark.getFitnessFunction().fitnessType().getComparator());
+            Collections.sort(individuals, lamark.fitnessType().getComparator());
             endWait();
         }
     }

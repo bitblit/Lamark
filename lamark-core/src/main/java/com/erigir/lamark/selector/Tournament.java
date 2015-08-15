@@ -3,7 +3,6 @@ package com.erigir.lamark.selector;
 import com.erigir.lamark.AbstractLamarkComponent;
 import com.erigir.lamark.ISelector;
 import com.erigir.lamark.Individual;
-import com.erigir.lamark.annotation.LamarkComponent;
 import com.erigir.lamark.annotation.Param;
 import com.erigir.lamark.annotation.Selector;
 
@@ -20,7 +19,6 @@ import java.util.Random;
  * @author cweiss
  * @since 11/2007
  */
-@LamarkComponent
 public class Tournament extends AbstractLamarkComponent implements ISelector {
 
     /**

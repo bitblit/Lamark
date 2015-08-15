@@ -8,7 +8,6 @@ import com.erigir.lamark.IPreloadableCreator;
 import com.erigir.lamark.IValidatable;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.annotation.Creator;
-import com.erigir.lamark.annotation.LamarkComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +18,6 @@ import java.util.List;
  * @author cweiss
  * @since 04/2006
  */
-@LamarkComponent
 public class StringCreator extends AbstractLamarkComponent implements IPreloadableCreator<String>, IValidatable {
     /**
      * List of characters to create new strings from *

@@ -7,9 +7,11 @@ import com.erigir.lamark.AbstractLamarkComponent;
 import com.erigir.lamark.ISelector;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.Lamark;
-import com.erigir.lamark.annotation.LamarkComponent;
 import com.erigir.lamark.annotation.Selector;
+import com.erigir.lamark.config.LamarkComponent;
+import com.erigir.lamark.config.LamarkComponentType;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +24,6 @@ import java.util.List;
  * @author cweiss
  * @since 04/2005
  */
-@LamarkComponent
 public class RouletteWheel extends AbstractLamarkComponent implements ISelector {
     /**
      * Default constructor.
@@ -39,6 +40,20 @@ public class RouletteWheel extends AbstractLamarkComponent implements ISelector 
     public RouletteWheel(Lamark lamark) {
         super();
         setLamark(lamark);
+    }
+
+    public static LamarkComponent createDefaultComponent()
+    {
+        try {
+            RouletteWheel wheel = new RouletteWheel();
+            Method m = wheel.getClass().getMethod("select", List.class, int.class);
+            return new LamarkComponent(wheel, m, LamarkComponentType.SELECTOR);
+        }
+        catch (NoSuchMethodException e)
+        {
+            throw new RuntimeException("Couldnt find hardcoded method?",e);
+        }
+
     }
 
     /**
@@ -78,7 +93,7 @@ public class RouletteWheel extends AbstractLamarkComponent implements ISelector 
         double sumFit = sumFitness(individuals);
         List<Individual<?>> rval = new ArrayList<Individual<?>>(count);
         for (int i = 0; i < count; i++) {
-            Individual next = select(individuals, sumFit);
+            Individual next = innerSelect(individuals, sumFit);
             next.incrementSelected();
             rval.add(next);
         }
@@ -95,7 +110,7 @@ public class RouletteWheel extends AbstractLamarkComponent implements ISelector 
      * @param sumFitness  sum of the fitness of the supplied individuals.
      * @return Individual that was selected
      */
-    private Individual<?> select(List<Individual<?>> individuals, double sumFitness) {
+    private Individual<?> innerSelect(List<Individual<?>> individuals, double sumFitness) {
         return individuals.get(selectIndex(individuals, sumFitness));
     }
 
@@ -107,7 +122,7 @@ public class RouletteWheel extends AbstractLamarkComponent implements ISelector 
      * @return int containing the index of the selected value
      */
     private int selectIndex(List<Individual<?>> individuals, double sumFitness) {
-        switch (getLamark().getFitnessFunction().fitnessType()) {
+        switch (getLamark().fitnessType()) {
             case MINIMUM_BEST:
                 return minimizeSelectIndex(individuals, sumFitness);
             default:

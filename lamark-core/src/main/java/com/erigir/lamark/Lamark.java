@@ -5,6 +5,9 @@
  */
 package com.erigir.lamark;
 
+import com.erigir.lamark.annotation.FitnessFunction;
+import com.erigir.lamark.config.LamarkComponent;
+import com.erigir.lamark.config.LamarkComponentType;
 import com.erigir.lamark.config.LamarkRuntimeParameters;
 import com.erigir.lamark.events.*;
 import com.erigir.lamark.selector.RouletteWheel;
@@ -60,29 +63,9 @@ public class Lamark implements Callable<Population> {
     // ---------------------------------------------------------
     // The basic building blocks of a GA
     /**
-     * Handle to the creator component *
+     * Handle to all the basic components
      */
-    private ICreator creator;
-
-    /**
-     * Handle to the crossover component *
-     */
-    private ICrossover crossover;
-
-    /**
-     * Handle to the fitness function component *
-     */
-    private IFitnessFunction fitnessFunction;
-
-    /**
-     * Handle to the mutator component *
-     */
-    private IMutator mutator;
-
-    /**
-     * Handle to the selector component, defaulted to RouletteWheel *
-     */
-    private ISelector selector = new RouletteWheel(this);
+    private Map<LamarkComponentType, LamarkComponent> components = createDefaultComponents();
 
     /**
      * Handle to the individual formatter, used for printing individuals into messages *
@@ -184,6 +167,12 @@ public class Lamark implements Callable<Population> {
      */
     private List<Individual> toBeInserted = new LinkedList<Individual>();
 
+    private static Map<LamarkComponentType,LamarkComponent> createDefaultComponents()
+    {
+        Map<LamarkComponentType, LamarkComponent> rval = new TreeMap<>();
+        rval.put(LamarkComponentType.SELECTOR, RouletteWheel.createDefaultComponent());
+        return rval;
+    }
 
     /**
      * Records the parents for a given child in the parent registry.
@@ -496,10 +485,10 @@ public class Lamark implements Callable<Population> {
 
                 // Check for a new 'best'
                 if ((currentBest == null)
-                        || (current.best().getFitness() > currentBest.getFitness() && getFitnessFunction()
-                        .fitnessType() == EFitnessType.MAXIMUM_BEST)
-                        || (current.best().getFitness() < currentBest.getFitness() && getFitnessFunction()
-                        .fitnessType() == EFitnessType.MINIMUM_BEST)) {
+                        || (current.best().getFitness() > currentBest.getFitness() &&
+                        fitnessType() == EFitnessType.MAXIMUM_BEST)
+                        || (current.best().getFitness() < currentBest.getFitness() &&
+                        fitnessType() == EFitnessType.MINIMUM_BEST)) {
                     currentBest = current.best();
                     event(new BetterIndividualFoundEvent(this, current,
                             (Individual) current.best()));
@@ -577,7 +566,7 @@ public class Lamark implements Callable<Population> {
      */
     public boolean targetScoreFound() {
         if (currentBest != null && runtimeParameters.getTargetScore() != null) {
-            if (fitnessFunction.fitnessType() == EFitnessType.MAXIMUM_BEST) {
+            if (fitnessType() == EFitnessType.MAXIMUM_BEST) {
                 return currentBest.getFitness().compareTo(runtimeParameters.getTargetScore()) >= 0;
             } else // min best
             {
@@ -586,6 +575,15 @@ public class Lamark implements Callable<Population> {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Helper passthru for fitness type
+     * @return
+     */
+    public EFitnessType fitnessType()
+    {
+        return ((FitnessFunction)getFitnessFunction().getMethodAnnotation()).fitnessType();
     }
 
     /**
@@ -836,24 +834,20 @@ public class Lamark implements Callable<Population> {
         return currentBest;
     }
 
+    public final void updateComponent(LamarkComponent component)
+    {
+        Objects.requireNonNull(component);
+        checkRunning();
+        components.put(component.getType(), component);
+    }
+
     /**
      * Accessor method
      *
      * @return ICrossover containing the property
      */
-    public final ICrossover getCrossover() {
-        return crossover;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param pCrossover new value
-     */
-    public final void setCrossover(ICrossover pCrossover) {
-        checkRunning();
-        this.crossover = pCrossover;
-        updateBackPointer(pCrossover);
+    public final LamarkComponent getCrossover() {
+        return components.get(LamarkComponentType.CROSSOVER);
     }
 
     /**
@@ -861,19 +855,8 @@ public class Lamark implements Callable<Population> {
      *
      * @return IFitnessFunction containing the property
      */
-    public final IFitnessFunction getFitnessFunction() {
-        return fitnessFunction;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param pFitnessFunction new value
-     */
-    public final void setFitnessFunction(IFitnessFunction pFitnessFunction) {
-        checkRunning();
-        this.fitnessFunction = pFitnessFunction;
-        updateBackPointer(pFitnessFunction);
+    public final LamarkComponent getFitnessFunction() {
+        return components.get(LamarkComponentType.FITNESS_FUNCTION);
     }
 
     /**
@@ -881,19 +864,8 @@ public class Lamark implements Callable<Population> {
      *
      * @return IMutator containing the property
      */
-    public final IMutator getMutator() {
-        return mutator;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param pMutator new value
-     */
-    public final void setMutator(IMutator pMutator) {
-        checkRunning();
-        this.mutator = pMutator;
-        updateBackPointer(pMutator);
+    public final LamarkComponent getMutator() {
+        return components.get(LamarkComponentType.MUTATOR);
     }
 
     /**
@@ -901,19 +873,8 @@ public class Lamark implements Callable<Population> {
      *
      * @return ISelector containing the property
      */
-    public final ISelector getSelector() {
-        return selector;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param pSelector new value
-     */
-    public final void setSelector(ISelector pSelector) {
-        checkRunning();
-        this.selector = pSelector;
-        updateBackPointer(pSelector);
+    public final LamarkComponent getSelector() {
+        return components.get(LamarkComponentType.SELECTOR);
     }
 
     /**
@@ -921,25 +882,8 @@ public class Lamark implements Callable<Population> {
      *
      * @return ICreator containing the property
      */
-    public final ICreator getCreator() {
-        return creator;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param pCreator new value
-     */
-    public final void setCreator(ICreator pCreator) {
-        checkRunning();
-        this.creator = pCreator;
-        updateBackPointer(pCreator);
-    }
-
-    private void updateBackPointer(ILamarkComponent component) {
-        if (component != null) {
-            component.setLamark(this);
-        }
+    public final LamarkComponent getCreator() {
+        return components.get(LamarkComponentType.CREATOR);
     }
 
     /**
