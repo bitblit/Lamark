@@ -39,7 +39,8 @@ public class TestRouletteWheel {
     public void testIncreasing() {
         RouletteWheel rw = new RouletteWheel();
         rw.setLamark(new Lamark());
-        rw.getLamark().updateComponent(LamarkBootstrapper.extractComponentsFromObject(new AllOnes(), FitnessFunction.class).get(0));
+        List<LamarkComponent> list = LamarkBootstrapper.extractComponentsFromObject(new AllOnes(), FitnessFunction.class);
+        rw.getLamark().updateComponent(list.get(0));
 
         Collections.sort(source, EFitnessType.MAXIMUM_BEST.getComparator());
         rw.select(source, 100);
@@ -75,7 +76,7 @@ public class TestRouletteWheel {
             double current = i.getFitness();
             int expected = (int) (((max - current) / newSum) * 100);
             int var = expected - i.getSelectedCount();
-            LOG.debug("{} Expected {} got {} v={}" + new Object[]{i.getGenome(), expected, i.getSelectedCount(), var});
+            LOG.debug("{} Expected {} got {} v={}" , new Object[]{i.getGenome(), expected, i.getSelectedCount(), var});
             if (false) {
                 fail("Unexpectedly large variance:" + var);
             }

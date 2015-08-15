@@ -77,7 +77,7 @@ public class LamarkBootstrapper {
         {
             LOG.debug("----> {}", m.getName());
             for (Annotation a:m.getAnnotations()) {
-                LamarkComponentType matchType = LamarkComponentType.fromAnnotationClass(a.getClass());
+                LamarkComponentType matchType = LamarkComponentType.fromAnnotationClass(a.annotationType());
                 if (matchType == findType) {
                     LOG.debug("Adding as a valid {}", matchType);
                     rval.add(new LamarkComponent(o, m, matchType));
