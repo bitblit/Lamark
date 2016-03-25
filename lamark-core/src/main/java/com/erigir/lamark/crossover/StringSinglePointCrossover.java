@@ -29,10 +29,10 @@ public class StringSinglePointCrossover extends AbstractLamarkComponent implemen
         }
         if (strings.get(0).length()!=strings.get(1).length())
         {
-            throw new IllegalArgumentException("Strings must be same lenght");
+            throw new IllegalArgumentException("Strings must be same length");
         }
 
-        int split = rand().nextInt(strings.get(0).length());
+        int split = rand().nextInt(strings.get(0).length()-1)+1;
         StringBuilder sb = new StringBuilder();
         sb.append(strings.get(0).substring(0,split));
         sb.append(strings.get(1).substring(split));
