@@ -1,7 +1,9 @@
 package com.erigir.lamark.events;
 
-import com.erigir.lamark.Lamark;
-import com.erigir.lamark.Population;
+import com.erigir.lamark.stream.Individual;
+import com.erigir.lamark.stream.StreamLamark;
+
+import java.util.List;
 
 /**
  * This event is fired when all the members of a given population are
@@ -14,22 +16,23 @@ import com.erigir.lamark.Population;
  * @author cweiss
  * @since 11/2006
  */
-public class UniformPopulationEvent extends PopulationCompleteEvent {
+public class UniformPopulationEvent<T> extends PopulationCompleteEvent {
 
     /**
      * Default constructor
      *
      * @param pLamark Lamark object that generated the exception
-     * @param pPop    Population object that was uniform
+     * @param currentGeneration    Population that was uniform
+     * @param generationNumber Long containing the idx of the current generation
      */
-    public UniformPopulationEvent(Lamark pLamark, Population pPop) {
-        super(pLamark, pPop);
+    public UniformPopulationEvent(StreamLamark pLamark, List<Individual<T>> currentGeneration, Long generationNumber) {
+        super(pLamark, currentGeneration, generationNumber);
     }
 
     /**
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        return "Population Uniform.  Population #" + getPopulation().getNumber();
+        return "Population Uniform.  Population #" + getGenerationNumber();
     }
 }

@@ -1,4 +1,6 @@
-package com.erigir.lamark.stream;
+package com.erigir.lamark.selector;
+
+import com.erigir.lamark.stream.Individual;
 
 import java.util.List;
 import java.util.Random;

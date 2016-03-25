@@ -4,11 +4,11 @@
 package com.erigir.lamark.crossover;
 
 import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.ICrossover;
-import com.erigir.lamark.Individual;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.function.Function;
 
 
 /**
@@ -18,15 +18,19 @@ import java.util.List;
  * @author cweiss
  * @since 03/2005
  */
-public class ListSinglePoint extends AbstractLamarkComponent implements ICrossover<List> {
+public class ListSinglePoint  extends AbstractLamarkComponent implements Function<List<List>,List> {
 
-    /**
-     * @see com.erigir.lamark.ICrossover#crossover(java.util.List)
-     */
-    public Individual<List> crossover(List<Individual<List>> parents) {
-        List p1 = parents.get(0).getGenome();
-        List p2 = parents.get(1).getGenome();
-        int point = getLamark().getRandom().nextInt(p1.size());
+    public ListSinglePoint() {
+    }
+
+    public ListSinglePoint(Random srcRandom) {
+        super(srcRandom);
+    }
+
+    public List apply(List<List> parents) {
+        List p1 = parents.get(0);
+        List p2 = parents.get(1);
+        int point = rand().nextInt(p1.size());
 
         List<Object> c1 = new ArrayList<Object>(p1.size());
 
@@ -37,17 +41,7 @@ public class ListSinglePoint extends AbstractLamarkComponent implements ICrossov
             c1.add(p2.get(i));
         }
 
-        Individual i1 = new Individual(c1);
-
-        return i1;
+        return c1;
     }
-
-    /**
-     * @see com.erigir.lamark.ICrossover#parentCount()
-     */
-    public int parentCount() {
-        return 2;
-    }
-
 
 }

@@ -4,12 +4,12 @@
 package com.erigir.lamark.crossover;
 
 import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.ICrossover;
-import com.erigir.lamark.Individual;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
+import java.util.function.Function;
 
 /**
  * Crosses over two lists of integers preserving both the permutation and longest common subsequence property.
@@ -22,8 +22,14 @@ import java.util.List;
  * @author cweiss
  * @since 03/2005
  */
-public class IntegerPermutationLongestCommonSubsequence extends AbstractLamarkComponent implements
-        ICrossover<List<Integer>> {
+public class IntegerPermutationLongestCommonSubsequence extends AbstractLamarkComponent implements Function<List<List<Integer>>,List<Integer>> {
+
+    public IntegerPermutationLongestCommonSubsequence() {
+    }
+
+    public IntegerPermutationLongestCommonSubsequence(Random srcRandom) {
+        super(srcRandom);
+    }
 
     /**
      * Computes the longest common subsequence of two lists, assuming equal length.
@@ -115,19 +121,9 @@ public class IntegerPermutationLongestCommonSubsequence extends AbstractLamarkCo
 
     }
 
-    /**
-     * @see com.erigir.lamark.ICrossover#parentCount()
-     */
-    public int parentCount() {
-        return 2;
-    }
-
-    /**
-     * @see com.erigir.lamark.ICrossover#crossover(java.util.List)
-     */
-    public Individual<List<Integer>> crossover(List<Individual<List<Integer>>> parents) {
-        List<Integer> p1 = parents.get(0).getGenome();
-        List<Integer> p2 = parents.get(1).getGenome();
+    public List<Integer> apply(List<List<Integer>> parents) {
+        List<Integer> p1 = parents.get(0);
+        List<Integer> p2 = parents.get(1);
         int size = p1.size();
 
         // Find the largest common substring in any order
@@ -158,10 +154,10 @@ public class IntegerPermutationLongestCommonSubsequence extends AbstractLamarkCo
         remainder.addAll(p1);
         remainder.removeAll(sub);
         while (remainder.size() > 0) {
-            child.add(remainder.remove(getLamark().getRandom().nextInt(remainder.size())));
+            child.add(remainder.remove(rand().nextInt(remainder.size())));
         }
 
-        return new Individual<List<Integer>>(child);
+        return child;
     }
 
 

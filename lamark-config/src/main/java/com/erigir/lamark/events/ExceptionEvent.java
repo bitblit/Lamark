@@ -1,6 +1,7 @@
 package com.erigir.lamark.events;
 
 import com.erigir.lamark.Lamark;
+import com.erigir.lamark.stream.StreamLamark;
 
 /**
  * This event is thrown whenever an exception occurs within the code
@@ -21,7 +22,7 @@ public class ExceptionEvent extends LamarkEvent {
      * @param pLamark    Lamark object that generated the exception
      * @param pException Exception object that occurred
      */
-    public ExceptionEvent(Lamark pLamark, Throwable pException) {
+    public ExceptionEvent(StreamLamark pLamark, Throwable pException) {
         super(pLamark);
         exception = pException;
     }

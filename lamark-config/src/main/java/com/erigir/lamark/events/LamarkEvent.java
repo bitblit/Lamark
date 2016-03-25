@@ -1,6 +1,7 @@
 package com.erigir.lamark.events;
 
 import com.erigir.lamark.Lamark;
+import com.erigir.lamark.stream.StreamLamark;
 
 /**
  * The base class for all Lamark-created events.  All lamark events
@@ -14,14 +15,14 @@ public abstract class LamarkEvent {
     /**
      * Handle to the generating lamark instance
      */
-    private Lamark lamark;
+    private StreamLamark lamark;
 
     /**
      * Default constructor
      *
      * @param pLamark Lamark object that generated the exception
      */
-    public LamarkEvent(Lamark pLamark) {
+    public LamarkEvent(StreamLamark pLamark) {
         lamark = pLamark;
     }
 
@@ -30,7 +31,7 @@ public abstract class LamarkEvent {
      *
      * @return Lamark instance that created the event
      */
-    public Lamark getLamark() {
+    public StreamLamark getLamark() {
         return lamark;
     }
 }

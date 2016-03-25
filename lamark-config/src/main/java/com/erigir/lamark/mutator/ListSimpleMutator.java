@@ -5,11 +5,11 @@
 package com.erigir.lamark.mutator;
 
 import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.IMutator;
-import com.erigir.lamark.Individual;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.function.Function;
 
 
 /**
@@ -20,21 +20,25 @@ import java.util.List;
  * @author cweiss
  * @since 04/2005
  */
-public class ListSimpleMutator extends AbstractLamarkComponent implements IMutator<List> {
-    /**
-     * @see com.erigir.lamark.IMutator#mutate(com.erigir.lamark.Individual)
-     */
-    public void mutate(Individual<List> being) {
-        List tempChromosome = being.getGenome();
-        List<Object> chromosome = new ArrayList<Object>(tempChromosome.size());
-        chromosome.addAll(tempChromosome);
-        int loc1 = getLamark().getRandom().nextInt(chromosome.size());
-        int loc2 = getLamark().getRandom().nextInt(chromosome.size());
+public class ListSimpleMutator  extends AbstractLamarkComponent implements Function<List,List> {
+
+    public ListSimpleMutator() {
+        super();
+    }
+
+    public ListSimpleMutator(Random srcRandom) {
+        super(srcRandom);
+    }
+
+    public List apply(List being) {
+        List<Object> chromosome = new ArrayList<Object>(being.size());
+        chromosome.addAll(being);
+        int loc1 = rand().nextInt(chromosome.size());
+        int loc2 = rand().nextInt(chromosome.size());
         Object temp = chromosome.get(loc2);
         chromosome.set(loc2, chromosome.get(loc1));
         chromosome.set(loc1, temp);
-        being.setGenome(chromosome);
+        return chromosome;
     }
-
 
 }

@@ -1,6 +1,10 @@
 package com.erigir.lamark.stream;
 
 
+import com.erigir.lamark.events.*;
+import com.erigir.lamark.selector.RouletteWheelSelector;
+import com.erigir.lamark.selector.Selector;
+
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
@@ -9,34 +13,111 @@ import java.util.stream.Collectors;
  * Created by cweiss1271 on 3/24/16.
  */
 public class StreamLamark<T> {
+    private List<FilteredListener> listeners = new LinkedList<>();
 
+    private LastPopulationCompleteEvent.Type finishType=null;
+    private Individual bestSoFar;
     private List<T> initialValues;
     private Random random;
     private Integer populationSize;
     private Long maxGenerations;
-    private int currentGeneration = 0;
+    private Long currentGeneration = 0l;
     private Supplier<T> creator;
     //private ToDoubleFunction<T> fitnessFunction;
     private InnerFitnessCalculator<T> fitnessFunction;
     private InnerCrossover<T> crossover;
     private InnerMutator<T> mutator;
+    private Function<T,String> formatter = new Function<T, String>() {
+        @Override
+        public String apply(T t) {
+            return String.valueOf(t);
+        }
+    };
     //private Function<List<T>, T> crossover;
     //private Function<T,T> mutator;
     private Wrapper<T> wrapper = new Wrapper<>();
     private Stripper<T> stripper = new Stripper<>();
     private Selector<T> selector = new RouletteWheelSelector<>();
+    private Double targetScore = null;
 
-    private boolean aborted = false;
-
-    private boolean shouldKeepRunning()
+    public void addListener(LamarkEventListener listener)
     {
-        return (!aborted && (maxGenerations==null || currentGeneration<maxGenerations));
+        Optional<FilteredListener> o = listeners.stream().filter((p)->p.getListener()==listener).findFirst();
+        if (!o.isPresent())
+        {
+            listeners.add(new FilteredListener(listener,null));
+        }
+    }
+
+    public String format(Individual<T> individual)
+    {
+        return formatter.apply(individual.getGenome());
+    }
+
+    public String format(Collection<Individual<T>> individuals)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (Individual<T> i:individuals)
+        {
+            sb.append(format(i));
+            sb.append(",");
+        }
+        String out = sb.toString();
+        return out.substring(0,out.length()-1);
+    }
+
+    public void addListener(LamarkEventListener listener, Set<Class<? extends LamarkEvent>> filter)
+    {
+        Optional<FilteredListener> o = listeners.stream().filter((p)->p.getListener()==listener).findFirst();
+        if (!o.isPresent())
+        {
+            listeners.add(new FilteredListener(listener,filter));
+        }
+        else
+        {
+            o.get().addFilter(filter);
+        }
+    }
+
+    private void publishEvent(LamarkEvent event)
+    {
+        for (FilteredListener f:listeners)
+        {
+            f.applyEvent(event);
+        }
+    }
+
+    private void updateIfShouldKeepRunning(List<Individual<T>> currentPopulation)
+    {
+        if (maxGenerations!=null && currentGeneration>=maxGenerations)
+        {
+            finishType = LastPopulationCompleteEvent.Type.BY_POPULATION_NUMBER;
+        }
+        else if (targetScore!=null && bestSoFar!=null && bestSoFar.getFitness().compareTo(targetScore)>=0)
+        {
+            finishType = LastPopulationCompleteEvent.Type.BY_TARGET_SCORE;
+        }
+        else
+        {
+            boolean allEqual = true;
+            T first = currentPopulation.get(0).getGenome();
+            for (int i=1;i<currentPopulation.size() && allEqual;i++)
+            {
+                allEqual = currentPopulation.get(i).getGenome().equals(first);
+            }
+            if (allEqual)
+            {
+                publishEvent(new UniformPopulationEvent(this, currentPopulation));
+                finishType = LastPopulationCompleteEvent.Type.UNIFORM;
+            }
+        }
     }
 
     public void stop()
     {
         System.out.println("Aborted!");
-        aborted=true;
+        finishType = LastPopulationCompleteEvent.Type.ABORTED;
+        publishEvent(new AbortedEvent(this));
     }
 
     public void start()
@@ -49,35 +130,65 @@ public class StreamLamark<T> {
         }
 
         System.out.println("Got these items : "+items);
+        List<Individual<T>> curGen = null;
 
-        List<Individual<T>> curGen = items.stream().map(wrapper).collect(Collectors.toList());
-
-        while (shouldKeepRunning())
+        try {
+            curGen = items.stream().map(wrapper).collect(Collectors.toList());
+        }
+        catch (Exception e)
         {
-            // Start each generation with a list of individuals with no fitness value yet
+            publishEvent(new ExceptionEvent(this, e));
+            this.stop();
+        }
 
-            // Calc the fit values and sort
-            curGen = curGen.stream().map(fitnessFunction).sorted().collect(Collectors.toList());
-            // Calc total
-            System.out.println("Generation "+currentGeneration+" : "+curGen);
-            System.out.println("Stripped:"+curGen.stream().map(stripper).collect(Collectors.toList()));
+        while (finishType == null)
+        {
+            try {
+                // Start each generation with a list of individuals with no fitness value yet
 
-            double totalFitness = curGen.stream().mapToDouble((p)->p.getFitness()).sum();
-            // TODO: impl selector
-            System.out.println("Total fitness: "+totalFitness);
+                // Calc the fit values and sort
+                curGen = curGen.stream().map(fitnessFunction).sorted().collect(Collectors.toList());
 
-            // Select for crossover
-            List<List<Individual<T>>> parents = new ArrayList<>();
-            for (int i=0;i<populationSize;i++)
+                // If we've found a new best, update and report
+                if (bestSoFar == null || curGen.get(0).getFitness().compareTo(bestSoFar.getFitness()) > 0) {
+                    bestSoFar = curGen.get(0);
+                    publishEvent(new BetterIndividualFoundEvent(this, curGen, currentGeneration , bestSoFar));
+                }
+
+                // Calc total
+                System.out.println("Generation " + currentGeneration + " : " + curGen);
+                System.out.println("Stripped:" + curGen.stream().map(stripper).collect(Collectors.toList()));
+
+                double totalFitness = curGen.stream().mapToDouble((p) -> p.getFitness()).sum();
+                // TODO: impl selector
+                System.out.println("Total fitness: " + totalFitness);
+
+                // Select for crossover
+                List<List<Individual<T>>> parents = new ArrayList<>();
+                for (int i = 0; i < populationSize; i++) {
+                    parents.add(Arrays.asList(selector.select(curGen, random, totalFitness), selector.select(curGen, random, totalFitness)));
+                }
+
+                publishEvent(new PopulationCompleteEvent(this, curGen,currentGeneration));
+
+                // At the end of each cycle check exit conditions
+                updateIfShouldKeepRunning(curGen);
+                // --------------------
+                // Next generation starts here
+
+                System.out.println("Generating next gen...");
+                currentGeneration++;
+                // Apply crossover and mutation
+                curGen = parents.stream().map(crossover).map(mutator).collect(Collectors.toList());
+            }
+            catch (Exception e)
             {
-                parents.add(Arrays.asList(selector.select(curGen, random, totalFitness), selector.select(curGen,random, totalFitness)));
+                publishEvent(new ExceptionEvent(this, e));
             }
 
-            System.out.println("Generating next gen...");
-            currentGeneration++;
-            // Apply crossover and mutation
-            curGen = parents.stream().map(crossover).map(mutator).collect(Collectors.toList());
         }
+
+        publishEvent(new LastPopulationCompleteEvent<>(this, curGen, currentGeneration, finishType ));
 
     }
 
@@ -92,17 +203,20 @@ public class StreamLamark<T> {
         private ToDoubleFunction<T> fitnessFunction;
         private Function<List<T>,T> crossover;
         private Function<T,T> mutator;
+        private Function<T,String> formatter;
         private double pCrossover=1.0;
         private double pMutation=.005;
         private Selector selector;
         private Integer populationSize;
 
+        // TODO: Implement the stuff below
         private Double upperElitism;
         private Double lowerElitism;
         private Double targetScore;
 
         private boolean trackParentage;
         private boolean abortOnUniformPopulation;
+        private boolean runParallel;
 
 
         public StreamLamark<T> build()
@@ -129,6 +243,12 @@ public class StreamLamark<T> {
             rval.fitnessFunction = new InnerFitnessCalculator<>(fitnessFunction);
             rval.selector = (selector==null)?new RouletteWheelSelector<>():selector;
             rval.populationSize = populationSize;
+
+            if (formatter!=null)
+            {
+                rval.formatter = formatter;
+            }
+
             return rval;
         }
 
@@ -185,6 +305,11 @@ public class StreamLamark<T> {
 
         public LamarkBuilder withPopulationSize(final Integer populationSize) {
             this.populationSize = populationSize;
+            return this;
+        }
+
+        public LamarkBuilder withFormatter(final Function<T, String> formatter) {
+            this.formatter = formatter;
             return this;
         }
 

@@ -2,6 +2,10 @@ package com.erigir.lamark.events;
 
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.Population;
+import com.erigir.lamark.stream.Individual;
+import com.erigir.lamark.stream.StreamLamark;
+
+import java.util.List;
 
 /**
  * This event is fired when the last population has been generated, which
@@ -14,7 +18,7 @@ import com.erigir.lamark.Population;
  * @author cweiss
  * @since 03/2005
  */
-public class LastPopulationCompleteEvent extends PopulationCompleteEvent {
+public class LastPopulationCompleteEvent<T> extends PopulationCompleteEvent<T> {
 
     /**
      * Type of last population it was : ie, the reason the instance stopped *
@@ -28,8 +32,8 @@ public class LastPopulationCompleteEvent extends PopulationCompleteEvent {
      * @param pPop       Population that was last
      * @param finishType Type of the finishing event
      */
-    public LastPopulationCompleteEvent(Lamark pLamark, Population pPop, Type finishType) {
-        super(pLamark, pPop);
+    public LastPopulationCompleteEvent(StreamLamark pLamark, List<Individual<T>> pPop, Long generationNumber, Type finishType) {
+        super(pLamark, pPop, generationNumber);
         type = finishType;
     }
 
@@ -37,7 +41,7 @@ public class LastPopulationCompleteEvent extends PopulationCompleteEvent {
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        return "Completed last population " + type + ", #" + getPopulation().getNumber() + " pop=" + getLamark().format(getPopulation().getIndividuals());
+        return "Completed last population " + type + ", #" + getGenerationNumber() + " pop=" + getLamark().format(getPopulation());
     }
 
     /**

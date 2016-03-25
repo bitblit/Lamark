@@ -1,6 +1,7 @@
 package com.erigir.lamark.events;
 
 import com.erigir.lamark.Lamark;
+import com.erigir.lamark.stream.StreamLamark;
 
 /**
  * An event that is fired if SingleThreadedLamark is "aborted" for some
@@ -16,7 +17,7 @@ public class AbortedEvent extends LamarkEvent {
      *
      * @param pLamark Lamark object that generated the exception
      */
-    public AbortedEvent(Lamark pLamark) {
+    public AbortedEvent(StreamLamark pLamark) {
         super(pLamark);
     }
 

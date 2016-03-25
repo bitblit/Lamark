@@ -1,37 +1,33 @@
 package com.erigir.lamark;
 
-/**
- * Provides a default implementation of ILamarkComponent.
- * <p/>
- * This class provides a simple implementation of the requirements
- * of ILamarkComponent, so that descendant classes don't have to
- * deal with the details.
- *
- * @author cweiss
- * @version 2007-04-28
- */
-public abstract class AbstractLamarkComponent implements ILamarkComponent {
-    /**
-     * Handle to the instance of lamark using this component
-     */
-    private Lamark lamark;
+import java.util.Objects;
+import java.util.Random;
 
-    /**
-     * Returns a handle to the stored lamark instance.
-     * Exposes the private Lamark instance
-     * for use by any subclasses.
-     *
-     * @return Lamark instance for use.
-     */
-    public Lamark getLamark() {
-        return lamark;
+/**
+ * Any class implementing the right interface can be a Lamark component, but
+ * good ones need to support having an instance of a "Random" object passed
+ * in, to support repeatable runs (with a set seed).  This class simplifies
+ * construction of general Lamark components with this and other support
+ * Created by cweiss1271 on 3/25/16.
+ */
+public abstract class AbstractLamarkComponent {
+    private Random random = new Random(); // Yeah, it might get thrown away.  I'm ok with that, perf wise.
+
+    public AbstractLamarkComponent()
+    {
+        super();
     }
 
-    /**
-     * @see com.erigir.lamark.ILamarkComponent#setLamark(Lamark)
-     */
-    public void setLamark(Lamark pLamark) {
-        lamark = pLamark;
+    public AbstractLamarkComponent(Random srcRandom)
+    {
+        super();
+        Objects.requireNonNull(srcRandom);
+        this.random = srcRandom;
+    }
+
+    public Random rand()
+    {
+        return random;
     }
 
 }

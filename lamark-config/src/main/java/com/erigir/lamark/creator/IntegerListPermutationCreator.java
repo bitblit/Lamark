@@ -4,12 +4,11 @@
 package com.erigir.lamark.creator;
 
 import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.ICreator;
-import com.erigir.lamark.IValidatable;
-import com.erigir.lamark.Individual;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.function.Supplier;
 
 
 /**
@@ -18,11 +17,21 @@ import java.util.List;
  * @author cweiss
  * @since 04/2006
  */
-public class IntegerListPermutationCreator extends AbstractLamarkComponent implements ICreator<List<Integer>>, IValidatable {
+public class IntegerListPermutationCreator extends AbstractLamarkComponent implements Supplier<List<Integer>> {
     /**
      * Size of the list to generate (REQUIRED)*
      */
     private Integer size;
+
+    public IntegerListPermutationCreator(int size, Random random) {
+        super(random);
+        this.size = size;
+    }
+
+    public IntegerListPermutationCreator(int size) {
+        super();
+        this.size = size;
+    }
 
     /**
      * Accessor method
@@ -33,24 +42,8 @@ public class IntegerListPermutationCreator extends AbstractLamarkComponent imple
         return size;
     }
 
-    /**
-     * Mutator method
-     *
-     * @param size new value
-     */
-    public void setSize(Integer size) {
-        this.size = size;
-    }
 
-    /**
-     * @see com.erigir.lamark.ICreator#create()
-     */
-    public Individual<List<Integer>> create() {
-        getLamark().logFine("create called");
-        if (size == null) {
-            throw new IllegalStateException("Cannot process, 'size' not set");
-        }
-
+    public List<Integer> get() {
         ArrayList<Integer> rval = new ArrayList<Integer>(size);
         ArrayList<Integer> temp = new ArrayList<Integer>(size);
 
@@ -60,26 +53,11 @@ public class IntegerListPermutationCreator extends AbstractLamarkComponent imple
 
         int loc = -1;
         for (int i = 0; i < size; i++) {
-            loc = getLamark().getRandom().nextInt(temp.size());
+            loc = rand().nextInt(temp.size());
             rval.add(temp.get(loc));
             temp.remove(loc);
         }
-        Individual i = new Individual();
-        i.setGenome(rval);
-
-        return i;
+        return rval;
     }
-
-    /**
-     * Checks if size was set.
-     *
-     * @see com.erigir.lamark.IValidatable#validate(List)
-     */
-    public void validate(List<String> errors) {
-        if (size == null) {
-            errors.add("No 'size' set for the creator");
-        }
-    }
-
 
 }

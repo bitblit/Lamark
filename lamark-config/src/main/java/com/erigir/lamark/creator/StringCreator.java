@@ -4,14 +4,8 @@
 package com.erigir.lamark.creator;
 
 import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.IPreloadableCreator;
-import com.erigir.lamark.IValidatable;
-import com.erigir.lamark.Individual;
-import com.erigir.lamark.annotation.Creator;
-import com.erigir.lamark.annotation.LamarkComponent;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -20,16 +14,64 @@ import java.util.function.Supplier;
  * @author cweiss
  * @since 04/2006
  */
-@LamarkComponent
-public class StringCreator extends AbstractLamarkComponent implements IPreloadableCreator<String>, IValidatable {
+public class StringCreator extends AbstractLamarkComponent implements Supplier<String> {
     /**
-     * List of characters to create new strings from *
+     * Set of characters to create new strings from *
      */
     private List<Character> validCharacters = new ArrayList<Character>();
     /**
-     * Size of the list to generate (REQUIRED)*
+     * Size of the string to generate (REQUIRED)*
      */
-    private Integer size;
+    private int size;
+
+    public StringCreator(Set<Character> validCharacters, int size, Random random) {
+        super(random);
+        initialize(validCharacters, size);
+    }
+
+    public StringCreator(Set<Character> validCharacters, int size) {
+        super();
+        initialize(validCharacters, size);
+    }
+
+    public StringCreator(String validCharacters, int size, Random random) {
+        super(random);
+        Objects.requireNonNull(validCharacters);
+
+        Set<Character> temp = new TreeSet<>();
+        for (char c:validCharacters.toCharArray())
+        {
+            temp.add(c);
+        }
+
+        initialize(temp, size);
+    }
+
+    private void initialize(Set<Character> validCharacters, int size)
+    {
+        Objects.requireNonNull(validCharacters);
+
+        if (validCharacters.size() < 2) {
+            throw new IllegalArgumentException("Need at least 2 valid characters");
+        }
+
+        // Pass in a set for uniqueness, convert to list for random access
+        this.validCharacters = new ArrayList<>(validCharacters);
+        this.size = size;
+    }
+
+    public StringCreator(String validCharacters, int size) {
+        super();
+        Objects.requireNonNull(validCharacters);
+
+        Set<Character> temp = new TreeSet<>();
+        for (char c:validCharacters.toCharArray())
+        {
+            temp.add(c);
+        }
+
+        initialize(temp, size);
+    }
 
     /**
      * Accessor method
@@ -41,105 +83,54 @@ public class StringCreator extends AbstractLamarkComponent implements IPreloadab
     }
 
 
-    /**
-     * Mutator method
-     *
-     * @param size new value
-     */
-    public void setSize(Integer size) {
-        this.size = size;
-    }
-
-    /**
-     * @see com.erigir.lamark.IPreloadableCreator#createFromPreload(String)
-     */
-    public Individual<String> createFromPreload(String value) {
-        if (validCharacters == null || validCharacters.size() == 0) {
-            throw new IllegalStateException("Not initialized, or no valid characters");
-        }
-        if (size == null) {
-            throw new IllegalStateException("Cannot process, 'size' not set");
-        }
-        if (value == null) {
-            throw new IllegalStateException("Cannot process, passed value was null");
-        }
-        if (value.length() != size) {
-            throw new IllegalStateException("Cannot process, passed value was wrong size");
-        }
-
-        Individual<String> i = new Individual<String>();
-        i.setGenome(value);
-        return i;
-    }
-
-    /**
-     * @see com.erigir.lamark.ICreator#create()
-     */
-    public Individual<String> create() {
-        if (validCharacters == null || validCharacters.size() == 0) {
-            throw new IllegalStateException("Not initialized, or no valid characters");
-        }
-        if (size == null) {
-            throw new IllegalStateException("Cannot process, 'size' not set");
-        }
-
-        StringBuffer sb = new StringBuffer();
+    public String get() {
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < size; i++) {
-            sb.append(validCharacters.get(getLamark().getRandom().nextInt(validCharacters
-                    .size())));
-        }
-        Individual<String> i = new Individual<String>();
-        i.setGenome(sb.toString());
-        return i;
-    }
-
-    @Creator
-    public String createString()
-    {
-        if (validCharacters == null || validCharacters.size() == 0) {
-            throw new IllegalStateException("Not initialized, or no valid characters");
-        }
-        if (size == null) {
-            throw new IllegalStateException("Cannot process, 'size' not set");
-        }
-
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < size; i++) {
-            sb.append(validCharacters.get(getLamark().getRandom().nextInt(validCharacters
-                    .size())));
+            sb.append(validCharacters.get(rand().nextInt(validCharacters.size())));
         }
         return sb.toString();
     }
 
-
-    /**
-     * Mutator method.
-     *
-     * @param validChars String containing new value
-     */
-    public void setValidCharacters(String validChars) {
-        for (int i = 0; i < validChars.length(); i++) {
-            Character c = validChars.charAt(i);
-            if (!validCharacters.contains(c)) {
-                validCharacters.add(c);
-            }
-        }
+    public static StringCreator alphaAndSpaceCreator(int length, Random random)
+    {
+        return new StringCreator("ABCDEFGHIJKLMNOPQRSTUVWXYZ ",length,random);
+    }
+    public static StringCreator alphaCreator(int length, Random random)
+    {
+        return new StringCreator("ABCDEFGHIJKLMNOPQRSTUVWXYZ",length,random);
+    }
+    public static StringCreator binaryCreator(int length, Random random)
+    {
+        return new StringCreator("01",length,random);
+    }
+    public static StringCreator decimalCreator(int length, Random random)
+    {
+        return new StringCreator("0123456789",length,random);
+    }
+    public static StringCreator hexadecimalCreator(int length, Random random)
+    {
+        return new StringCreator("0123456789ABCDEF",length,random);
     }
 
-
-    /**
-     * Checks if size and validCharacters were set.
-     *
-     * @see com.erigir.lamark.IValidatable#validate(List)
-     */
-    public void validate(List<String> errors) {
-        if (validCharacters == null) {
-            errors.add("No 'validCharacters' set for the creator");
-        }
-        if (size == null) {
-            errors.add("No 'size' set for the creator");
-        }
+    public static StringCreator alphaAndSpaceCreator(int length)
+    {
+        return new StringCreator("ABCDEFGHIJKLMNOPQRSTUVWXYZ ",length);
     }
-
+    public static StringCreator alphaCreator(int length)
+    {
+        return new StringCreator("ABCDEFGHIJKLMNOPQRSTUVWXYZ",length);
+    }
+    public static StringCreator binaryCreator(int length)
+    {
+        return new StringCreator("01",length);
+    }
+    public static StringCreator decimalCreator(int length)
+    {
+        return new StringCreator("0123456789",length);
+    }
+    public static StringCreator hexadecimalCreator(int length)
+    {
+        return new StringCreator("0123456789ABCDEF",length);
+    }
 
 }

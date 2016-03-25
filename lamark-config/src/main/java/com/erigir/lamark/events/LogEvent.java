@@ -1,6 +1,6 @@
 package com.erigir.lamark.events;
 
-import com.erigir.lamark.Lamark;
+import com.erigir.lamark.stream.StreamLamark;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,7 +35,7 @@ public class LogEvent extends LamarkEvent {
      * @param message Object to log as a message
      * @param lvl     Level to log the message at
      */
-    public LogEvent(Lamark lamark, Object message, Level lvl) {
+    public LogEvent(StreamLamark lamark, Object message, Level lvl) {
         super(lamark);
         this.message = message;
         this.level = lvl;
