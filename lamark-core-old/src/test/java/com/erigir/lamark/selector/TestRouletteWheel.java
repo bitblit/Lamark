@@ -1,6 +1,6 @@
 package com.erigir.lamark.selector;
 
-import com.erigir.lamark.FitnessType;
+import com.erigir.lamark.EFitnessType;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.annotation.FitnessFunction;
@@ -42,7 +42,7 @@ public class TestRouletteWheel {
         List<LamarkComponent> list = LamarkBootstrapper.extractComponentsFromObject(new AllOnes(), FitnessFunction.class);
         rw.getLamark().updateComponent(list.get(0));
 
-        Collections.sort(source, FitnessType.MAXIMUM_BEST.getComparator());
+        Collections.sort(source, EFitnessType.MAXIMUM_BEST.getComparator());
         rw.select(source, 100);
 
         double sum = RouletteWheel.sumFitness(source);
@@ -63,7 +63,7 @@ public class TestRouletteWheel {
         rw.setLamark(new Lamark());
         rw.getLamark().updateComponent(LamarkBootstrapper.extractComponentsFromObject(new AllOnes(), FitnessFunction.class).get(0));
 
-        Collections.sort(source, FitnessType.MINIMUM_BEST.getComparator());
+        Collections.sort(source, EFitnessType.MINIMUM_BEST.getComparator());
         rw.select(source, 100);
 
         double max = RouletteWheel.maxFitness(source);

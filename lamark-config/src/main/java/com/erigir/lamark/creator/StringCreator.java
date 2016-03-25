@@ -12,6 +12,7 @@ import com.erigir.lamark.annotation.LamarkComponent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Creates new individuals of type String, with characters taken from the supplied valid character set.

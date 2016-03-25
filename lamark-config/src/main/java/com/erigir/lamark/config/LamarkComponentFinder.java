@@ -1,7 +1,7 @@
 package com.erigir.lamark.config;
 
 import com.erigir.lamark.annotation.*;
-import org.reflections.Reflections;
+//import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +12,7 @@ import java.util.*;
  * Created by chrweiss on 8/24/14.
  */
 public class LamarkComponentFinder {
+    /*
     private static final Logger LOG = LoggerFactory.getLogger(LamarkComponentFinder.class);
 
     private List<String> locationsToScan;
@@ -75,4 +76,5 @@ public class LamarkComponentFinder {
     public Set<Method> getParamProviders() {
         return Collections.unmodifiableSet(reflections.getMethodsAnnotatedWith(ParamProvider.class));
     }
+    */
 }

@@ -191,8 +191,8 @@ public class CAMajorityFitness extends AbstractLamarkComponent implements IFitne
     /**
      * @see com.erigir.lamark.IFitnessFunction#fitnessType()
      */
-    public EFitnessType fitnessType() {
-        return EFitnessType.MAXIMUM_BEST;
+    public FitnessType fitnessType() {
+        return FitnessType.MAXIMUM_BEST;
     }
 
     /**

@@ -7,7 +7,7 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>lamark-core</artifactId>
+    <artifactId>lamark-core-old</artifactId>
     <packaging>jar</packaging>
     <name>Lamark Core Library</name>
     <version>1.0.0-SNAPSHOT</version>
@@ -46,6 +46,13 @@
             <artifactId>jackson-databind</artifactId>
             <version>${jackson-2-version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.9-RC1</version>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
 
     <properties>

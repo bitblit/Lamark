@@ -21,6 +21,7 @@ import java.util.Arrays;
 public class TestLamarkComponentFinder {
     private static final Logger LOG = LoggerFactory.getLogger(TestLamarkComponentFinder.class);
 
+    /*
     private LamarkComponentFinder finder;
 
     @Before
@@ -42,4 +43,5 @@ public class TestLamarkComponentFinder {
         assertTrue(finder.getComponentClasses().contains(DefaultIndividualFormatter.class));
         assertTrue(finder.getComponentClasses().contains(AlphaStringCreator.class));
     }
+    */
 }
