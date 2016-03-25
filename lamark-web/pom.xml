@@ -1,11 +1,18 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <parent>
+        <groupId>com.erigir</groupId>
+        <artifactId>lamark</artifactId>
+        <version>LOCAL-SNAPSHOT</version>
+    </parent>
+
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.erigir</groupId>
+
     <artifactId>lamark-web</artifactId>
     <packaging>war</packaging>
     <name>Lamark Web Server</name>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>LOCAL-SNAPSHOT</version>
     <description>Server side of the Lamark Service</description>
     <url>http://lamark.erigir.com/Lamark</url>
     <inceptionYear>2008</inceptionYear>
@@ -33,7 +40,7 @@
         <dependency>
             <groupId>com.erigir</groupId>
             <artifactId>lamark-core</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>LOCAL-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.mojo.webstart</groupId>
@@ -43,11 +50,7 @@
     </dependencies>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
-        <mytime>${maven.build.timestamp}</mytime>
         <tomcat.port.number>8080</tomcat.port.number>
     </properties>
 

@@ -1,1074 +1,394 @@
-/*
- * Copyright Lexikos, Inc Las Vegas NV All Rights Reserved
- * 
- * Created on Aug 9, 2005
- */
 package com.erigir.lamark;
 
-import com.erigir.lamark.annotation.FitnessFunction;
-import com.erigir.lamark.config.LamarkComponent;
-import com.erigir.lamark.config.LamarkComponentType;
-import com.erigir.lamark.config.LamarkRuntimeParameters;
+
 import com.erigir.lamark.events.*;
-import com.erigir.lamark.selector.RouletteWheel;
+import com.erigir.lamark.selector.RouletteWheelSelector;
+import com.erigir.lamark.selector.Selector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.logging.Level;
+import java.util.function.*;
+import java.util.stream.Collectors;
 
 /**
- * Lamark is the central class that runs a generic genetic algorithm.
- * <p/>
- * Assuming you have already written any classes necessary to implement the 4 main
- * components (creator, crossover, fitness function, mutator), then the standard usage
- * of a Lamark object is as follows:
- * <ol>
- * <li>Create a lamark instance</li>
- * <li>Instantiate a copy of each of the 4 main components</li>
- * <li>Set any applicable parameters on each of the components</li>
- * <li>Set the component into Lamark using the appropriate set method</li>
- * <li>Optionally set the 5th component (selector) if this is useful for you</li>
- * <li>Optionally instantiate and set a custom individual formatter</li>
- * <li>Create a LamarkRuntimeParameters object and set it into the lamark instance</li>
- * <li>Instantiate and add any listeners as appropriate</li>
- * <li>Run Lamark
- * <ul><li>Either call the call() method on the instance to run within your current thread, <em>or</em></li>
- * <li>submit the lamark instance to an executor from java.util.concurrent,
- * <li>e.g., Executors.newSingleThreadExecutor().submit(lamark) If you use a new thread you can either</li>
- * <li>wait on the Future (its for this reason Lamark implements "callable" or listen for the correct</li>
- * <li>event.</li></ul></li>
- * <li>During the run (via events) or after the run (via cached data) perform analysis on gathered results.</li>
- * </ol>
- *
- * @author cweiss
- * @since 04/2006
+ * Created by cweiss1271 on 3/24/16.
  */
-public class Lamark implements Callable<Population> {
+public class Lamark<T> implements Callable<T> {
     private static final Logger LOG = LoggerFactory.getLogger(Lamark.class);
-    /**
-     * Shared instance of the random class
-     */
-    private Random random = new Random();
-    /**
-     * Handle to the object will all the configurable settings for an instance
-     */
-    private LamarkRuntimeParameters runtimeParameters;
 
-    // ---------------------------------------------------------
-    // Configurable options
-    // ---------------------------------------------------------
-    // The basic building blocks of a GA
-    /**
-     * Handle to all the basic components
-     */
-    private Map<LamarkComponentType, LamarkComponent> components = createDefaultComponents();
+    private List<FilteredListener> listeners = new LinkedList<>();
 
-    /**
-     * Handle to the individual formatter, used for printing individuals into messages *
-     */
-    private IIndividualFormatter formatter = new DefaultIndividualFormatter();
+    private LastPopulationCompleteEvent.Type finishType=null;
+    private Individual<T> bestSoFar;
+    private List<T> initialValues;
+    private Random random;
+    private Integer populationSize;
+    private Long maxGenerations;
+    private Long currentGeneration = 0l;
+    private Supplier<T> creator;
+    //private ToDoubleFunction<T> fitnessFunction;
+    private InnerFitnessCalculator<T> fitnessFunction;
+    private InnerCrossover<T> crossover;
+    private InnerMutator<T> mutator;
+    private Function<T,String> formatter = new Function<T, String>() {
+        @Override
+        public String apply(T t) {
+            return String.valueOf(t);
+        }
+    };
+    //private Function<List<T>, T> crossover;
+    //private Function<T,T> mutator;
+    private Wrapper<T> wrapper = new Wrapper<>();
+    private Stripper<T> stripper = new Stripper<>();
+    private Selector<T> selector = new RouletteWheelSelector<>();
+    private Double targetScore = null;
+    private boolean minimizeScore = false;
+    private int numberOfParents = 2;
 
-    // ----------------------------------------------------------------------------------------------------------------------------------
-    /**
-     * Set of objects to be notified of abortion events *
-     */
-    private Set<LamarkEventListener> abortListeners = new HashSet<LamarkEventListener>();
+    private Long started;
+    private Long ended;
 
-    /**
-     * Set of objects to be notified of new best individual events *
-     */
-    private Set<LamarkEventListener> betterIndividualFoundListeners = new HashSet<LamarkEventListener>();
-
-    /**
-     * Set of objects to be notified when the last population is complete *
-     */
-    private Set<LamarkEventListener> lastPopulationCompleteListeners = new HashSet<LamarkEventListener>();
-
-    /**
-     * Set of objects to be notified each time a population is completed *
-     */
-    private Set<LamarkEventListener> populationCompleteListeners = new HashSet<LamarkEventListener>();
-
-    /**
-     * Set of objects to be notified if a uniform population (all individuals identical) is found *
-     */
-    private Set<LamarkEventListener> uniformPopulationListeners = new HashSet<LamarkEventListener>();
-
-    /**
-     * Set of objects to be notified if an exception occurs during processing - typically the GA will abort*
-     */
-    private Set<LamarkEventListener> exceptionListeners = new HashSet<LamarkEventListener>();
-
-    /**
-     * Set of objects to be notified if a log event occurs *
-     */
-    private Set<LamarkEventListener> logListeners = new HashSet<LamarkEventListener>();
-
-    /**
-     * Set of objects to be notified when the 'plan' for the next population is complete *
-     */
-    private Set<LamarkEventListener> planCompleteListeners = new HashSet<LamarkEventListener>();
-
-    // ----------------------------------------------------------------------------------------------------------------------------------
-    /**
-     * Whether this lamark instance was aborted.  Defaults to false *
-     */
-    private boolean aborted = false;
-
-    /**
-     * System time when the instance started running *
-     */
-    private Long startTime;
-
-    /**
-     * True when the instance is currently running the GA *
-     */
-    private boolean running = false;
-
-    /**
-     * Amount of time the instance has run so far *
-     */
-    private Long totalRunTime;
-
-    /**
-     * Amount of time the instance has spent in the main thread, waiting for work packages to finish *
-     */
-    private Long totalWaitTime;
-
-    // ----------------------------------------------------------------------------------------------------------------------------------
-    /**
-     * Handle to the executorservice that will process all work packages *
-     */
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
-
-    // ----------------------------------------------------------------------------------------------------------------------------------
-    /**
-     * Holds a reference to the best individual found so far *
-     */
-    private Individual currentBest;
-
-    /**
-     * Holds a reference to the current population being created (also used for catching deadlocks) *
-     */
-    private Population current;
-
-    /**
-     * Holds the parentage of individuals, if parentage tracking is turned on *
-     */
-    private Map<Individual<?>, List<Individual<?>>> parentage = new HashMap<Individual<?>, List<Individual<?>>>();
-
-    /**
-     * List of individuals to be inserted at next opportunity
-     * This is used either for directed search, or for communication across 'worlds'
-     */
-    private List<Individual> toBeInserted = new LinkedList<Individual>();
-
-    private static Map<LamarkComponentType,LamarkComponent> createDefaultComponents()
+    public void addListener(LamarkEventListener listener)
     {
-        Map<LamarkComponentType, LamarkComponent> rval = new TreeMap<>();
-        rval.put(LamarkComponentType.SELECTOR, RouletteWheel.createDefaultComponent());
+        Optional<FilteredListener> o = listeners.stream().filter((p)->p.getListener()==listener).findFirst();
+        if (!o.isPresent())
+        {
+            listeners.add(new FilteredListener(listener,null));
+        }
+    }
+
+    public String format(Individual<T> individual)
+    {
+        return formatter.apply(individual.getGenome());
+    }
+
+    public String format(Collection<Individual<T>> individuals)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (Individual<T> i:individuals)
+        {
+            sb.append(format(i));
+            sb.append(",");
+        }
+        String out = sb.toString();
+        return out.substring(0,out.length()-1);
+    }
+
+    public void addListener(LamarkEventListener listener, Set<Class<? extends LamarkEvent>> filter)
+    {
+        Optional<FilteredListener> o = listeners.stream().filter((p)->p.getListener()==listener).findFirst();
+        if (!o.isPresent())
+        {
+            listeners.add(new FilteredListener(listener,filter));
+        }
+        else
+        {
+            o.get().addFilter(filter);
+        }
+    }
+
+    private void publishEvent(LamarkEvent event)
+    {
+        for (FilteredListener f:listeners)
+        {
+            f.applyEvent(event);
+        }
+    }
+
+    private void updateIfShouldKeepRunning(List<Individual<T>> currentPopulation)
+    {
+        if (maxGenerations!=null && currentGeneration>=maxGenerations)
+        {
+            finishType = LastPopulationCompleteEvent.Type.BY_POPULATION_NUMBER;
+        }
+        else if (targetScore!=null && bestSoFar!=null && bestSoFar.getFitness().compareTo(targetScore)>=0)
+        {
+            finishType = LastPopulationCompleteEvent.Type.BY_TARGET_SCORE;
+        }
+        else
+        {
+            boolean allEqual = true;
+            T first = currentPopulation.get(0).getGenome();
+            for (int i=1;i<currentPopulation.size() && allEqual;i++)
+            {
+                allEqual = currentPopulation.get(i).getGenome().equals(first);
+            }
+            if (allEqual)
+            {
+                publishEvent(new UniformPopulationEvent(this, currentPopulation, currentGeneration));
+                finishType = LastPopulationCompleteEvent.Type.UNIFORM;
+            }
+        }
+    }
+
+    public void stop()
+    {
+        LOG.warn("Aborted!");
+        finishType = LastPopulationCompleteEvent.Type.ABORTED;
+        publishEvent(new AbortedEvent(this));
+    }
+
+    public void start()
+    {
+        LOG.info("Running Lamark in calling thread");
+        call();
+    }
+
+
+    public T call()
+    {
+        started = System.currentTimeMillis();
+
+        // create generation
+        List<T> items = new ArrayList<>(populationSize);
+        for (int i=0;i<populationSize;i++)
+        {
+            items.add(creator.get());
+        }
+
+        LOG.debug("Items on startup: {}",items);
+        List<Individual<T>> curGen = null;
+
+        try {
+            curGen = items.stream().map(wrapper).collect(Collectors.toList());
+        }
+        catch (Exception e)
+        {
+            publishEvent(new ExceptionEvent(this, e));
+            this.stop();
+        }
+
+        while (finishType == null)
+        {
+            try {
+                // Start each generation with a list of individuals with no fitness value yet
+
+                // Calc the fit values and sort
+                curGen = curGen.stream().map(fitnessFunction).sorted().collect(Collectors.toList());
+
+                // If we've found a new best, update and report
+                if (minimizeScore)
+                {
+                    if (bestSoFar == null || curGen.get(curGen.size()-1).getFitness().compareTo(bestSoFar.getFitness()) < 0)
+                    {
+                        bestSoFar = curGen.get(curGen.size()-1);
+                        publishEvent(new BetterIndividualFoundEvent(this, curGen, currentGeneration , bestSoFar));
+                    }
+                }
+                else
+                {
+                    if (bestSoFar == null || curGen.get(0).getFitness().compareTo(bestSoFar.getFitness()) > 0)
+                    {
+                        bestSoFar = curGen.get(0);
+                        publishEvent(new BetterIndividualFoundEvent(this, curGen, currentGeneration , bestSoFar));
+                    }
+                }
+
+                // Calc total
+                LOG.debug("Generation {}:{}" , currentGeneration , curGen);
+                LOG.debug("Stripped: {}" , curGen.stream().map(stripper).collect(Collectors.toList()));
+
+                double totalFitness = curGen.stream().mapToDouble((p) -> p.getFitness()).sum();
+                LOG.debug("Total fitness: {}" , totalFitness);
+
+                // Select for crossover (select a bunch at once, and then create parent lists from them
+                // Designed this way because the selectors typically do a bunch of calcs that can be reused
+                // over and over
+                List<Individual<T>> selected = selector.select(curGen, random, numberOfParents*populationSize, minimizeScore);
+                // Stats - increment all of their selected counters
+                selected.stream().forEach((p)->p.incrementSelected());
+
+                List<List<Individual<T>>> parents = new ArrayList<>(populationSize);
+                for (int i = 0;i<populationSize;i++)
+                {
+                    parents.add(selected.subList(i*numberOfParents, (i+1)*numberOfParents));
+                }
+                publishEvent(new PopulationCompleteEvent(this, curGen,currentGeneration));
+
+                // At the end of each cycle check exit conditions
+                updateIfShouldKeepRunning(curGen);
+                // --------------------
+                // Next generation starts here
+                // TODO: Upper/lower elitism
+
+                currentGeneration++;
+                // Apply crossover and mutation
+                curGen = parents.stream().map(crossover).map(mutator).collect(Collectors.toList());
+            }
+            catch (Exception e)
+            {
+                LOG.warn("Error",e);
+                publishEvent(new ExceptionEvent(this, e));
+            }
+
+        }
+
+        publishEvent(new LastPopulationCompleteEvent<>(this, curGen, currentGeneration, finishType ));
+        ended = System.currentTimeMillis();
+
+        return (bestSoFar==null)?null:bestSoFar.getGenome();
+    }
+
+    public Long getRunTime()
+    {
+        Long rval = null;
+        if (started!=null)
+        {
+            rval = (ended==null)?System.currentTimeMillis()-started:ended-started;
+        }
         return rval;
     }
 
-    /**
-     * Records the parents for a given child in the parent registry.
-     * <p/>
-     * NOTE: This only takes place if trackParentage is true.  Otherwise
-     * nothing happens when this is called.
-     *
-     * @param child   Individual of which  to register parents
-     * @param parents List of parents for the child
-     */
-    public void registerParentage(Individual<?> child, List<Individual<?>> parents) {
-        if (runtimeParameters.isTrackParentage() && child != null && parents != null) {
-            parentage.put(child, parents);
-        }
+
+    public Individual getBestSoFar() {
+        return bestSoFar;
     }
 
-    /**
-     * Get a list of parents for the passed individual.
-     * If trackParentage is turned on, and this child was created at some
-     * point in the current instance, than this function will return a list
-     * of the childs immediate parents.  Call recursively to build a
-     * "family tree" of a given individual.
-     *
-     * @param child Individual to get the parents for
-     * @return List of Individual parent objects
-     */
-    public List<Individual<?>> getParentage(Individual child) {
-        if (!runtimeParameters.isTrackParentage()) {
-            throw new IllegalStateException("Can't call 'getParentage' if trackParentage is off");
-        }
-        if (child == null) {
-            throw new IllegalArgumentException("Can't call 'getParentage' on null child");
-        } else {
-            return parentage.get(child);
-        }
-    }
+    public static class LamarkBuilder<T>
+    {
+        private Random random;
+        private Long maxGenerations;
+        private Supplier<T> creator;
+        private List<T> initialValues;
+        private ToDoubleFunction<T> fitnessFunction;
+        private Function<List<T>,T> crossover;
+        private Function<T,T> mutator;
+        private Function<T,String> formatter;
+        private double pCrossover=1.0;
+        private double pMutation=.005;
+        private Selector selector;
+        private Integer populationSize;
 
-    /**
-     * Puts the individual on the list to be inserted at the next opportunity.
-     *
-     * @param i Individual to be inserted.
-     */
-    public final void enqueueForInsert(Individual i) {
-        toBeInserted.add(i);
-    }
+        // TODO: Implement the stuff below
+        private Double upperElitism;
+        private Double lowerElitism;
+        private Double targetScore;
 
-    /**
-     * Removes everything from the list of "to be inserted" individuals.
-     */
-    public final void clearInsertQueue() {
-        toBeInserted.retainAll(Collections.EMPTY_LIST);
-    }
+        private boolean trackParentage;
+        private boolean abortOnUniformPopulation;
+        private boolean runParallel;
+        private boolean minimizeScore;
 
 
-    /**
-     * Called by all property setters to make sure that a property isn't modified as the system is running.
-     *
-     * @throws IllegalStateException if running is true
-     */
-    public final void checkRunning() {
-        if (running) {
-            throw new IllegalStateException(
-                    "Cannot modify this property while Lamark is running.");
-        }
-    }
+        public Lamark<T> build()
+        {
+            Objects.requireNonNull(creator);
+            Objects.requireNonNull(fitnessFunction);
+            Objects.requireNonNull(crossover);
+            Objects.requireNonNull(mutator);
+            Objects.requireNonNull(selector);
+            Objects.requireNonNull(populationSize);
 
-    /**
-     * Accessor method (READ-ONLY)
-     *
-     * @return boolean containing the property
-     */
-    public final boolean isRunning() {
-        return running;
-    }
-
-    /**
-     * Converts the passed individual into a human-readable string using the formatter.
-     *
-     * @param i Individual to convert
-     * @return String containing the human-readable version
-     */
-    public final String format(Individual i) {
-        return formatter.format(i);
-    }
-
-    /**
-     * Converts a collection of individuals into human-readable format
-     *
-     * @param c Collection to convert
-     * @return String containing the human-readable format
-     */
-    public final String format(Collection<Individual> c) {
-        return formatter.format(c);
-    }
-
-    /**
-     * Helper function to log issues to all log listeners at the given level
-     *
-     * @param o Object to log
-     */
-    public final void logSevere(Object o) {
-        event(new LogEvent(this, o, Level.SEVERE));
-    }
-
-    /**
-     * Helper function to log issues to all log listeners at the given level
-     *
-     * @param o Object to log
-     */
-    public final void logWarning(Object o) {
-        event(new LogEvent(this, o, Level.WARNING));
-    }
-
-    /**
-     * Helper function to log issues to all log listeners at the given level
-     *
-     * @param o Object to log
-     */
-    public final void logInfo(Object o) {
-        event(new LogEvent(this, o, Level.INFO));
-    }
-
-    /**
-     * Helper function to log issues to all log listeners at the given level
-     *
-     * @param o Object to log
-     */
-    public final void logConfig(Object o) {
-        event(new LogEvent(this, o, Level.CONFIG));
-    }
-
-    /**
-     * Helper function to log issues to all log listeners at the given level
-     *
-     * @param o Object to log
-     */
-    public final void logFine(Object o) {
-        event(new LogEvent(this, o, Level.FINE));
-    }
-
-    /**
-     * Helper function to log issues to all log listeners at the given level
-     *
-     * @param o Object to log
-     */
-    public final void logFiner(Object o) {
-        event(new LogEvent(this, o, Level.FINER));
-    }
-
-    /**
-     * Helper function to log issues to all log listeners at the given level
-     *
-     * @param o Object to log
-     */
-    public final void logFinest(Object o) {
-        event(new LogEvent(this, o, Level.FINEST));
-    }
-
-    /**
-     * Returns whether the passed population is the last one for any of a variety of reasons.
-     *
-     * @param p Population to test for "lastness"
-     * @return true if this is a last population
-     */
-    private boolean lastPopulation(Population p) {
-        return (runtimeParameters.getMaximumPopulations() != null && p != null && p.getNumber() >= runtimeParameters.getMaximumPopulations());
-    }
-
-    /**
-     * Main method for the lamark instance, which configures and runs the GA.
-     *
-     * @see java.lang.Runnable#run()
-     */
-    public final Population call() {
-        // Calc exit type and notify listeners
-        LastPopulationCompleteEvent.Type exitType = LastPopulationCompleteEvent.Type.BY_POPULATION_NUMBER;
-
-        startTime = new Long(System.currentTimeMillis());
-        try {
-
-            logInfo("top, ab=" + aborted);
-
-            totalWaitTime = 0L;
-            // Init the workpackage queue
-            WorkPackage.initializeQueue(runtimeParameters.getPopulationSize());
-
-            if (runtimeParameters.getRandomSeed() != null) {
-                random.setSeed(runtimeParameters.getRandomSeed());
-            }
-            logInfo("Started Lamark run at time " + new Date());
-            running = true;
-
-            // Start a deadlock monitor
-            new Thread(new DeadLockMonitor(this, Thread.currentThread())).start();
-
-            int lowerElitismCount = (int) Math.ceil(runtimeParameters.getPopulationSize()
-                    * runtimeParameters.getLowerElitism());
-            logFine("Lower Elitism Percent=" + runtimeParameters.getLowerElitism() + " Size="
-                    + runtimeParameters.getPopulationSize());
-            logFine("Will replace the lower " + lowerElitismCount
-                    + " individuals each generation");
-
-            int upperElitismCount = (int) Math.ceil(runtimeParameters.getPopulationSize()
-                    * runtimeParameters.getUpperElitism());
-            logFine("Upper Elitism Percent=" + runtimeParameters.getUpperElitism() + " Size="
-                    + runtimeParameters.getPopulationSize());
-            logFine("Will reserve the upper " + upperElitismCount
-                    + " individuals each generation");
-            logFine("Will generate "
-                    + (runtimeParameters.getPopulationSize() - (lowerElitismCount + upperElitismCount))
-                    + " individuals by crossover each generation");
-
-            Population prev = null;
-
-            logInfo("ent ab=" + aborted);
-            while (!lastPopulation(current) && !aborted && !targetScoreFound()) {
-                // Init next generation
-                prev = current;
-                current = new Population(this, prev);
-
-                int cForceInsert = 0;
-                int cUpperElite = 0;
-                int cLowerElite = 0;
-                int cCrossover = 0;
-
-                // Create the list of work packages
-                // Step 1 - Insert any population members in the to-be-inserted
-                // list, up to max size
-                int remaining = runtimeParameters.getPopulationSize();
-                int toTake = Math.min(remaining, toBeInserted.size());
-
-                if (toTake > 0) {
-                    List<Individual<?>> insert = new LinkedList<Individual<?>>();
-                    for (int i = 0; i < toTake; i++) {
-                        insert.add(toBeInserted.remove(0));
-                    }
-                    for (WorkPackage w : WorkPackage.copies(this, current,
-                            insert)) {
-                        submitWorkPackage(w, getCurrentGenerationNumber());
-                    }
-                    logInfo("Inserted " + toTake
-                            + " from the 'tobeinserted' queue");
-                    remaining -= toTake;
-                    cForceInsert = toTake;
-                }
-
-                // Step 2 - Insert any upper elitism retained from previous gen
-                int upperEliteThisPop = Math.min(upperElitismCount, remaining);
-                if (prev != null && upperEliteThisPop > 0) {
-                    List<Individual<?>> elite = prev.getIndividuals()
-                            .subList(0, upperEliteThisPop);
-                    for (WorkPackage w : WorkPackage.copies(this, current,
-                            elite)) {
-                        submitWorkPackage(w, getCurrentGenerationNumber());
-                    }
-                    remaining -= upperEliteThisPop;
-                    cUpperElite = upperEliteThisPop;
-                    logInfo("Retained " + upperEliteThisPop
-                            + " via upper elitism");
-                }
-
-                // Step 3 - Replace any via lower elitism
-                int lowerEliteThisPop = Math.min(lowerElitismCount, remaining);
-                if (lowerEliteThisPop > 0) {
-                    for (WorkPackage w : WorkPackage.newItems(this, current,
-                            lowerEliteThisPop)) {
-                        submitWorkPackage(w, getCurrentGenerationNumber());
-                    }
-                    remaining -= lowerEliteThisPop;
-                    cLowerElite = lowerEliteThisPop;
-                    logInfo("Created " + lowerEliteThisPop
-                            + " to replace via lower elitism");
-                }
-
-                // Step 4 - Create any remnants via crossover (or create if this
-                // is the first population)
-                if (remaining > 0) {
-                    logInfo("Creating " + remaining + " via crossover");
-                    cCrossover = remaining;
-                    if (prev != null) {
-                        for (WorkPackage w : WorkPackage.crossovers(this, prev,
-                                current, remaining)) {
-                            submitWorkPackage(w, getCurrentGenerationNumber());
-                        }
-                        remaining = 0;
-                    } else {
-                        for (WorkPackage w : WorkPackage.newItems(this,
-                                current, remaining)) {
-                            submitWorkPackage(w, getCurrentGenerationNumber());
-                        }
-                        remaining = 0;
-                    }
-
-                }
-
-                event(new PopulationPlanCompleteEvent(this, cForceInsert, cUpperElite, cLowerElite, cCrossover));
-
-                // Step 5 - wait on the population to complete
-                while (!current.isFilled()) {
-                    current.startWait();
-                }
-
-                // Send the new population message
-                logFine("For population " + current.getNumber()
-                        + " best score is " + current.best().getFitness());
-                logFinest("Population description:");
-                logFinest(format(current.getIndividuals()));
-                event(new PopulationCompleteEvent(
-                        this, current));
-
-                // Check for a new 'best'
-                if ((currentBest == null)
-                        || (current.best().getFitness() > currentBest.getFitness() &&
-                        fitnessType() == EFitnessType.MAXIMUM_BEST)
-                        || (current.best().getFitness() < currentBest.getFitness() &&
-                        fitnessType() == EFitnessType.MINIMUM_BEST)) {
-                    currentBest = current.best();
-                    event(new BetterIndividualFoundEvent(this, current,
-                            (Individual) current.best()));
-                }
-
-                // Check if the population is uniform
-                if (current != null && current.isUniform()) {
-                    event(new UniformPopulationEvent(this, current));
-                    if (runtimeParameters.isAbortOnUniformPopulation()) {
-                        aborted = true;
-                    }
-                }
-
-            } // End main loop
-            logInfo("exit, ab=" + aborted);
-
-            // If we exited via abortion, notify listeners
-            if (aborted) {
-                if (abortListeners.size() > 0) {
-                    event(new AbortedEvent(this));
-                }
-            }
-            if (current != null && current.isUniform()) {
-                exitType = LastPopulationCompleteEvent.Type.UNIFORM;
-            } else if (targetScoreFound()) {
-                exitType = LastPopulationCompleteEvent.Type.BY_TARGET_SCORE;
-            } else if (aborted) {
-                exitType = LastPopulationCompleteEvent.Type.ABORTED;
-            }
-
-        } catch (Throwable t) {
-            event(new ExceptionEvent(this, t));
-            aborted = true;
-        } finally {
-            totalRunTime = new Long(System.currentTimeMillis() - startTime);
-            startTime = null;
-
-            // Notify listeners of last population
-            event(new LastPopulationCompleteEvent(this, current, exitType));
-            // Finally, mark running complete
-            running = false;
-
-        }
-        return current;
-    }
-
-    /**
-     * Returns the current generation number, or -1 if not started.
-     *
-     * @return long containing the number
-     */
-    public long getCurrentGenerationNumber() {
-        if (current != null) {
-            return current.getNumber();
-        }
-        return -1;
-    }
-
-    /**
-     * Placeholder method for submitting work packages to be processed.
-     *
-     * @param wp    WorkPackage to submit
-     * @param genNo Long number of the population this is submitted for
-     */
-    private void submitWorkPackage(WorkPackage wp, Long genNo) {
-        // Placeholder in case i want to monitor every time a WP is submitted
-        executor.submit(wp);
-    }
-
-
-    /**
-     * Determine whether we have reached the target score, if any.
-     *
-     * @return true if we have
-     */
-    public boolean targetScoreFound() {
-        if (currentBest != null && runtimeParameters.getTargetScore() != null) {
-            if (fitnessType() == EFitnessType.MAXIMUM_BEST) {
-                return currentBest.getFitness().compareTo(runtimeParameters.getTargetScore()) >= 0;
-            } else // min best
+            if (pCrossover>1.0 || pMutation>1.0 || pCrossover<0 || pMutation<0)
             {
-                return currentBest.getFitness().compareTo(runtimeParameters.getTargetScore()) <= 0;
-            }
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Helper passthru for fitness type
-     * @return
-     */
-    public EFitnessType fitnessType()
-    {
-        return ((FitnessFunction)getFitnessFunction().getMethodAnnotation()).fitnessType();
-    }
-
-    /**
-     * Adds a listener for the specified type of events.
-     *
-     * @param jel LamarkEventListener to add
-     */
-    public final void addLogListener(LamarkEventListener jel) {
-        if (jel != null) {
-            logListeners.add(jel);
-        }
-    }
-
-    /**
-     * Adds a listener for the specified type of events.
-     *
-     * @param jel LamarkEventListener to add
-     */
-    public final void addAbortListener(LamarkEventListener jel) {
-        if (jel != null) {
-            abortListeners.add(jel);
-            logInfo("Added abort listener:" + jel);
-        }
-    }
-
-    /**
-     * Adds a listener for the specified type of events.
-     *
-     * @param jel LamarkEventListener to add
-     */
-    public final void addExceptionListener(LamarkEventListener jel) {
-        if (jel != null) {
-            exceptionListeners.add(jel);
-            logInfo("Added exception listener:" + jel);
-        }
-    }
-
-    /**
-     * Adds a listener for the specified type of events.
-     *
-     * @param jel LamarkEventListener to add
-     */
-    public final void addBetterIndividualFoundListener(LamarkEventListener jel) {
-        if (jel != null) {
-            betterIndividualFoundListeners.add(jel);
-            logInfo("Added BIF listener:" + jel);
-
-        }
-    }
-
-    /**
-     * Adds a listener for the specified type of events.
-     *
-     * @param jel LamarkEventListener to add
-     */
-    public final void addLastPopulationCompleteListener(LamarkEventListener jel) {
-        if (jel != null) {
-            lastPopulationCompleteListeners.add(jel);
-            logInfo("Added last pop complete listener:" + jel);
-
-        }
-    }
-
-    /**
-     * Adds a listener for the specified type of events.
-     *
-     * @param jel LamarkEventListener to add
-     */
-    public final void addUniformPopulationListener(LamarkEventListener jel) {
-        if (jel != null) {
-            uniformPopulationListeners.add(jel);
-            logInfo("Added uniform pop listener:" + jel);
-
-        }
-    }
-
-    /**
-     * Adds a listener for the specified type of events.
-     *
-     * @param jel LamarkEventListener to add
-     */
-    public final void addPopulationCompleteListener(LamarkEventListener jel) {
-        if (jel != null) {
-            populationCompleteListeners.add(jel);
-            logInfo("Added pop complete listener:" + jel);
-
-        }
-    }
-
-    /**
-     * Adds a listener for the specified type of events.
-     *
-     * @param jel LamarkEventListener to add
-     */
-    public final void addPopulationPlanCompleteListener(LamarkEventListener jel) {
-        if (jel != null) {
-            planCompleteListeners.add(jel);
-            logInfo("Added pop plan complete listener:" + jel);
-
-        }
-    }
-
-    /**
-     * Registers this listener to receive ALL events
-     *
-     * @param jel LamarkEventListener to add
-     */
-    public final void addGenericListener(LamarkEventListener jel) {
-        if (jel != null) {
-            abortListeners.add(jel);
-            betterIndividualFoundListeners.add(jel);
-            lastPopulationCompleteListeners.add(jel);
-            uniformPopulationListeners.add(jel);
-            populationCompleteListeners.add(jel);
-            exceptionListeners.add(jel);
-            logListeners.add(jel);
-            planCompleteListeners.add(jel);
-            logInfo("Added generic listener:" + jel);
-        }
-    }
-
-
-    /**
-     * Sends the event to all appropriate listeners, or enques it if instance not started.
-     *
-     * @param event LamarkEvent to broadcast
-     * @return true if the event was sent, false if it was enqueud
-     */
-    public final boolean event(LamarkEvent event) {
-        if (event != null) {
-            Set<LamarkEventListener> listenerSet = null;
-            Class tClass = event.getClass();
-            if (AbortedEvent.class.isAssignableFrom(tClass)) {
-                listenerSet = abortListeners;
-            } else if (BetterIndividualFoundEvent.class.isAssignableFrom(tClass)) {
-                listenerSet = betterIndividualFoundListeners;
-            } else if (ExceptionEvent.class.isAssignableFrom(tClass)) {
-                listenerSet = exceptionListeners;
-            } else if (LastPopulationCompleteEvent.class.isAssignableFrom(tClass)) {
-                listenerSet = lastPopulationCompleteListeners;
-            } else if (LogEvent.class.isAssignableFrom(tClass)) {
-                listenerSet = logListeners;
-            } else if (PopulationCompleteEvent.class.isAssignableFrom(tClass)) {
-                listenerSet = populationCompleteListeners;
-            } else if (PopulationPlanCompleteEvent.class.isAssignableFrom(tClass)) {
-                listenerSet = planCompleteListeners;
-            } else if (UniformPopulationEvent.class.isAssignableFrom(tClass)) {
-                listenerSet = uniformPopulationListeners;
+                throw new IllegalArgumentException("Probabilities must be between 0 and 1, inclusive");
             }
 
-            // Send it to the proper set
-            for (LamarkEventListener listener : listenerSet) {
-                listener.handleEvent(event);
+            Lamark<T> rval = new Lamark<>();
+            rval.random = (random==null)?new Random():random;
+            rval.maxGenerations = maxGenerations;
+            rval.creator = creator;
+            rval.crossover = new InnerCrossover<>(crossover, pCrossover, rval.random);
+            rval.mutator = new InnerMutator<>(mutator, pMutation, rval.random);
+            rval.initialValues = initialValues;
+            rval.fitnessFunction = new InnerFitnessCalculator<>(fitnessFunction);
+            rval.selector = (selector==null)?new RouletteWheelSelector<>():selector;
+            rval.populationSize = populationSize;
+            rval.minimizeScore = minimizeScore;
+
+            if (formatter!=null)
+            {
+                rval.formatter = formatter;
             }
-            return true;
-        }
-        return false;
-    }
 
-    /**
-     * A function called by subunits (wp's basically) when an exception occurs.
-     * Causes the GA to abort and an error message to be thrown and logged.
-     *
-     * @param e Exception that occured
-     */
-    public final void exceptionInSubunit(Exception e) {
-        logSevere("Error occurred:" + e);
-        event(new ExceptionEvent(this, e));
-        abort();
-    }
-
-    /**
-     * Sets the abort flag, which causes the GA to stop at the end of the current generation.
-     */
-    public final void abort() {
-        this.aborted = true;
-    }
-
-
-    /**
-     * Returns the time elapsed since instace start in milliseconds.
-     *
-     * @return long containing the runtime
-     */
-    public final long currentRuntimeMS() {
-        if (running && null != startTime) {
-            return System.currentTimeMillis() - startTime;
-        }
-        return 0;
-    }
-
-    /**
-     * Returns the estimated time from start to completion milliseconds.
-     * NOTE: this function only returns a value if maximumPopulations is
-     * set.
-     *
-     * @return long containing the estimated runtime
-     */
-    public final long estimatedRuntimeMS() {
-        if (running && null != startTime && null != current && null != runtimeParameters.getMaximumPopulations()) {
-            long curTime = currentRuntimeMS();
-            double pctDone = 0;
-            if (runtimeParameters.getMaximumPopulations() != null) {
-                pctDone = (double) getCurrentGenerationNumber()
-                        / (double) runtimeParameters.getMaximumPopulations();
-            }
-            double totalTime = curTime / pctDone;
-            return (long) (totalTime - curTime);
-        }
-        return 0;
-    }
-
-    /**
-     * Test whether mutation should occur.
-     *
-     * @return true if test succeeds, false otherwise.
-     */
-    public boolean mutationFlip() {
-        return random.nextDouble() < runtimeParameters.getMutationProbability();
-    }
-
-    /**
-     * Test whether crossover should occur.
-     *
-     * @return true if test succeeds, false otherwise.
-     */
-    public boolean crossoverFlip() {
-        return random.nextDouble() < runtimeParameters.getCrossoverProbability();
-    }
-
-    /**
-     * Accessor method
-     * NOTE: only non-null when the system is running
-     *
-     * @return Long containing the property
-     */
-    public final Long getTotalRunTime() {
-        return totalRunTime;
-    }
-
-    /**
-     * Accessor method
-     * NOTE: only non-null after starting
-     *
-     * @return Individual containing the property
-     */
-    public final Individual getCurrentBest() {
-        return currentBest;
-    }
-
-    public final void updateComponent(LamarkComponent component)
-    {
-        Objects.requireNonNull(component);
-        checkRunning();
-        components.put(component.getType(), component);
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return ICrossover containing the property
-     */
-    public final LamarkComponent getCrossover() {
-        return components.get(LamarkComponentType.CROSSOVER);
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return IFitnessFunction containing the property
-     */
-    public final LamarkComponent getFitnessFunction() {
-        return components.get(LamarkComponentType.FITNESS_FUNCTION);
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return IMutator containing the property
-     */
-    public final LamarkComponent getMutator() {
-        return components.get(LamarkComponentType.MUTATOR);
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return ISelector containing the property
-     */
-    public final LamarkComponent getSelector() {
-        return components.get(LamarkComponentType.SELECTOR);
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return ICreator containing the property
-     */
-    public final LamarkComponent getCreator() {
-        return components.get(LamarkComponentType.CREATOR);
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return Long containing the property
-     */
-    public Long getTotalWaitTime() {
-        return totalWaitTime;
-    }
-
-    /**
-     * Returns, on average, how much time is spent waiting on work package completion.
-     * NOTE: Only non-null after the system is started
-     *
-     * @return double containing the property
-     */
-    public Double getAverageWaitTime() {
-        if (current != null) {
-            return totalWaitTime.doubleValue() / (double) getCurrentGenerationNumber();
-        }
-        return null;
-    }
-
-    /**
-     * Returns the percentage of total run time that is consumed waiting on work package completion.
-     * NOTE: Only non-null when the system is running
-     *
-     * @return Double containing the percentage
-     */
-    public Double getPercentageTimeWaiting() {
-        if (getTotalRunTime() != null) {
-            return getTotalWaitTime().doubleValue() / getTotalRunTime().doubleValue();
-        }
-        return null;
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return Random containing the property
-     */
-    public Random getRandom() {
-        return random;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param random new value
-     */
-    public void setRandom(Random random) {
-        checkRunning();
-        this.random = random;
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return IIndividualFormatter containing the property
-     */
-    public IIndividualFormatter getFormatter() {
-        return formatter;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param pFormatter new value
-     */
-    public void setFormatter(IIndividualFormatter pFormatter) {
-        checkRunning();
-        this.formatter = pFormatter;
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return LamarkRuntimeParameters containing the property
-     */
-    public LamarkRuntimeParameters getRuntimeParameters() {
-        return runtimeParameters;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param runtimeParameters new value
-     */
-    public void setRuntimeParameters(LamarkRuntimeParameters runtimeParameters) {
-        checkRunning();
-        this.runtimeParameters = runtimeParameters;
-    }
-
-    /**
-     * Accessor method
-     *
-     * @return LamarkConfig containing the property
-     */
-    public ExecutorService getExecutor() {
-        return executor;
-    }
-
-    /**
-     * Mutator method
-     *
-     * @param executor new value
-     */
-    public void setExecutor(ExecutorService executor) {
-        checkRunning();
-        this.executor = executor;
-    }
-
-    /**
-     * A little inner class to run and make sure the GA hasn't hung up somewhere.
-     * <p/>
-     * Currently this class does little except send out messages when it thinks
-     * a deadlock has occurred.  Probably should be extended to allow forced
-     * abortion of the parent threads, as well as configurability on how
-     * long to wait before assuming deadlock
-     *
-     * @author cweiss
-     * @since 10/2007
-     */
-    class DeadLockMonitor implements Runnable {
-
-        /**
-         * Number of times I need to see the same generation before I assume deadlock *
-         */
-        private static final int THRESHOLD = 4;
-        /**
-         * Lamark object to monitor *
-         */
-        private Lamark subject;
-        /**
-         * Last generation number seen when awake *
-         */
-        private Long lastGenerationNumber;
-        /**
-         * Number of times Ive seen that generation when I awoke *
-         */
-        private int cycleCount;
-        /**
-         * Handle to the main thread running lamark *
-         */
-        private Thread mainThread;
-
-        /**
-         * Default constructor
-         *
-         * @param toMonitor   Lamark to monitor for deadlock
-         * @param pMainThread Thread to monitor for deadlock
-         */
-        public DeadLockMonitor(Lamark toMonitor, Thread pMainThread) {
-            super();
-            subject = toMonitor;
-            mainThread = pMainThread;
+            return rval;
         }
 
-        /**
-         * Checks the lamark instance to make sure it isnt hung up.
-         *
-         * @see java.lang.Runnable#run()
-         */
-        public void run() {
-            try {
-                cycleCount = 0;
-                lastGenerationNumber = subject.getCurrentGenerationNumber();
-                while (subject != null && subject.running) {
-                    if (lastGenerationNumber == subject.getCurrentGenerationNumber()) {
-                        cycleCount++;
-                    } else {
-                        lastGenerationNumber = subject.getCurrentGenerationNumber();
-                        cycleCount = 0;
-                        subject.logFinest("Deadlock Check, no DL Found");
-                    }
-                    if (cycleCount > THRESHOLD) {
-                        subject.logWarning("Deadlock detected, gen=" + current.getNumber() + " lock = " + " current=" + current + " cs=" + current.getSize() + " cts=" + current.getTargetSize() + " qs:" + WorkPackage.queueSize() + " main state:" + mainThread.getState());
-                    }
-                    Thread.sleep(1000);
-
-                }
-            } catch (Exception e) {
-                LOG.error("Deadlock failure", e);
-            }
+        public LamarkBuilder withRandom(final Random random) {
+            this.random = random;
+            return this;
         }
+
+
+        public LamarkBuilder withMaxGenerations(final Long maxGenerations) {
+            this.maxGenerations = maxGenerations;
+            return this;
+        }
+
+        public LamarkBuilder withCreator(final Supplier<T> creator) {
+            this.creator = creator;
+            return this;
+        }
+
+        public LamarkBuilder withInitialValues(final List<T> initialValues) {
+            this.initialValues = initialValues;
+            return this;
+        }
+
+        public LamarkBuilder withFitnessFunction(final ToDoubleFunction<T> fitnessFunction) {
+            this.fitnessFunction = fitnessFunction;
+            return this;
+        }
+
+        public LamarkBuilder withCrossover(final Function<List<T>, T> crossover) {
+            this.crossover = crossover;
+            return this;
+        }
+
+        public LamarkBuilder withMutator(final Function<T, T> mutator) {
+            this.mutator = mutator;
+            return this;
+        }
+
+        public LamarkBuilder withSelector(final Selector selector) {
+            this.selector = selector;
+            return this;
+        }
+
+        public LamarkBuilder withPMutation(final double pMutation) {
+            this.pMutation = pMutation;
+            return this;
+        }
+
+        public LamarkBuilder withPCrossover(final double pCrossover) {
+            this.pCrossover = pCrossover;
+            return this;
+        }
+
+        public LamarkBuilder withPopulationSize(final Integer populationSize) {
+            this.populationSize = populationSize;
+            return this;
+        }
+
+        public LamarkBuilder withFormatter(final Function<T, String> formatter) {
+            this.formatter = formatter;
+            return this;
+        }
+
+        public LamarkBuilder withMinimizeScore(final boolean minimizeScore) {
+            this.minimizeScore = minimizeScore;
+            return this;
+        }
+
+        public LamarkBuilder withUpperElitism(final Double upperElitism) {
+            this.upperElitism = upperElitism;
+            return this;
+        }
+
+        public LamarkBuilder withLowerElitism(final Double lowerElitism) {
+            this.lowerElitism = lowerElitism;
+            return this;
+        }
+
+        public LamarkBuilder withTargetScore(final Double targetScore) {
+            this.targetScore = targetScore;
+            return this;
+        }
+
+
     }
+
+
 }

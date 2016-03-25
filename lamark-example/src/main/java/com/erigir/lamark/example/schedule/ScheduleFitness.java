@@ -147,8 +147,8 @@ public class ScheduleFitness extends AbstractLamarkComponent implements IFitness
     /**
      * @see com.erigir.lamark.IFitnessFunction#fitnessType()
      */
-    public EFitnessType fitnessType() {
-        return EFitnessType.MINIMUM_BEST;
+    public FitnessType fitnessType() {
+        return FitnessType.MINIMUM_BEST;
     }
 
     /**

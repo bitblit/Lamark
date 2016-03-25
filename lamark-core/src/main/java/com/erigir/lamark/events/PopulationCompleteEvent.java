@@ -1,7 +1,9 @@
 package com.erigir.lamark.events;
 
+import com.erigir.lamark.Individual;
 import com.erigir.lamark.Lamark;
-import com.erigir.lamark.Population;
+
+import java.util.List;
 
 /**
  * An event that is fired ever time Lamark completes processing
@@ -10,12 +12,13 @@ import com.erigir.lamark.Population;
  * @author cweiss
  * @since 03/2005
  */
-public class PopulationCompleteEvent extends LamarkEvent {
+public class PopulationCompleteEvent<T> extends LamarkEvent {
 
     /**
      * Population that was just completed *
      */
-    private Population population;
+    private List<Individual<T>> population;
+    private Long generationNumber;
 
     /**
      * Default constructor
@@ -23,9 +26,10 @@ public class PopulationCompleteEvent extends LamarkEvent {
      * @param pLamark Lamark object that generated the exception
      * @param pPop    Population that was just completed
      */
-    public PopulationCompleteEvent(Lamark pLamark, Population pPop) {
+    public PopulationCompleteEvent(Lamark pLamark, List<Individual<T>> pPop, Long generationNumber) {
         super(pLamark);
         this.population = pPop;
+        this.generationNumber = generationNumber;
     }
 
     /**
@@ -33,15 +37,24 @@ public class PopulationCompleteEvent extends LamarkEvent {
      *
      * @return Population that was completed
      */
-    public Population getPopulation() {
+    public List<Individual<T>> getPopulation() {
         return population;
+    }
+
+    /**
+     * Accessor method
+     *
+     * @return Long containing the number of the generation
+     */
+    public Long getGenerationNumber() {
+        return generationNumber;
     }
 
     /**
      * @see java.lang.Object#toString()
      */
     public String toString() {
-        return "Completed population #" + population.getNumber() + " best score : " + population.best().getFitness() + " pop=" + getLamark().format(population.getIndividuals());
+        return "Completed population #" + generationNumber + " best score : " + population.get(0).getFitness() + " pop=" + getLamark().format(population);
     }
 
 }

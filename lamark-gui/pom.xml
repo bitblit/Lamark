@@ -1,6 +1,5 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-
     <parent>
         <groupId>com.erigir</groupId>
         <artifactId>lamark</artifactId>
@@ -8,13 +7,11 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>lamark-music</artifactId>
-
+    <artifactId>lamark-gui</artifactId>
     <packaging>jar</packaging>
-
-    <name>Lamark Music Writing Extension</name>
+    <name>Lamark Graphic Interface</name>
     <version>LOCAL-SNAPSHOT</version>
-    <description>Lamark Music Writing Extension</description>
+    <description>Lamark Graphic Interface</description>
     <url>http://www.erigir.com/Lamark</url>
     <inceptionYear>2006</inceptionYear>
     <issueManagement>
@@ -37,21 +34,29 @@
         </developer>
     </developers>
 
+    <!-- Jackson comes in for serialization/de-serialization -->
     <dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson-2-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-2-version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.erigir</groupId>
-            <artifactId>lamark-gui</artifactId>
+            <artifactId>lamark-core</artifactId>
             <version>LOCAL-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>com.explodingart</groupId>
-            <artifactId>jmusic</artifactId>
-            <version>1.6.4.1</version>
-        </dependency>
-
     </dependencies>
 
+
+    <build>
+    </build>
 
 
 </project>

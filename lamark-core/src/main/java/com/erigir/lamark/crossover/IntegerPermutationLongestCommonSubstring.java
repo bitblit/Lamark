@@ -4,13 +4,9 @@
 package com.erigir.lamark.crossover;
 
 import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.ICrossover;
-import com.erigir.lamark.Individual;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
 
 
 /**
@@ -24,7 +20,14 @@ import java.util.List;
  * @author cweiss
  * @since 03/2005
  */
-public class IntegerPermutationLongestCommonSubstring extends AbstractLamarkComponent implements ICrossover<List<Integer>> {
+public class IntegerPermutationLongestCommonSubstring extends AbstractLamarkComponent implements Function<List<List<Integer>>,List<Integer>> {
+
+    public IntegerPermutationLongestCommonSubstring() {
+    }
+
+    public IntegerPermutationLongestCommonSubstring(Random srcRandom) {
+        super(srcRandom);
+    }
 
     /**
      * Construct the longest common substring between two strings if such
@@ -146,19 +149,9 @@ public class IntegerPermutationLongestCommonSubstring extends AbstractLamarkComp
         return match;
     }
 
-    /**
-     * @see com.erigir.lamark.ICrossover#parentCount()
-     */
-    public int parentCount() {
-        return 2;
-    }
-
-    /**
-     * @see com.erigir.lamark.ICrossover#crossover(java.util.List)
-     */
-    public Individual<List<Integer>> crossover(List<Individual<List<Integer>>> parents) {
-        List<Integer> p1 = parents.get(0).getGenome();
-        List<Integer> p2 = parents.get(1).getGenome();
+    public List<Integer> apply(List<List<Integer>> parents) {
+        List<Integer> p1 = parents.get(0);
+        List<Integer> p2 = parents.get(1);
         int size = p1.size();
 
         // Find the largest common substring in any order
@@ -198,7 +191,7 @@ public class IntegerPermutationLongestCommonSubstring extends AbstractLamarkComp
 
         Collections.reverse(c1);
 
-        return new Individual<List<Integer>>(c1);
+        return c1;
     }
 
     /**

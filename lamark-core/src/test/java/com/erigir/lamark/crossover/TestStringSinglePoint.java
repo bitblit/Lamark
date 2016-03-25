@@ -1,7 +1,5 @@
 package com.erigir.lamark.crossover;
 
-import com.erigir.lamark.Individual;
-import com.erigir.lamark.Lamark;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -18,19 +16,16 @@ public class TestStringSinglePoint {
         String p1 = "0000";
         String p2 = "1111";
 
-        Individual<String> i1 = new Individual<String>(p1);
-        Individual<String> i2 = new Individual<String>(p2);
-        List<Individual<String>> parents = new ArrayList<Individual<String>>(2);
-        parents.add(i1);
-        parents.add(i2);
+        List<String> parents = new ArrayList<String>(2);
+        parents.add(p1);
+        parents.add(p2);
 
-        StringSinglePoint ssp = new StringSinglePoint();
-        ssp.setLamark(new Lamark());
+        StringSinglePointCrossover ssp = new StringSinglePointCrossover();
         int case1 = 0;
         int case2 = 0;
         int case3 = 0;
         for (int i = 0; i < size; i++) {
-            String c1 = ssp.crossover(parents).getGenome();
+            String c1 = ssp.apply(parents);
 
             if (c1.equals("0111")) {
                 case1++;

@@ -4,7 +4,7 @@
 package com.erigir.lamark.example.simple;
 
 import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.EFitnessType;
+import com.erigir.lamark.FitnessType;
 import com.erigir.lamark.IFitnessFunction;
 import com.erigir.lamark.Individual;
 
@@ -24,8 +24,8 @@ public class IntegerSort extends AbstractLamarkComponent implements IFitnessFunc
     /**
      * @see com.erigir.lamark.IFitnessFunction#fitnessType()
      */
-    public EFitnessType fitnessType() {
-        return EFitnessType.MAXIMUM_BEST;
+    public FitnessType fitnessType() {
+        return FitnessType.MAXIMUM_BEST;
     }
 
     /**

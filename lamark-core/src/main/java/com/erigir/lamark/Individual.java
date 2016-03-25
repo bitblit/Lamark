@@ -37,10 +37,9 @@ import java.util.Map;
  *
  * @param <T> Type of objects in this class wraps
  * @author cweiss
- * @see com.erigir.lamark.Lamark#getParentage(Individual)
  * @since 4-1-06
  */
-public class Individual<T> implements Serializable {
+public class Individual<T> implements Serializable, Comparable<Individual<T>> {
     /**
      * The actual genome of this individual, of the passed generic type
      */
@@ -92,7 +91,7 @@ public class Individual<T> implements Serializable {
     }
 
     /**
-     * @see java.lang.Object#toString()
+     * @see Object#toString()
      */
     public String toString() {
         StringBuffer sb = new StringBuffer();
@@ -205,5 +204,15 @@ public class Individual<T> implements Serializable {
      */
     public void setMutated(boolean mutated) {
         this.mutated = mutated;
+    }
+
+    @Override
+    public int compareTo(Individual<T> o) {
+        int rval = this.fitness.compareTo(o.fitness);
+        if (rval==0)
+        {
+            rval = this.genome.hashCode()-o.getGenome().hashCode();
+        }
+        return rval;
     }
 }

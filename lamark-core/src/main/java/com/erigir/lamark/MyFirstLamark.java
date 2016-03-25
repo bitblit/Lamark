@@ -1,19 +1,17 @@
 package com.erigir.lamark;
 
-import com.erigir.lamark.config.LamarkBootstrapper;
-import com.erigir.lamark.config.LamarkRuntimeParameters;
 import com.erigir.lamark.creator.StringCreator;
-import com.erigir.lamark.crossover.StringSinglePoint;
-import com.erigir.lamark.events.ExceptionEvent;
-import com.erigir.lamark.events.LamarkEvent;
-import com.erigir.lamark.events.LamarkEventListener;
-import com.erigir.lamark.events.LastPopulationCompleteEvent;
+import com.erigir.lamark.crossover.StringSinglePointCrossover;
+import com.erigir.lamark.events.*;
 import com.erigir.lamark.fitness.StringFinderFitness;
 import com.erigir.lamark.mutator.StringSimpleMutator;
-import com.erigir.lamark.selector.RouletteWheel;
+import com.erigir.lamark.selector.TournamentSelector;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * A simple command-line program that searches for the word LAMARK using a GA.
@@ -46,50 +44,33 @@ public class MyFirstLamark implements LamarkEventListener {
      * the CLI itself (although Lamark may start other threads as well, depending
      * on the value of "numberOfWorkerThreads").  Typically, (especially in GUI
      * apps) Lamark should be run in it's own thread, and monitored by listening for
-     * "last population" events.  This can be done by calling:
-     * new Thread(lamark).start();
-     * Since lamark implements Runnable.
+     * "last population" events.  This can be done by calling (for example, on a String based Lamark):
+     *
+     * Future<String> value =  Executors.newCachedThreadPool().submit(lamark)
+     * String output = value.get();
+     * Since Lamark implements Callable.
      */
     public void go() {
-        //Lamark lamark = new Lamark();
-        StringFinderFitness fitness = new StringFinderFitness();
-        fitness.setTarget("LAMARK");
+        Future<String> f;
 
-        StringCreator creator = new StringCreator();
-        creator.setValidCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-        creator.setSize(6);
-
-        List<Object> holder = new LinkedList<>();
-        holder.add(fitness);
-        holder.add(new StringSinglePoint());
-        holder.add(new RouletteWheel());
-        holder.add(new StringSimpleMutator());
-        holder.add(creator);
-
-        Lamark lamark = LamarkBootstrapper.createLamark(holder);
-
-        LamarkRuntimeParameters lrp = new LamarkRuntimeParameters();
-
-
-        lrp.setNumberOfWorkerThreads(400);
-        lrp.setPopulationSize(50);
-
-        lrp.setTargetScore(1.0);
-        lrp.setMutationProbability(.01);
-        lrp.setLowerElitism(.1);
-        lrp.setUpperElitism(.1);
-
-        lamark.setRuntimeParameters(lrp);
-
+        Lamark<String> lamark = new Lamark.LamarkBuilder<String>()
+                .withCreator(StringCreator.alphaCreator(6))
+                .withCrossover(new StringSinglePointCrossover())
+                .withFitnessFunction(new StringFinderFitness("LAMARK"))
+                .withMutator(new StringSimpleMutator())
+                .withSelector(new TournamentSelector<>())
+                .withPopulationSize(50)
+                .withPMutation(.01)
+                .withPCrossover(1.0)
+                .withUpperElitism(.1)
+                .withLowerElitism(.1)
+                .withTargetScore(1.0)
+                .build();
 
         // Setup self as a listener
-        lamark.addBetterIndividualFoundListener(this);
-        lamark.addPopulationCompleteListener(this);
-        lamark.addExceptionListener(this);
-        lamark.addLastPopulationCompleteListener(this);
+        lamark.addListener(this, new HashSet<>(Arrays.asList(BetterIndividualFoundEvent.class, PopulationCompleteEvent.class, ExceptionEvent.class, LastPopulationCompleteEvent.class)));
 
-
-        lamark.call();
+        lamark.start();
     }
 
 
@@ -108,13 +89,8 @@ public class MyFirstLamark implements LamarkEventListener {
         }
 
         if (je instanceof LastPopulationCompleteEvent) {
-            System.out.println("Finished, best found was: " + je.getLamark().getCurrentBest());
-            System.out.println("WP Queue size grew to: " + WorkPackage.queueSize() + " for a population size of " + je.getLamark().getRuntimeParameters().getPopulationSize());
-            System.out.println("Total time spent was: " + je.getLamark().getTotalRunTime() + " ms");
-            System.out.println("Total wait time was: " + je.getLamark().getTotalWaitTime() + " ms");
-            System.out.println("Average wait time was: " + je.getLamark().getAverageWaitTime() + " ms");
-            int pct = (int) (100.0 * je.getLamark().getPercentageTimeWaiting());
-            System.out.println("Wait time was: " + pct + "% of the total time");
+            System.out.println("Finished, best found was: " + je.getLamark().getBestSoFar());
+            System.out.println("Total time spent was: " + je.getLamark().getRunTime() + " ms");
         }
 
     }

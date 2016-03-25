@@ -3,14 +3,14 @@
     <parent>
         <groupId>com.erigir</groupId>
         <artifactId>lamark</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>LOCAL-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>lamark-example</artifactId>
     <packaging>jar</packaging>
     <name>Lamark Example Library</name>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>LOCAL-SNAPSHOT</version>
     <description>Lamark Example Library</description>
     <url>http://www.erigir.com/Lamark</url>
     <inceptionYear>2006</inceptionYear>
@@ -34,21 +34,13 @@
         </developer>
     </developers>
 
-    <!-- Jackson comes in for serialization/de-serialization -->
     <dependencies>
         <dependency>
             <groupId>com.erigir</groupId>
-            <artifactId>lamark-core</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <artifactId>lamark-gui</artifactId>
+            <version>LOCAL-SNAPSHOT</version>
         </dependency>
     </dependencies>
-
-    <properties>
-        <jackson-2-version>2.3.1</jackson-2-version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
-        <mytime>${maven.build.timestamp}</mytime>
-    </properties>
 
     <build>
     </build>

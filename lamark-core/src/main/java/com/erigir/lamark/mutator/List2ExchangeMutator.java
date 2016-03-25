@@ -5,11 +5,11 @@
 package com.erigir.lamark.mutator;
 
 import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.IMutator;
-import com.erigir.lamark.Individual;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.function.Function;
 
 
 /**
@@ -22,7 +22,15 @@ import java.util.List;
  * @author cweiss
  * @since 02/2005
  */
-public class List2ExchangeMutator extends AbstractLamarkComponent implements IMutator<List> {
+public class List2ExchangeMutator extends AbstractLamarkComponent implements Function<List,List> {
+
+    public List2ExchangeMutator() {
+        super();
+    }
+
+    public List2ExchangeMutator(Random srcRandom) {
+        super(srcRandom);
+    }
 
     /**
      * Switches the 2 points in the passed list.
@@ -53,16 +61,12 @@ public class List2ExchangeMutator extends AbstractLamarkComponent implements IMu
         return rval;
     }
 
-    /**
-     * @see com.erigir.lamark.IMutator#mutate(com.erigir.lamark.Individual)
-     */
-    public void mutate(Individual<List> being) {
-        List chromosome = being.getGenome();
+    public List apply(List input) {
 
-        int loc1 = getLamark().getRandom().nextInt(chromosome.size());
-        int loc2 = getLamark().getRandom().nextInt(chromosome.size());
+        int loc1 = rand().nextInt(input.size());
+        int loc2 = rand().nextInt(input.size());
 
-        being.setGenome(exchange2(chromosome, Math.min(loc1, loc2), Math.max(loc1, loc2)));
+        return exchange2(input, Math.min(loc1, loc2), Math.max(loc1, loc2));
     }
 
 }
