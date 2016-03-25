@@ -1,6 +1,6 @@
 package com.erigir.lamark.events;
 
-import com.erigir.lamark.StreamLamark;
+import com.erigir.lamark.Lamark;
 
 /**
  * This event is fired when the system finishes its 'plan' for the next population.
@@ -40,7 +40,7 @@ public class PopulationPlanCompleteEvent extends LamarkEvent {
      * @param pReplaceViaLowerElitism int containing the initial value
      * @param pCreateViaCrossover     int containing the initial value
      */
-    public PopulationPlanCompleteEvent(StreamLamark pLamark, int pCreateViaForcedInsert, int pRetainViaUpperElitism, int pReplaceViaLowerElitism, int pCreateViaCrossover) {
+    public PopulationPlanCompleteEvent(Lamark pLamark, int pCreateViaForcedInsert, int pRetainViaUpperElitism, int pReplaceViaLowerElitism, int pCreateViaCrossover) {
         super(pLamark);
 
         createViaForcedInsert = pCreateViaForcedInsert;

@@ -1,7 +1,7 @@
 package com.erigir.lamark.events;
 
 import com.erigir.lamark.Individual;
-import com.erigir.lamark.StreamLamark;
+import com.erigir.lamark.Lamark;
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ public class LastPopulationCompleteEvent<T> extends PopulationCompleteEvent<T> {
      * @param pPop       Population that was last
      * @param finishType Type of the finishing event
      */
-    public LastPopulationCompleteEvent(StreamLamark pLamark, List<Individual<T>> pPop, Long generationNumber, Type finishType) {
+    public LastPopulationCompleteEvent(Lamark pLamark, List<Individual<T>> pPop, Long generationNumber, Type finishType) {
         super(pLamark, pPop, generationNumber);
         type = finishType;
     }

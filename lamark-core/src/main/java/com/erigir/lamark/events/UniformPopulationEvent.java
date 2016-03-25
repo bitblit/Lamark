@@ -1,7 +1,7 @@
 package com.erigir.lamark.events;
 
 import com.erigir.lamark.Individual;
-import com.erigir.lamark.StreamLamark;
+import com.erigir.lamark.Lamark;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class UniformPopulationEvent<T> extends PopulationCompleteEvent {
      * @param currentGeneration Population that was uniform
      * @param generationNumber  Long containing the idx of the current generation
      */
-    public UniformPopulationEvent(StreamLamark pLamark, List<Individual<T>> currentGeneration, Long generationNumber) {
+    public UniformPopulationEvent(Lamark pLamark, List<Individual<T>> currentGeneration, Long generationNumber) {
         super(pLamark, currentGeneration, generationNumber);
     }
 

@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
 /**
  * Created by cweiss1271 on 3/24/16.
  */
-public class StreamLamark<T> {
-    private static final Logger LOG = LoggerFactory.getLogger(StreamLamark.class);
+public class Lamark<T> {
+    private static final Logger LOG = LoggerFactory.getLogger(Lamark.class);
 
     private List<FilteredListener> listeners = new LinkedList<>();
 
@@ -265,7 +265,7 @@ public class StreamLamark<T> {
         private boolean minimizeScore;
 
 
-        public StreamLamark<T> build()
+        public Lamark<T> build()
         {
             Objects.requireNonNull(creator);
             Objects.requireNonNull(fitnessFunction);
@@ -279,7 +279,7 @@ public class StreamLamark<T> {
                 throw new IllegalArgumentException("Probabilities must be between 0 and 1, inclusive");
             }
 
-            StreamLamark<T> rval = new StreamLamark<>();
+            Lamark<T> rval = new Lamark<>();
             rval.random = (random==null)?new Random():random;
             rval.maxGenerations = maxGenerations;
             rval.creator = creator;

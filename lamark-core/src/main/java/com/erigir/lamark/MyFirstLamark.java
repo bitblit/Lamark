@@ -5,12 +5,10 @@ import com.erigir.lamark.crossover.StringSinglePointCrossover;
 import com.erigir.lamark.events.*;
 import com.erigir.lamark.fitness.StringFinderFitness;
 import com.erigir.lamark.mutator.StringSimpleMutator;
-import com.erigir.lamark.selector.RouletteWheelSelector;
 import com.erigir.lamark.selector.TournamentSelector;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.TreeSet;
 
 /**
  * A simple command-line program that searches for the word LAMARK using a GA.
@@ -48,7 +46,7 @@ public class MyFirstLamark implements LamarkEventListener {
      * Since lamark implements Runnable.
      */
     public void go() {
-        StreamLamark<String> lamark = new StreamLamark.LamarkBuilder<String>()
+        Lamark<String> lamark = new Lamark.LamarkBuilder<String>()
                 .withCreator(StringCreator.alphaCreator(6))
                 .withCrossover(new StringSinglePointCrossover())
                 .withFitnessFunction(new StringFinderFitness("LAMARK"))

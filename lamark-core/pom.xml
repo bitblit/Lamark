@@ -3,14 +3,14 @@
     <parent>
         <groupId>com.erigir</groupId>
         <artifactId>lamark</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>LOCAL-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>lamark-config</artifactId>
+    <artifactId>lamark-core</artifactId>
     <packaging>jar</packaging>
     <name>Lamark Core Library</name>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>LOCAL-SNAPSHOT</version>
     <description>Lamark Core Library</description>
     <url>http://www.erigir.com/Lamark</url>
     <inceptionYear>2006</inceptionYear>

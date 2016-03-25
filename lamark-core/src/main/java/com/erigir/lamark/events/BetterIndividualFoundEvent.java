@@ -1,7 +1,7 @@
 package com.erigir.lamark.events;
 
 import com.erigir.lamark.Individual;
-import com.erigir.lamark.StreamLamark;
+import com.erigir.lamark.Lamark;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public class BetterIndividualFoundEvent<T> extends PopulationCompleteEvent {
      * @param pPop    Population object containing the new best individual
      * @param better  Individual object that is the new top
      */
-    public BetterIndividualFoundEvent(StreamLamark pLamark, List<Individual<T>> pPop, Long generationNumber, Individual<T> better) {
+    public BetterIndividualFoundEvent(Lamark pLamark, List<Individual<T>> pPop, Long generationNumber, Individual<T> better) {
         super(pLamark, pPop, generationNumber);
         this.newBest = better;
     }

@@ -1,7 +1,7 @@
 package com.erigir.lamark.events;
 
 import com.erigir.lamark.Individual;
-import com.erigir.lamark.StreamLamark;
+import com.erigir.lamark.Lamark;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ public class PopulationCompleteEvent<T> extends LamarkEvent {
      * @param pLamark Lamark object that generated the exception
      * @param pPop    Population that was just completed
      */
-    public PopulationCompleteEvent(StreamLamark pLamark, List<Individual<T>> pPop, Long generationNumber) {
+    public PopulationCompleteEvent(Lamark pLamark, List<Individual<T>> pPop, Long generationNumber) {
         super(pLamark);
         this.population = pPop;
         this.generationNumber = generationNumber;

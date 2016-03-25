@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.erigir</groupId>
         <artifactId>lamark</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>LOCAL-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
@@ -13,7 +13,7 @@
     <packaging>jar</packaging>
 
     <name>Lamark Music Writing Extension</name>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>LOCAL-SNAPSHOT</version>
     <description>Lamark Music Writing Extension</description>
     <url>http://www.erigir.com/Lamark</url>
     <inceptionYear>2006</inceptionYear>
