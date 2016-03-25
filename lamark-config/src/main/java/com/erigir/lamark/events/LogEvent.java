@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 /**
  * This event is fired whenever a logging event occurs in Lamark.
- * <p/>
+ * <p>
  * NOTE: this type of event is meant to allow bridging Lamark logging
  * into the logger of whatever container is being used.  To simplify
  * bridging, an adapter for standard java logging is provided (either

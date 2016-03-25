@@ -1,7 +1,5 @@
 package com.erigir.lamark.events;
 
-import com.erigir.lamark.Lamark;
-import com.erigir.lamark.Population;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.StreamLamark;
 
@@ -39,7 +37,7 @@ public class PopulationCompleteEvent<T> extends LamarkEvent {
      *
      * @return Population that was completed
      */
-    public List<Individual<T>>  getPopulation() {
+    public List<Individual<T>> getPopulation() {
         return population;
     }
 

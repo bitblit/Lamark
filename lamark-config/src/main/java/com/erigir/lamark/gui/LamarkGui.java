@@ -3,8 +3,7 @@
  */
 package com.erigir.lamark.gui;
 
-import com.erigir.lamark.Lamark;
-import com.erigir.lamark.LamarkConfigurationFailedException;
+import com.erigir.lamark.StreamLamark;
 import com.erigir.lamark.Util;
 import com.erigir.lamark.events.*;
 
@@ -98,7 +97,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
     /**
      * Handle to the current instnace of Lamark, if any *
      */
-    private Lamark currentRunner;
+    private StreamLamark currentRunner;
     /**
      * Panel holding the current configuration *
      */

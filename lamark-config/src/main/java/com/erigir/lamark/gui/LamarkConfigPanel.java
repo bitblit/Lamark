@@ -1,8 +1,5 @@
 package com.erigir.lamark.gui;
 
-import com.erigir.lamark.Lamark;
-import com.erigir.lamark.LamarkFactory;
-import com.erigir.lamark.config.LamarkGUIConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,11 +37,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      */
     private static final String DEFAULT_CONFIG_LOCATION = "classpath:com/erigir/lamark/gui/default-lamark.json";
 
-
-    /**
-     * Factory is used for serialization
-     */
-    private LamarkFactory lamarkFactory = new LamarkFactory();
 
     /**
      * Custom properties for creator *

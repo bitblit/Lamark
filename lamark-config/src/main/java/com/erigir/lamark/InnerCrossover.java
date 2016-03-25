@@ -6,6 +6,9 @@ import java.util.Random;
 import java.util.function.Function;
 
 /**
+ * A wrapper around the crossover function to isolate out the use of the individual object -
+ * basically allows the GA writer to not be concerning with stats tracking over time
+ *
  * Created by cweiss1271 on 3/24/16.
  */
 public class InnerCrossover<T> implements Function<List<Individual<T>>, Individual<T>>
@@ -28,7 +31,6 @@ public class InnerCrossover<T> implements Function<List<Individual<T>>, Individu
             List<T> temp = new ArrayList<>(value.size());
             for (Individual<T> i:value)
             {
-                i.incrementSelected(); // increment the number of times selected for crossover
                 temp.add(i.getGenome());
             }
             T output = this.crossover.apply(temp);

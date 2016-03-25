@@ -1,11 +1,10 @@
 package com.erigir.lamark.events;
 
-import com.erigir.lamark.Lamark;
 import com.erigir.lamark.StreamLamark;
 
 /**
  * This event is fired when the system finishes its 'plan' for the next population.
- * <p/>
+ * <p>
  * That is to say, it knows how each individual will be created, but they haven't
  * been created yet.  Mainly useful for systems with VERY expensive crossover/create
  * operations that make each population take a significant amount of time to process.

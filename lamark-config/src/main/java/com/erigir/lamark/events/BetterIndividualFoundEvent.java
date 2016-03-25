@@ -1,6 +1,5 @@
 package com.erigir.lamark.events;
 
-import com.erigir.lamark.Population;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.StreamLamark;
 

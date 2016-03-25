@@ -21,9 +21,9 @@ public class UniformPopulationEvent<T> extends PopulationCompleteEvent {
     /**
      * Default constructor
      *
-     * @param pLamark Lamark object that generated the exception
-     * @param currentGeneration    Population that was uniform
-     * @param generationNumber Long containing the idx of the current generation
+     * @param pLamark           Lamark object that generated the exception
+     * @param currentGeneration Population that was uniform
+     * @param generationNumber  Long containing the idx of the current generation
      */
     public UniformPopulationEvent(StreamLamark pLamark, List<Individual<T>> currentGeneration, Long generationNumber) {
         super(pLamark, currentGeneration, generationNumber);

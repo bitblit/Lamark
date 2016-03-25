@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ *  A wrapper for a LamarkEventListener that holds the set of events of which it wishes to be informed
  * Created by cweiss1271 on 3/24/16.
  */
 public class FilteredListener {
