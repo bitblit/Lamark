@@ -9,6 +9,9 @@ import com.erigir.lamark.selector.TournamentSelector;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * A simple command-line program that searches for the word LAMARK using a GA.
@@ -41,11 +44,15 @@ public class MyFirstLamark implements LamarkEventListener {
      * the CLI itself (although Lamark may start other threads as well, depending
      * on the value of "numberOfWorkerThreads").  Typically, (especially in GUI
      * apps) Lamark should be run in it's own thread, and monitored by listening for
-     * "last population" events.  This can be done by calling:
-     * new Thread(lamark).start();
-     * Since lamark implements Runnable.
+     * "last population" events.  This can be done by calling (for example, on a String based Lamark):
+     *
+     * Future<String> value =  Executors.newCachedThreadPool().submit(lamark)
+     * String output = value.get();
+     * Since Lamark implements Callable.
      */
     public void go() {
+        Future<String> f;
+
         Lamark<String> lamark = new Lamark.LamarkBuilder<String>()
                 .withCreator(StringCreator.alphaCreator(6))
                 .withCrossover(new StringSinglePointCrossover())

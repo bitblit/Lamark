@@ -8,19 +8,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
 /**
  * Created by cweiss1271 on 3/24/16.
  */
-public class Lamark<T> {
+public class Lamark<T> implements Callable<T> {
     private static final Logger LOG = LoggerFactory.getLogger(Lamark.class);
 
     private List<FilteredListener> listeners = new LinkedList<>();
 
     private LastPopulationCompleteEvent.Type finishType=null;
-    private Individual bestSoFar;
+    private Individual<T> bestSoFar;
     private List<T> initialValues;
     private Random random;
     private Integer populationSize;
@@ -124,12 +125,19 @@ public class Lamark<T> {
 
     public void stop()
     {
-        System.out.println("Aborted!");
+        LOG.warn("Aborted!");
         finishType = LastPopulationCompleteEvent.Type.ABORTED;
         publishEvent(new AbortedEvent(this));
     }
 
     public void start()
+    {
+        LOG.info("Running Lamark in calling thread");
+        call();
+    }
+
+
+    public T call()
     {
         started = System.currentTimeMillis();
 
@@ -140,7 +148,7 @@ public class Lamark<T> {
             items.add(creator.get());
         }
 
-        System.out.println("Got these items : "+items);
+        LOG.debug("Items on startup: {}",items);
         List<Individual<T>> curGen = null;
 
         try {
@@ -179,12 +187,11 @@ public class Lamark<T> {
                 }
 
                 // Calc total
-                System.out.println("Generation " + currentGeneration + " : " + curGen);
-                System.out.println("Stripped:" + curGen.stream().map(stripper).collect(Collectors.toList()));
+                LOG.debug("Generation {}:{}" , currentGeneration , curGen);
+                LOG.debug("Stripped: {}" , curGen.stream().map(stripper).collect(Collectors.toList()));
 
                 double totalFitness = curGen.stream().mapToDouble((p) -> p.getFitness()).sum();
-                // TODO: impl selector
-                System.out.println("Total fitness: " + totalFitness);
+                LOG.debug("Total fitness: {}" , totalFitness);
 
                 // Select for crossover (select a bunch at once, and then create parent lists from them
                 // Designed this way because the selectors typically do a bunch of calcs that can be reused
@@ -206,7 +213,6 @@ public class Lamark<T> {
                 // Next generation starts here
                 // TODO: Upper/lower elitism
 
-                System.out.println("Generating next gen...");
                 currentGeneration++;
                 // Apply crossover and mutation
                 curGen = parents.stream().map(crossover).map(mutator).collect(Collectors.toList());
@@ -222,6 +228,7 @@ public class Lamark<T> {
         publishEvent(new LastPopulationCompleteEvent<>(this, curGen, currentGeneration, finishType ));
         ended = System.currentTimeMillis();
 
+        return (bestSoFar==null)?null:bestSoFar.getGenome();
     }
 
     public Long getRunTime()
