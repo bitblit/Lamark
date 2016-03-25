@@ -46,8 +46,8 @@
     </dependencies>
     <modules>
         <module>lamark-core</module>
+        <module>lamark-gui</module>
         <module>lamark-core-old</module>
-        <module>lamark-config</module>
         <module>lamark-example</module>
         <module>lamark-web</module>
         <module>lamark-music</module>
