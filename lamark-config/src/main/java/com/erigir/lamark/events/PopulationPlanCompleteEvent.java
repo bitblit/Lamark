@@ -1,7 +1,7 @@
 package com.erigir.lamark.events;
 
 import com.erigir.lamark.Lamark;
-import com.erigir.lamark.stream.StreamLamark;
+import com.erigir.lamark.StreamLamark;
 
 /**
  * This event is fired when the system finishes its 'plan' for the next population.

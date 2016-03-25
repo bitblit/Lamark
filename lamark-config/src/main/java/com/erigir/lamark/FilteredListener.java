@@ -1,6 +1,5 @@
-package com.erigir.lamark.stream;
+package com.erigir.lamark;
 
-import com.erigir.lamark.Lamark;
 import com.erigir.lamark.events.LamarkEvent;
 import com.erigir.lamark.events.LamarkEventListener;
 

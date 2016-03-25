@@ -1,4 +1,4 @@
-package com.erigir.lamark.stream;
+package com.erigir.lamark;
 
 import java.util.ArrayList;
 import java.util.List;

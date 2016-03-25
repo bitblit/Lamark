@@ -1,4 +1,4 @@
-package com.erigir.lamark.stream;
+package com.erigir.lamark;
 
 
 import com.erigir.lamark.events.LamarkEvent;

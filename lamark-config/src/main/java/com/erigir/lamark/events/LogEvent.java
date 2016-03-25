@@ -1,6 +1,6 @@
 package com.erigir.lamark.events;
 
-import com.erigir.lamark.stream.StreamLamark;
+import com.erigir.lamark.StreamLamark;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

@@ -1,4 +1,4 @@
-package com.erigir.lamark.stream;
+package com.erigir.lamark;
 
 
 import com.erigir.lamark.events.*;
@@ -39,6 +39,11 @@ public class StreamLamark<T> {
     private Stripper<T> stripper = new Stripper<>();
     private Selector<T> selector = new RouletteWheelSelector<>();
     private Double targetScore = null;
+    private boolean minimizeScore = false;
+    private int numberOfParents = 2;
+
+    private Long started;
+    private Long ended;
 
     public void addListener(LamarkEventListener listener)
     {
@@ -107,7 +112,7 @@ public class StreamLamark<T> {
             }
             if (allEqual)
             {
-                publishEvent(new UniformPopulationEvent(this, currentPopulation));
+                publishEvent(new UniformPopulationEvent(this, currentPopulation, currentGeneration));
                 finishType = LastPopulationCompleteEvent.Type.UNIFORM;
             }
         }
@@ -122,6 +127,8 @@ public class StreamLamark<T> {
 
     public void start()
     {
+        started = System.currentTimeMillis();
+
         // create generation
         List<T> items = new ArrayList<>(populationSize);
         for (int i=0;i<populationSize;i++)
@@ -150,9 +157,21 @@ public class StreamLamark<T> {
                 curGen = curGen.stream().map(fitnessFunction).sorted().collect(Collectors.toList());
 
                 // If we've found a new best, update and report
-                if (bestSoFar == null || curGen.get(0).getFitness().compareTo(bestSoFar.getFitness()) > 0) {
-                    bestSoFar = curGen.get(0);
-                    publishEvent(new BetterIndividualFoundEvent(this, curGen, currentGeneration , bestSoFar));
+                if (minimizeScore)
+                {
+                    if (bestSoFar == null || curGen.get(curGen.size()-1).getFitness().compareTo(bestSoFar.getFitness()) < 0)
+                    {
+                        bestSoFar = curGen.get(curGen.size()-1);
+                        publishEvent(new BetterIndividualFoundEvent(this, curGen, currentGeneration , bestSoFar));
+                    }
+                }
+                else
+                {
+                    if (bestSoFar == null || curGen.get(0).getFitness().compareTo(bestSoFar.getFitness()) > 0)
+                    {
+                        bestSoFar = curGen.get(0);
+                        publishEvent(new BetterIndividualFoundEvent(this, curGen, currentGeneration , bestSoFar));
+                    }
                 }
 
                 // Calc total
@@ -163,18 +182,25 @@ public class StreamLamark<T> {
                 // TODO: impl selector
                 System.out.println("Total fitness: " + totalFitness);
 
-                // Select for crossover
-                List<List<Individual<T>>> parents = new ArrayList<>();
-                for (int i = 0; i < populationSize; i++) {
-                    parents.add(Arrays.asList(selector.select(curGen, random, totalFitness), selector.select(curGen, random, totalFitness)));
-                }
+                // Select for crossover (select a bunch at once, and then create parent lists from them
+                // Designed this way because the selectors typically do a bunch of calcs that can be reused
+                // over and over
+                List<Individual<T>> selected = selector.select(curGen, random, numberOfParents*populationSize, minimizeScore);
+                // Stats - increment all of their selected counters
+                selected.stream().forEach((p)->p.incrementSelected());
 
+                List<List<Individual<T>>> parents = new ArrayList<>(populationSize);
+                for (int i = 0;i<populationSize;i++)
+                {
+                    parents.add(selected.subList(i*numberOfParents, (i+1)*numberOfParents));
+                }
                 publishEvent(new PopulationCompleteEvent(this, curGen,currentGeneration));
 
                 // At the end of each cycle check exit conditions
                 updateIfShouldKeepRunning(curGen);
                 // --------------------
                 // Next generation starts here
+                // TODO: Upper/lower elitism
 
                 System.out.println("Generating next gen...");
                 currentGeneration++;
@@ -189,10 +215,24 @@ public class StreamLamark<T> {
         }
 
         publishEvent(new LastPopulationCompleteEvent<>(this, curGen, currentGeneration, finishType ));
+        ended = System.currentTimeMillis();
 
     }
 
+    public Long getRunTime()
+    {
+        Long rval = null;
+        if (started!=null)
+        {
+            rval = (ended==null)?System.currentTimeMillis()-started:ended-started;
+        }
+        return rval;
+    }
 
+
+    public Individual getBestSoFar() {
+        return bestSoFar;
+    }
 
     public static class LamarkBuilder<T>
     {
@@ -217,6 +257,7 @@ public class StreamLamark<T> {
         private boolean trackParentage;
         private boolean abortOnUniformPopulation;
         private boolean runParallel;
+        private boolean minimizeScore;
 
 
         public StreamLamark<T> build()
@@ -243,6 +284,7 @@ public class StreamLamark<T> {
             rval.fitnessFunction = new InnerFitnessCalculator<>(fitnessFunction);
             rval.selector = (selector==null)?new RouletteWheelSelector<>():selector;
             rval.populationSize = populationSize;
+            rval.minimizeScore = minimizeScore;
 
             if (formatter!=null)
             {
@@ -310,6 +352,26 @@ public class StreamLamark<T> {
 
         public LamarkBuilder withFormatter(final Function<T, String> formatter) {
             this.formatter = formatter;
+            return this;
+        }
+
+        public LamarkBuilder withMinimizeScore(final boolean minimizeScore) {
+            this.minimizeScore = minimizeScore;
+            return this;
+        }
+
+        public LamarkBuilder withUpperElitism(final Double upperElitism) {
+            this.upperElitism = upperElitism;
+            return this;
+        }
+
+        public LamarkBuilder withLowerElitism(final Double lowerElitism) {
+            this.lowerElitism = lowerElitism;
+            return this;
+        }
+
+        public LamarkBuilder withTargetScore(final Double targetScore) {
+            this.targetScore = targetScore;
             return this;
         }
 

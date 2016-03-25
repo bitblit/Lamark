@@ -1,15 +1,14 @@
 package com.erigir.lamark;
 
-import com.erigir.lamark.config.LamarkRuntimeParameters;
 import com.erigir.lamark.creator.StringCreator;
-import com.erigir.lamark.crossover.StringSinglePoint;
-import com.erigir.lamark.events.ExceptionEvent;
-import com.erigir.lamark.events.LamarkEvent;
-import com.erigir.lamark.events.LamarkEventListener;
-import com.erigir.lamark.events.LastPopulationCompleteEvent;
+import com.erigir.lamark.crossover.StringSinglePointCrossover;
+import com.erigir.lamark.events.*;
 import com.erigir.lamark.fitness.StringFinderFitness;
 import com.erigir.lamark.mutator.StringSimpleMutator;
-import com.erigir.lamark.selector.RouletteWheel;
+import com.erigir.lamark.selector.RouletteWheelSelector;
+
+import java.util.Arrays;
+import java.util.TreeSet;
 
 /**
  * A simple command-line program that searches for the word LAMARK using a GA.
@@ -47,41 +46,24 @@ public class MyFirstLamark implements LamarkEventListener {
      * Since lamark implements Runnable.
      */
     public void go() {
-        Lamark lamark = new Lamark();
-        StringFinderFitness fitness = new StringFinderFitness();
-        fitness.setTarget("LAMARK");
-        lamark.setFitnessFunction(fitness);
-        lamark.setCrossover(new StringSinglePoint());
-        lamark.setSelector(new RouletteWheel());
-        lamark.setMutator(new StringSimpleMutator());
-
-        StringCreator creator = new StringCreator();
-        creator.setValidCharacters("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-        creator.setSize(6);
-        lamark.setCreator(creator);
-
-        LamarkRuntimeParameters lrp = new LamarkRuntimeParameters();
-
-
-        lrp.setNumberOfWorkerThreads(400);
-        lrp.setPopulationSize(50);
-
-        lrp.setTargetScore(1.0);
-        lrp.setMutationProbability(.01);
-        lrp.setLowerElitism(.1);
-        lrp.setUpperElitism(.1);
-
-        lamark.setRuntimeParameters(lrp);
-
+        StreamLamark<String> lamark = new StreamLamark.LamarkBuilder<String>()
+                .withCreator(StringCreator.alphaCreator(6))
+                .withCrossover(new StringSinglePointCrossover())
+                .withFitnessFunction(new StringFinderFitness("LAMARK"))
+                .withMutator(new StringSimpleMutator())
+                .withSelector(new RouletteWheelSelector<String>())
+                .withPopulationSize(50)
+                .withPMutation(.01)
+                .withPCrossover(1.0)
+                .withUpperElitism(.1)
+                .withLowerElitism(.1)
+                .withTargetScore(1.0)
+                .build();
 
         // Setup self as a listener
-        lamark.addBetterIndividualFoundListener(this);
-        lamark.addPopulationCompleteListener(this);
-        lamark.addExceptionListener(this);
-        lamark.addLastPopulationCompleteListener(this);
+        lamark.addListener(this, new TreeSet<>(Arrays.asList(BetterIndividualFoundEvent.class, PopulationCompleteEvent.class, ExceptionEvent.class, LastPopulationCompleteEvent.class)));
 
-
-        lamark.call();
+        lamark.start();
     }
 
 
@@ -100,13 +82,8 @@ public class MyFirstLamark implements LamarkEventListener {
         }
 
         if (je instanceof LastPopulationCompleteEvent) {
-            System.out.println("Finished, best found was: " + je.getLamark().getCurrentBest());
-            System.out.println("WP Queue size grew to: " + WorkPackage.queueSize() + " for a population size of " + je.getLamark().getRuntimeParameters().getPopulationSize());
-            System.out.println("Total time spent was: " + je.getLamark().getTotalRunTime() + " ms");
-            System.out.println("Total wait time was: " + je.getLamark().getTotalWaitTime() + " ms");
-            System.out.println("Average wait time was: " + je.getLamark().getAverageWaitTime() + " ms");
-            int pct = (int) (100.0 * je.getLamark().getPercentageTimeWaiting());
-            System.out.println("Wait time was: " + pct + "% of the total time");
+            System.out.println("Finished, best found was: " + je.getLamark().getBestSoFar());
+            System.out.println("Total time spent was: " + je.getLamark().getRunTime() + " ms");
         }
 
     }
