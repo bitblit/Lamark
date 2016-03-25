@@ -5,7 +5,7 @@ import javax.swing.*;
 
 /**
  * A Applet wrapper around the LamarkGUI class to permit display on website.
- * <p/>
+ * &lt;p /&gt;
  * This is a simple JApplet class to allow the LamarkGUI class to
  * be shown on the website.  It is a companion to the LamarkApplication
  * class.  Since this is the applet, it assumes no privs, and only allows

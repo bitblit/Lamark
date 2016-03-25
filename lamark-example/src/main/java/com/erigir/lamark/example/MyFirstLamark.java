@@ -13,7 +13,7 @@ import com.erigir.lamark.selector.RouletteWheel;
 
 /**
  * A simple command-line program that searches for the word LAMARK using a GA.
- * <p/>
+ * &lt;p /&gt;
  * This class demonstrates how to simply wire a java command line client
  * to run Lamark internally.  Typically used as a stub for further work.
  * For serious work, I'd recommend the use of an inversion of control
@@ -37,7 +37,7 @@ public class MyFirstLamark implements LamarkEventListener {
 
     /**
      * Creates an instance of lamark, configures it, and then runs it.
-     * <p/>
+     * &lt;p /&gt;
      * NOTE: In this case, we are running lamark within the same thread as
      * the CLI itself (although Lamark may start other threads as well, depending
      * on the value of "numberOfWorkerThreads").  Typically, (especially in GUI

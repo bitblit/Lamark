@@ -4,7 +4,7 @@ import java.util.function.ToDoubleFunction;
 
 /**
  * A fitness function that searches for a given string.
- * <p/>
+ * &lt;p /&gt;
  * The fitness function assumes that a string is passed, and
  * its score is the ratio of correct letters to all letters.
  * When this ratio is 1.0, the target string has been found.

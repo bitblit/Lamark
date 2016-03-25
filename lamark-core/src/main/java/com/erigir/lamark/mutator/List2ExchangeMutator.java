@@ -14,7 +14,7 @@ import java.util.function.Function;
 
 /**
  * Performs the permutation-safe 2-exchange mutation.
- * <p/>
+ * &lt;p /&gt;
  * If the original list is viewed as a path, this mutation can
  * be viewed as cutting the string 2 in 2 places, and tying the
  * opposite ends together.

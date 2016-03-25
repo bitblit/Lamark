@@ -12,7 +12,7 @@ import java.awt.geom.Line2D;
 
 /**
  * A class for displaying a given cellular automata plan as a picture.
- * <p/>
+ * &lt;p /&gt;
  * This class implements GUIEventListener, and every time a new best
  * individual object is found, it repaints the drawn GA in the display
  * panel with the output of the new best CA.

@@ -10,7 +10,7 @@ import java.util.List;
  * found within the treble cleff, this trait calculates the
  * percentage of notes in the treble cleff and returns
  * that number as its score
- * <p/>
+ * &lt;p /&gt;
  * Trebel cleff is notes 60 (middle c) to  81 (c above cleff)
  *
  * @author cweiss

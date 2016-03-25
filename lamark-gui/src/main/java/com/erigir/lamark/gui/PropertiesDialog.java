@@ -14,7 +14,7 @@ import java.util.Properties;
 
 /**
  * Dialog box that displays a table with name/value pairs allowing editing/adding/removing.
- * <p/>
+ * &lt;p /&gt;
  * Used to modify a set of properties, typically custom properties for a component.
  *
  * @author cweiss

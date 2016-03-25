@@ -7,7 +7,7 @@ import java.util.Properties;
 
 /**
  * A table model that holds a set of name/value pairs (2 columns) for a dialog box.
- * <p/>
+ * &lt;p /&gt;
  * Used to hold custom properties for the various GA components.
  *
  * @author cweiss
@@ -123,7 +123,7 @@ public class PropertiesTableModel extends AbstractTableModel {
 
     /**
      * Wrapper class to simplify table handling.
-     * <p/>
+     * &lt;p /&gt;
      * Needed because properties objects are hashed and have no set order.
      *
      * @author cweiss

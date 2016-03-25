@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 
 /**
  * A class implementing a simple GUI for creating and running Lamark instances.
- * <p/>
+ * &lt;p /&gt;
  * This panel is typically wrapped by either an applet (LamarkApplet) or application
  * (LamarkApplication), which only differ in whether they allow the file menu (the
  * applet has no menus since they would be disabled anyway).  The GUI has controls
@@ -455,7 +455,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
 
     /**
      * A class to wrap a lamarklistener around the output panel of the gui.
-     * <p/>
+     * &lt;p /&gt;
      * This class catches the selected events and outputs their
      * string representation into the output panel.
      *

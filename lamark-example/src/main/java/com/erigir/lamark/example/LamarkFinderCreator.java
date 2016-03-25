@@ -4,7 +4,7 @@ import com.erigir.lamark.creator.StringCreator;
 
 /**
  * A class extending StringCreator that creates strings of length 6.
- * <p/>
+ * &lt;p /&gt;
  * All letters are considered valid for this string creator.
  *
  * @author cweiss

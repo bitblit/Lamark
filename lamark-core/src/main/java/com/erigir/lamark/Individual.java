@@ -13,7 +13,7 @@ import java.util.Map;
 
 /**
  * Individual is a class representing a single genome in Lamark.
- * <p/>
+ * &lt;p/&gt;
  * Individual is the wrapper class that holds a given genome together with its
  * fitness, and flags as to whether it was mutated or not.  Individual also contains a
  * generic "attributes" member, which the components (fitness function, creator, etc)
@@ -22,20 +22,19 @@ import java.util.Map;
  * but may be computationally expensive to perform over and over again.  Users of
  * networked Lamark should be aware that any attributes must be serializable if
  * they are to be used without error.
- * <br />
+ * &lt;br /&gt;
  * Note that the same genome may be present in different individuals, either because
  * they are coincidentally the same, or because they are present in different generations (ie,
  * individuals retained by upper elitism are kept forward via copies, not with multiple
  * populations pointing to the same individual.
- * <br />
+ * &lt;br /&gt;
  * As tracking parentage can consume a great deal of memory (it essentially keeps every
  * individual ever created through its hierarchy) it is by default turned off in Lamark.
  * Parentage information, when tracked, is kept by the Lamark object and not the individual
  * object itself.
- * <br />
+ * &lt;br /&gt;
  * Use of the word 'individual' for this class comes from David Goldberg's book
  *
- * @param <T> Type of objects in this class wraps
  * @author cweiss
  * @since 4-1-06
  */

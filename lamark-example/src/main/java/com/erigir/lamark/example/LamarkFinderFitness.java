@@ -4,7 +4,7 @@ import com.erigir.lamark.fitness.StringFinderFitness;
 
 /**
  * A fitness function that tries to find the word 'LAMARK'
- * <p/>
+ * &lt;p /&gt;
  * Relies on the StringFinderFitness class to implement the fitness
  * function.
  *

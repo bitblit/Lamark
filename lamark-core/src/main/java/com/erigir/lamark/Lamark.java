@@ -26,7 +26,7 @@ public class Lamark<T> implements Callable<T> {
     private Random random;
     private Integer populationSize;
     private Long maxGenerations;
-    private Long currentGeneration = 0l;
+    private Long currentGeneration = 0L;
     private Supplier<T> creator;
     //private ToDoubleFunction<T> fitnessFunction;
     private InnerFitnessCalculator<T> fitnessFunction;

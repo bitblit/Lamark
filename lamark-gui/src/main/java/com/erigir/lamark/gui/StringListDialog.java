@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * Dialog displaying an editable list of strings in a table with add/remove buttons.
- * <p/>
+ * &lt;p /&gt;
  * Lamark uses this class to display a list of pre-load individuals.
  *
  * @author cweiss

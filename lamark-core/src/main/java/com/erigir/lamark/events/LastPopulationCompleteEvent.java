@@ -28,6 +28,7 @@ public class LastPopulationCompleteEvent<T> extends PopulationCompleteEvent<T> {
      *
      * @param pLamark    Lamark object that generated the exception
      * @param pPop       Population that was last
+     * @param generationNumber Long containing the current generation number
      * @param finishType Type of the finishing event
      */
     public LastPopulationCompleteEvent(Lamark pLamark, List<Individual<T>> pPop, Long generationNumber, Type finishType) {

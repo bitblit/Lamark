@@ -4,9 +4,9 @@ import java.util.function.ToDoubleFunction;
 
 /**
  * A simple fitness function to find a string with all ones in it.
- * <p/>
+ * &lt;p /&gt;
  * This class is here mainly as a simple example and because it's used in the unit tests of the roulette wheel
- * <p/>
+ * &lt;p /&gt;
  * Can be used to test 'minimize' score settings (which should result in all zeros)
  *
  * @author cweiss

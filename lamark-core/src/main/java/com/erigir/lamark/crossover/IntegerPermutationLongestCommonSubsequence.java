@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 /**
  * Crosses over two lists of integers preserving both the permutation and longest common subsequence property.
- * <p/>
+ * &lt;p /&gt;
  * This crossover finds the longest common subsequence of the two parent lists, assuming that the lists have
  * a symmetrical nature (ie, can be reversed without effect on the underlying problem space, so a LCS match on
  * the reverse of a list is as good as a LCS match on it front-ways).  It then copies this LCS into the child,

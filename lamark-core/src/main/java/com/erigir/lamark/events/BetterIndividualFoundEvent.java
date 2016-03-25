@@ -23,6 +23,7 @@ public class BetterIndividualFoundEvent<T> extends PopulationCompleteEvent {
      *
      * @param pLamark Lamark object that generated the exception
      * @param pPop    Population object containing the new best individual
+     * @param generationNumber Long containing the current generation number
      * @param better  Individual object that is the new top
      */
     public BetterIndividualFoundEvent(Lamark pLamark, List<Individual<T>> pPop, Long generationNumber, Individual<T> better) {

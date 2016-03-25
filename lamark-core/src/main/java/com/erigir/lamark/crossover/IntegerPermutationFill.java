@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 /**
  * A crossover for Lists of Integers that maintains the permutation property via fill.
- * <p/>
+ * &lt;p /&gt;
  * <em>Fill</em> in this context means that we pick a split point, and copy in
  * every item to the left of that point into the child.  We then iterate through
  * the second parent, and fill the remaining slots in the permutation out

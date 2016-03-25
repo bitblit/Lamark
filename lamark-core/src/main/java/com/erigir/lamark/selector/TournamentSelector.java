@@ -8,7 +8,7 @@ import java.util.Random;
 
 /**
  * Implements a selector that works on tournament selection.
- * <p/>
+ * &lt;p /&gt;
  * Pairs of individuals are chosen from the source, with the better of the
  * two being selected.
  *

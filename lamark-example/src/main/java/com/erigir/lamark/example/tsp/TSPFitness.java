@@ -15,7 +15,7 @@ import java.util.StringTokenizer;
 
 /**
  * A fitness function for TSPs, where the fitness value is the length of the path.
- * <p/>
+ * &lt;p /&gt;
  * This class implements the IFitnessFunction interface for TSPs, when passed a
  * TSP to solve, and a given solution, returns the length of that path as the
  * fitness value for the individual.  Note that this class cannot be used for

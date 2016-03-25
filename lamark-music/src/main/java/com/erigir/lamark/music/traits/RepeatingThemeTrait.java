@@ -9,7 +9,7 @@ import java.util.*;
  * music, by finding repeating substrings in the notes
  * and giving points for them.  Points are given both
  * for substring length and number of times repeated.
- * <p/>
+ * &lt;p /&gt;
  * NOTE: Since a given theme can occur anywhere on a scale,
  * the notes themselves are not analyzed, but rather the
  * deltas, so 40-43-41 == 71-74-72

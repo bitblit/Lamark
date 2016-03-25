@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * A panel for holding and organizing the various properties controls for LamarkGUI.
- * <p/>
+ * &lt;p /&gt;
  * Also wraps business logic for converting these controls into properties object
  * that can configure a lamark instance or be saved to disk.
  *
@@ -225,7 +225,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
 
     /**
      * Default constructor.
-     * <p/>
+     * &lt;p /&gt;
      * Builds the layout.
      */
     public LamarkConfigPanel(final String inConfigResource, final String inSelectedItem) {

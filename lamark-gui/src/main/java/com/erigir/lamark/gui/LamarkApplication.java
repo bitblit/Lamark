@@ -16,7 +16,7 @@ import java.io.FileWriter;
 
 /**
  * A class for running a LamarkGUI instance as an application.
- * <p/>
+ * &lt;p /&gt;
  * This class wraps the GUI in a frame, adding a menu bar and allowing
  * loading from the local disk.
  *

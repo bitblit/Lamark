@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 /**
  * Crosses over two lists of integers preserving both the permutation and longest common substring property.
- * <p/>
+ * &lt;p /&gt;
  * This crossover finds the longest common substring of the two parent lists, assuming that the lists have
  * a symmetrical nature (ie, can be reversed without effect on the underlying problem space, so a LCS match on
  * the reverse of a list is as good as a LCS match on it front-ways).  It then copies this LCS into the child,
@@ -40,7 +40,7 @@ public class IntegerPermutationLongestCommonSubstring extends AbstractLamarkComp
      * against that set is just a matter of computing the suffix matrix
      * for the input (e.g., line) and comparing against the pre-computed
      * suffix arrays for each data item.
-     * <p/>
+     * &lt;p /&gt;
      * In any event, this routine always computes and sorts the suffix
      * arrays for both input string parameters.
      *
