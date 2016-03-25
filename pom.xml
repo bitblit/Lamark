@@ -20,34 +20,21 @@
             </roles>
         </developer>
     </developers>
+
     <properties>
         <site.name>lamark</site.name>
-        <proto.version>1.0.0-SNAPSHOT</proto.version>
+        <jackson-2-version>2.3.1</jackson-2-version>
+        <slf4j.version>1.7.7</slf4j.version>
+        <junit.version>4.8.2</junit.version>
+        <logback.version>1.0.11</logback.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
+        <mytime>${maven.build.timestamp}</mytime>
     </properties>
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-            <version>4.11</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.6</version>
-        </dependency>
 
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.1.2</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
     <modules>
         <module>lamark-core</module>
         <module>lamark-gui</module>
-        <module>lamark-core-old</module>
         <module>lamark-example</module>
         <module>lamark-web</module>
         <module>lamark-music</module>

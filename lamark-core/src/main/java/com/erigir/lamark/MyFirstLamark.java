@@ -6,8 +6,10 @@ import com.erigir.lamark.events.*;
 import com.erigir.lamark.fitness.StringFinderFitness;
 import com.erigir.lamark.mutator.StringSimpleMutator;
 import com.erigir.lamark.selector.RouletteWheelSelector;
+import com.erigir.lamark.selector.TournamentSelector;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.TreeSet;
 
 /**
@@ -51,7 +53,7 @@ public class MyFirstLamark implements LamarkEventListener {
                 .withCrossover(new StringSinglePointCrossover())
                 .withFitnessFunction(new StringFinderFitness("LAMARK"))
                 .withMutator(new StringSimpleMutator())
-                .withSelector(new RouletteWheelSelector<String>())
+                .withSelector(new TournamentSelector<>())
                 .withPopulationSize(50)
                 .withPMutation(.01)
                 .withPCrossover(1.0)
@@ -61,7 +63,7 @@ public class MyFirstLamark implements LamarkEventListener {
                 .build();
 
         // Setup self as a listener
-        lamark.addListener(this, new TreeSet<>(Arrays.asList(BetterIndividualFoundEvent.class, PopulationCompleteEvent.class, ExceptionEvent.class, LastPopulationCompleteEvent.class)));
+        lamark.addListener(this, new HashSet<>(Arrays.asList(BetterIndividualFoundEvent.class, PopulationCompleteEvent.class, ExceptionEvent.class, LastPopulationCompleteEvent.class)));
 
         lamark.start();
     }

@@ -4,6 +4,8 @@ package com.erigir.lamark;
 import com.erigir.lamark.events.*;
 import com.erigir.lamark.selector.RouletteWheelSelector;
 import com.erigir.lamark.selector.Selector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.*;
@@ -13,6 +15,8 @@ import java.util.stream.Collectors;
  * Created by cweiss1271 on 3/24/16.
  */
 public class StreamLamark<T> {
+    private static final Logger LOG = LoggerFactory.getLogger(StreamLamark.class);
+
     private List<FilteredListener> listeners = new LinkedList<>();
 
     private LastPopulationCompleteEvent.Type finishType=null;
@@ -209,6 +213,7 @@ public class StreamLamark<T> {
             }
             catch (Exception e)
             {
+                LOG.warn("Error",e);
                 publishEvent(new ExceptionEvent(this, e));
             }
 
@@ -278,8 +283,8 @@ public class StreamLamark<T> {
             rval.random = (random==null)?new Random():random;
             rval.maxGenerations = maxGenerations;
             rval.creator = creator;
-            rval.crossover = new InnerCrossover<>(crossover, pCrossover, random);
-            rval.mutator = new InnerMutator<>(mutator, pMutation, random);
+            rval.crossover = new InnerCrossover<>(crossover, pCrossover, rval.random);
+            rval.mutator = new InnerMutator<>(mutator, pMutation, rval.random);
             rval.initialValues = initialValues;
             rval.fitnessFunction = new InnerFitnessCalculator<>(fitnessFunction);
             rval.selector = (selector==null)?new RouletteWheelSelector<>():selector;

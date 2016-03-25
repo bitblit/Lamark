@@ -34,30 +34,25 @@
         </developer>
     </developers>
 
-    <!-- Jackson comes in for serialization/de-serialization -->
     <dependencies>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>${jackson-2-version}</version>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+            <version>${junit.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson-2-version}</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
-
-    <properties>
-        <jackson-2-version>2.3.1</jackson-2-version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
-        <mytime>${maven.build.timestamp}</mytime>
-    </properties>
-
-    <build>
-    </build>
-
 
 </project>

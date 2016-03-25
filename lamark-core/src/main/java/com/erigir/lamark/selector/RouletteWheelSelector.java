@@ -16,9 +16,20 @@ public class RouletteWheelSelector<T> implements Selector<T> {
         return (minimumBest)?selectForMin(sortedList, random, numberToSelect):selectForMax(sortedList, random, numberToSelect);
     }
 
+    public double sumFitness(List<Individual<T>> input)
+    {
+        return input.stream().mapToDouble((p) -> p.getFitness()).sum();
+    }
+
+    public double invertedSumFitness(List<Individual<T>> input)
+    {
+        Double minimumFitness = input.get(0).getFitness();
+        return input.stream().mapToDouble((p) -> minimumFitness/p.getFitness()).sum();
+    }
+
     public List<Individual<T>> selectForMax(List<Individual<T>> sortedList, Random random, int numberToSelect)
     {
-        Double totalFitness = sortedList.stream().mapToDouble((p) -> p.getFitness()).sum();
+        Double totalFitness = sumFitness(sortedList);
         List<Individual<T>> rval = new ArrayList<>(numberToSelect);
 
         for (int i=0;i<numberToSelect;i++) {
@@ -40,8 +51,8 @@ public class RouletteWheelSelector<T> implements Selector<T> {
         // First reverse the sort
         List<Individual<T>> temp = new ArrayList<>(sortedList);
         Collections.reverse(temp);
-        Double minimumFitness = sortedList.get(0).getFitness();
-        Double totalFitness = sortedList.stream().mapToDouble((p) -> minimumFitness/p.getFitness()).sum();
+        Double minimumFitness = temp.get(0).getFitness();
+        Double totalFitness = invertedSumFitness(temp);
 
         List<Individual<T>> rval = new ArrayList<>(numberToSelect);
         for (int i=0;i<numberToSelect;i++)
@@ -52,10 +63,10 @@ public class RouletteWheelSelector<T> implements Selector<T> {
             int idx=0;
             while (adder<rVal)
             {
-                adder+=(minimumFitness/sortedList.get(idx).getFitness());
+                adder+=(minimumFitness/temp.get(idx).getFitness());
                 idx++;
             }
-            rval.add(sortedList.get(idx-1));
+            rval.add(temp.get(idx-1));
         }
 
         return rval;
