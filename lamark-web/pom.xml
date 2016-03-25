@@ -40,7 +40,7 @@
         <dependency>
             <groupId>com.erigir</groupId>
             <artifactId>lamark-core</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <version>LOCAL-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.mojo.webstart</groupId>
@@ -50,11 +50,7 @@
     </dependencies>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
-        <mytime>${maven.build.timestamp}</mytime>
         <tomcat.port.number>8080</tomcat.port.number>
     </properties>
 
