@@ -142,7 +142,7 @@ public class LamarkApplication implements ActionListener {
                     if (f.exists()) {
                         try {
                             gui.appendOutput("\n\nOpening file " + f + "...\n");
-                            gui.getConfigPanel().loadFromLocation(f.toURI().toString(), null);
+                            gui.getConfigPanel().loadFromLocation(f.toURI().toString());
                             lastFile = f;
                         } catch (Exception ioe) {
                             LOG.warn("Error opening file", ioe);

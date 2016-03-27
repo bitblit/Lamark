@@ -1,5 +1,10 @@
 package com.erigir.lamark.gui;
 
+import com.erigir.lamark.LamarkBuilder;
+import com.erigir.lamark.LamarkBuilderSerializer;
+import com.erigir.lamark.selector.Selector;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +22,9 @@ import java.net.URLClassLoader;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.function.ToDoubleFunction;
 
 /**
  * A panel for holding and organizing the various properties controls for LamarkGUI.
@@ -36,7 +44,14 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * Location of the default file
      */
     private static final String DEFAULT_CONFIG_LOCATION = "classpath:com/erigir/lamark/gui/default-lamark.json";
+    /**
+    * The shared ObjectMapper instance
+     */
+    private static final ObjectMapper MAPPER = createObjectMapper();
 
+    private LamarkAvailableClasses availableClasses = loadAvailableClasses();
+
+    private LamarkBuilder builder = new LamarkBuilder();
 
     /**
      * Custom properties for creator *
@@ -227,8 +242,9 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * Default constructor.
      * &lt;p /&gt;
      * Builds the layout.
+     * @param inConfigResource String containing the config to load
      */
-    public LamarkConfigPanel(final String inConfigResource, final String inSelectedItem) {
+    public LamarkConfigPanel(final String inConfigResource) {
         super();
 
         setLayout(new BorderLayout());
@@ -239,7 +255,14 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         // Finally, initialize
         String configResource = (inConfigResource == null) ? DEFAULT_CONFIG_LOCATION : inConfigResource;
 
-        loadFromLocation(configResource, inSelectedItem);
+        loadFromLocation(configResource);
+    }
+
+    private static ObjectMapper createObjectMapper()
+    {
+        ObjectMapper rval = new ObjectMapper();
+        rval.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
+        return rval;
     }
 
     public static Map<String, Object> propertiesToMap(Properties p) {
@@ -304,7 +327,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     }
 
     public void reset() {
-        loadFromLocation(DEFAULT_CONFIG_LOCATION, null);
+        loadFromLocation(DEFAULT_CONFIG_LOCATION);
     }
 
     private String readStreamToString(InputStream ios)
@@ -336,11 +359,9 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * Otherwise, a dialog box for choices will be shown
      *
      * @param location          String containing a path to a resource
-     * @param optionalEntryName String optionally containing which entry in the json file to use
-     * @return boolean true if the config panel could be loaded from resource at that location
      */
 
-    public void loadFromLocation(String location, String optionalEntryName) {
+    public void loadFromLocation(String location) {
         try {
             String json = null;
 
@@ -359,44 +380,16 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
                     } else {
                         // Need to massage the classpath and load default
                         URLClassLoader newClassLoader = new URLClassLoader(new URL[]{u}, Thread.currentThread().getContextClassLoader());
-                        lamarkFactory = new LamarkFactory(newClassLoader);
-                        json = readStreamToString(lamarkFactory.getClassLoader().getResourceAsStream("lamark.json"));
+                        //lamarkFactory = new LamarkFactory(newClassLoader);
+                        //json = readStreamToString(lamarkFactory.getClassLoader().getResourceAsStream("lamark.json"));
                     }
                 }
 
                 if (json != null) {
 
-                    Map<String, LamarkGUIConfig> configs = lamarkFactory.jsonToConfig(json);
-
-                    // If more than one and not specified, then pop the selection box
-                    LamarkGUIConfig selected = null;
-                    if (optionalEntryName != null) {
-                        selected = configs.get(optionalEntryName);
-                    } else if (configs.size() == 1) {
-                        selected = configs.values().iterator().next();
-                    } else {
-                        Set<String> options = configs.keySet();
-
-                        String s = (String) JOptionPane.showInputDialog(
-                                null,
-                                "Options:",
-                                "Select Algorithm",
-                                JOptionPane.PLAIN_MESSAGE,
-                                null,
-                                options.toArray(),
-                                null);
-
-                        if (s != null && s.length() > 0) {
-                            selected = configs.get(s);
-                        }
-                    }
-
-                    if (selected != null) {
-                        fromGUIConfig(selected);
-                    } else {
-                        JOptionPane.showMessageDialog(null, "No config selected.  Nothing happened.");
-                    }
-
+                    builder = LamarkBuilderSerializer.deserialize(json);
+                    availableClasses.addBuilderClasses(builder);
+                    // TODO: set the classes to be the same
                 } else {
                     throw new IllegalStateException("Failed to load configuration JSON file");
                 }
@@ -576,7 +569,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * @param classes List of class objects to load from
      * @param def     Class to default select
      */
-    private void setComboBoxValues(JComboBox box, List<? extends Class> classes, Class def) {
+    private void setComboBoxValues(JComboBox box, List<? extends Class> classes, Object def) {
         box.setEditable(true);
 
         box.removeAllItems();
@@ -596,30 +589,29 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      *
      * @param lc Config object to load from.
      */
-    public void fromGUIConfig(LamarkGUIConfig lc) {
+    public void fromGUIConfig(LamarkAvailableClasses lc) {
 
         // Init the drop boxes
-        setComboBoxValues(selector, lc.getSelectorClasses(), lc.defaultSelector());
-        setComboBoxValues(creator, lc.getCreatorClasses(), lc.defaultCreator());
-        setComboBoxValues(crossover, lc.getCrossoverClasses(), lc.defaultCrossover());
-        setComboBoxValues(fitness, lc.getFitnessFunctionClasses(), lc.defaultFitnessFunction());
-        setComboBoxValues(mutator, lc.getMutatorClasses(), lc.defaultMutator());
+        setComboBoxValues(selector, availableClasses.toClasses(availableClasses.getSelectorClassNames()), builder.getSelector());
+        setComboBoxValues(creator, availableClasses.toClasses(availableClasses.getCreatorClassNames()), builder.getCreator());
+        setComboBoxValues(crossover, availableClasses.toClasses(availableClasses.getCrossoverClassNames()), builder.getCrossover());
+        setComboBoxValues(fitness, availableClasses.toClasses(availableClasses.getFitnessFunctionClassNames()), builder.getFitnessFunction());
+        setComboBoxValues(mutator, availableClasses.toClasses(availableClasses.getMutatorClassNames()), builder.getMutator());
 
-
-        creator.setSelectedItem(formatClassName(lc.defaultCreator()));
+        /*creator.setSelectedItem(formatClassName(lc.defaultCreator()));
         crossover.setSelectedItem(formatClassName(lc.defaultCrossover()));
         fitness.setSelectedItem(formatClassName(lc.defaultFitnessFunction()));
         mutator.setSelectedItem(formatClassName(lc.defaultMutator()));
-        selector.setSelectedItem(formatClassName(lc.defaultSelector()));
-        upperElitism.setText(doubleToPercent(lc.getUpperElitism()));
-        lowerElitism.setText(doubleToPercent(lc.getLowerElitism()));
-        maximumPopulations.setText(ein(lc.getMaximumPopulations()));
-        populationSize.setText(ein(lc.getPopulationSize()));
-        crossoverProbability.setText(ein(lc.getCrossoverProbability()));
-        mutationProbability.setText(ein(lc.getMutationProbability()));
-        numberOfWorkerThreads.setText(ein(lc.getNumberOfWorkerThreads()));
-        targetScore.setText(ein(lc.getTargetScore()));
-        randomSeed.setText(ein(lc.getRandomSeed()));
+        selector.setSelectedItem(formatClassName(lc.defaultSelector()));*/
+        upperElitism.setText(doubleToPercent(builder.getUpperElitismPercentage()));
+        lowerElitism.setText(doubleToPercent(builder.getLowerElitismPercentage()));
+        maximumPopulations.setText(ein(builder.getMaxGenerations()));
+        populationSize.setText(ein(builder.getPopulationSize()));
+        crossoverProbability.setText(ein(builder.getCrossoverProbability()));
+        mutationProbability.setText(ein(builder.getMutationProbability()));
+        targetScore.setText(ein(builder.getTargetScore()));
+        /*
+        randomSeed.setText(ein(builder.getRandomSeed()));
 
         creatorProperties = mapToProperties(lc.getCreatorConfiguration());
         crossoverProperties = mapToProperties(lc.getCrossoverConfiguration());
@@ -633,12 +625,14 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         for (Class c : lc.getCustomListeners()) {
             customListener.add(c.getName());
         }
+        TODO: Reimpl
+        */
 
 
     }
 
     public String toGUIConfigString() {
-        return lamarkFactory.convertToJson(toGUIConfigObject());
+        return LamarkBuilderSerializer.serialize(builder);
     }
 
     /**
@@ -708,7 +702,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
             String classN = start.substring(0, pi);
             String packageN = start.substring(pi + 1, start.length() - 1);
             String fullN = packageN + "." + classN;
-            return lamarkFactory.safeLoadClass(fullN);
+            return availableClasses.safeLoadClass(fullN);
         }
 
     }
@@ -716,10 +710,12 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     /**
      * Converts a classname to combobox format (CLASS[PACKAGE])
      *
-     * @param className String containing classname to convert
+     * @param obj Object to convert the classname of
      * @return String containing name in combo format
      */
-    private String formatClassName(String className) {
+    private String formatClassName(Object obj) {
+        String className = (obj==null)?null:obj.getClass().getName();
+
         if (className == null) {
             return null;
         }
@@ -745,24 +741,15 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      *
      * @return Properties object matching the panel.
      */
-    public LamarkGUIConfig toGUIConfigObject() {
-        LamarkGUIConfig p = new LamarkGUIConfig();
-        p.setCreatorClass(classFromCombo(creator));
-        p.setCrossoverClass(classFromCombo(crossover));
-        p.setFitnessFunctionClass(classFromCombo(fitness));
-        p.setMutatorClass(classFromCombo(mutator));
-        p.setSelectorClass(classFromCombo(selector));
+    public LamarkBuilder toBuilder() {
+        LamarkBuilder p = new LamarkBuilder();
+        p.withCreator((Supplier)availableClasses.safeInit(classFromCombo(creator)));
+        p.withCrossover((Function) availableClasses.safeInit(classFromCombo(crossover)));
+        p.withMutator((Function)availableClasses.safeInit(classFromCombo(mutator)));
+        p.withFitnessFunction((ToDoubleFunction) availableClasses.safeInit(classFromCombo(fitness)));
+        p.withSelector((Selector)availableClasses.safeInit(classFromCombo(selector)));
 
-        p.setUpperElitism(percentToDouble(upperElitism.getText()));
-        p.setLowerElitism(percentToDouble(lowerElitism.getText()));
-        p.setMaximumPopulations(nsInteger(maximumPopulations.getText()));
-        p.setPopulationSize(nsInteger(populationSize.getText()));
-        p.setCrossoverProbability(nsDouble(crossoverProbability.getText()));
-        p.setMutationProbability(nsDouble(mutationProbability.getText()));
-        p.setNumberOfWorkerThreads(nsInteger(numberOfWorkerThreads.getText()));
-        p.setTargetScore(nsDouble(targetScore.getText()));
-        p.setRandomSeed(nsLong(randomSeed.getText()));
-
+        /* TODO: Settings
         p.setCreatorConfiguration(propertiesToMap(creatorProperties));
         p.setCrossoverConfiguration(propertiesToMap(crossoverProperties));
         p.setFitnessFunctionConfiguration(propertiesToMap(fitnessProperties));
@@ -770,13 +757,25 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         p.setSelectorConfiguration(propertiesToMap(selectorProperties));
 
         p.setPreCreatedIndividuals(new LinkedList<String>(preloads));
+        */
 
+        p.withUpperElitism(percentToDouble(upperElitism.getText()));
+        p.withLowerElitism(percentToDouble(lowerElitism.getText()));
+        p.withMaxGenerations(nsLong(maximumPopulations.getText()));
+        p.withPopulationSize(nsInteger(populationSize.getText()));
+        p.withCrossoverProbability(nsDouble(crossoverProbability.getText()));
+        p.withMutationProbability(nsDouble(mutationProbability.getText()));
+        p.withTargetScore(nsDouble(targetScore.getText()));
+        //p.setRandomSeed(nsLong(randomSeed.getText()));
+
+        /*
         for (String s : customListener) {
             Class c = lamarkFactory.safeLoadClass(s);
             if (c != null) {
                 p.getCustomListeners().add(c);
             }
         }
+        */
 
         return p;
     }
@@ -871,16 +870,42 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         return preloads;
     }
 
-    public LamarkFactory getLamarkFactory() {
-        return lamarkFactory;
+    private LamarkAvailableClasses loadAvailableClasses()
+    {
+        LamarkAvailableClasses rval = loadAvailableClasses(System.getProperty("availableClassesConfig"));
+        if (rval==null)
+        {
+            rval = loadAvailableClasses("/override-available-classes.json");
+        }
+        if (rval==null)
+        {
+            rval = loadAvailableClasses("default-available-classes.json");
+        }
+        if (rval==null)
+        {
+            throw new IllegalStateException("Couldn't find any available classes file");
+        }
+        return rval;
     }
 
-    public void setLamarkFactory(LamarkFactory lamarkFactory) {
-        this.lamarkFactory = lamarkFactory;
+    private LamarkAvailableClasses loadAvailableClasses(String path)
+    {
+        LamarkAvailableClasses rval = null;
+        if (path!=null) {
+            try {
+                InputStream is = getClass().getResourceAsStream(path);
+                if (is!=null)
+                {
+                    rval = MAPPER.readValue(is, LamarkAvailableClasses.class);
+                }
+            }
+            catch (IOException ioe)
+            {
+                LOG.trace("Couldnt find : {}",path);
+            }
+        }
+        return rval;
     }
 
-    public Lamark createLamarkInstance(Component optionalParentComponent) {
-        return lamarkFactory.createLamarkFromConfig(toGUIConfigObject(), optionalParentComponent);
-    }
 
 }

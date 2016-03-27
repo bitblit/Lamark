@@ -18,37 +18,33 @@ import java.util.stream.Collectors;
 public class Lamark<T> implements Callable<T> {
     private static final Logger LOG = LoggerFactory.getLogger(Lamark.class);
 
-    private List<FilteredListener> listeners = new LinkedList<>();
-
+    // These are state of the run
     private LastPopulationCompleteEvent.Type finishType=null;
     private Individual<T> bestSoFar;
-    private List<T> initialValues;
-    private Random random;
-    private Integer populationSize;
-    private Long maxGenerations;
     private Long currentGeneration = 0L;
-    private Supplier<T> creator;
-    //private ToDoubleFunction<T> fitnessFunction;
-    private InnerFitnessCalculator<T> fitnessFunction;
-    private InnerCrossover<T> crossover;
-    private InnerMutator<T> mutator;
-    private Function<T,String> formatter = new Function<T, String>() {
-        @Override
-        public String apply(T t) {
-            return String.valueOf(t);
-        }
-    };
-    //private Function<List<T>, T> crossover;
-    //private Function<T,T> mutator;
-    private Wrapper<T> wrapper = new Wrapper<>();
-    private Stripper<T> stripper = new Stripper<>();
-    private Selector<T> selector = new RouletteWheelSelector<>();
-    private Double targetScore = null;
-    private boolean minimizeScore = false;
-    private int numberOfParents = 2;
-
     private Long started;
     private Long ended;
+
+    // Helper functions for wrapping and stripping Individual wrappers from genomes
+    private Wrapper<T> wrapper = new Wrapper<>();
+    private Stripper<T> stripper = new Stripper<>();
+
+    // Mostly package-level to allow the builder to set them
+    List<FilteredListener> listeners = new LinkedList<>();
+    List<T> initialValues;
+    Random random;
+    Integer populationSize;
+    Long maxGenerations;
+    Supplier<T> creator;
+    InnerFitnessCalculator<T> fitnessFunction;
+    InnerCrossover<T> crossover;
+    InnerMutator<T> mutator;
+    Function<T,String> formatter;
+    Selector<T> selector;
+    Double targetScore;
+    Boolean minimizeScore;
+    Integer numberOfParents;
+
 
     public void addListener(LamarkEventListener listener)
     {
@@ -241,154 +237,31 @@ public class Lamark<T> implements Callable<T> {
         return rval;
     }
 
+    public Long getEstimatedRunTime()
+    {
+        Long rval = null;
+        if (started!=null && maxGenerations!=null)
+        {
+            if (ended==null)
+            {
+                double pctDone = (double)currentGeneration/(double)maxGenerations;
+                rval = (long)((double)getRunTime()/pctDone);
+            }
+            else
+            {
+                rval = ended;
+            }
+        }
+        return rval;
+    }
+
+    public boolean isRunning()
+    {
+        return (started!=null && ended==null);
+    }
 
     public Individual getBestSoFar() {
         return bestSoFar;
     }
-
-    public static class LamarkBuilder<T>
-    {
-        private Random random;
-        private Long maxGenerations;
-        private Supplier<T> creator;
-        private List<T> initialValues;
-        private ToDoubleFunction<T> fitnessFunction;
-        private Function<List<T>,T> crossover;
-        private Function<T,T> mutator;
-        private Function<T,String> formatter;
-        private double pCrossover=1.0;
-        private double pMutation=.005;
-        private Selector selector;
-        private Integer populationSize;
-
-        // TODO: Implement the stuff below
-        private Double upperElitism;
-        private Double lowerElitism;
-        private Double targetScore;
-
-        private boolean trackParentage;
-        private boolean abortOnUniformPopulation;
-        private boolean runParallel;
-        private boolean minimizeScore;
-
-
-        public Lamark<T> build()
-        {
-            Objects.requireNonNull(creator);
-            Objects.requireNonNull(fitnessFunction);
-            Objects.requireNonNull(crossover);
-            Objects.requireNonNull(mutator);
-            Objects.requireNonNull(selector);
-            Objects.requireNonNull(populationSize);
-
-            if (pCrossover>1.0 || pMutation>1.0 || pCrossover<0 || pMutation<0)
-            {
-                throw new IllegalArgumentException("Probabilities must be between 0 and 1, inclusive");
-            }
-
-            Lamark<T> rval = new Lamark<>();
-            rval.random = (random==null)?new Random():random;
-            rval.maxGenerations = maxGenerations;
-            rval.creator = creator;
-            rval.crossover = new InnerCrossover<>(crossover, pCrossover, rval.random);
-            rval.mutator = new InnerMutator<>(mutator, pMutation, rval.random);
-            rval.initialValues = initialValues;
-            rval.fitnessFunction = new InnerFitnessCalculator<>(fitnessFunction);
-            rval.selector = (selector==null)?new RouletteWheelSelector<>():selector;
-            rval.populationSize = populationSize;
-            rval.minimizeScore = minimizeScore;
-
-            if (formatter!=null)
-            {
-                rval.formatter = formatter;
-            }
-
-            return rval;
-        }
-
-        public LamarkBuilder withRandom(final Random random) {
-            this.random = random;
-            return this;
-        }
-
-
-        public LamarkBuilder withMaxGenerations(final Long maxGenerations) {
-            this.maxGenerations = maxGenerations;
-            return this;
-        }
-
-        public LamarkBuilder withCreator(final Supplier<T> creator) {
-            this.creator = creator;
-            return this;
-        }
-
-        public LamarkBuilder withInitialValues(final List<T> initialValues) {
-            this.initialValues = initialValues;
-            return this;
-        }
-
-        public LamarkBuilder withFitnessFunction(final ToDoubleFunction<T> fitnessFunction) {
-            this.fitnessFunction = fitnessFunction;
-            return this;
-        }
-
-        public LamarkBuilder withCrossover(final Function<List<T>, T> crossover) {
-            this.crossover = crossover;
-            return this;
-        }
-
-        public LamarkBuilder withMutator(final Function<T, T> mutator) {
-            this.mutator = mutator;
-            return this;
-        }
-
-        public LamarkBuilder withSelector(final Selector selector) {
-            this.selector = selector;
-            return this;
-        }
-
-        public LamarkBuilder withPMutation(final double pMutation) {
-            this.pMutation = pMutation;
-            return this;
-        }
-
-        public LamarkBuilder withPCrossover(final double pCrossover) {
-            this.pCrossover = pCrossover;
-            return this;
-        }
-
-        public LamarkBuilder withPopulationSize(final Integer populationSize) {
-            this.populationSize = populationSize;
-            return this;
-        }
-
-        public LamarkBuilder withFormatter(final Function<T, String> formatter) {
-            this.formatter = formatter;
-            return this;
-        }
-
-        public LamarkBuilder withMinimizeScore(final boolean minimizeScore) {
-            this.minimizeScore = minimizeScore;
-            return this;
-        }
-
-        public LamarkBuilder withUpperElitism(final Double upperElitism) {
-            this.upperElitism = upperElitism;
-            return this;
-        }
-
-        public LamarkBuilder withLowerElitism(final Double lowerElitism) {
-            this.lowerElitism = lowerElitism;
-            return this;
-        }
-
-        public LamarkBuilder withTargetScore(final Double targetScore) {
-            this.targetScore = targetScore;
-            return this;
-        }
-
-
-    }
-
 
 }

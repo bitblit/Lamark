@@ -24,14 +24,20 @@ public class StringCreator extends AbstractLamarkComponent implements Supplier<S
      */
     private int size;
 
+    public StringCreator() {
+        super();
+    }
+
     public StringCreator(Set<Character> validCharacters, int size, Random random) {
         super(random);
-        initialize(validCharacters, size);
+        setValidCharacters(validCharacters);
+        setSize(size);
     }
 
     public StringCreator(Set<Character> validCharacters, int size) {
         super();
-        initialize(validCharacters, size);
+        setValidCharacters(validCharacters);
+        setSize(size);
     }
 
     public StringCreator(String validCharacters, int size, Random random) {
@@ -44,20 +50,8 @@ public class StringCreator extends AbstractLamarkComponent implements Supplier<S
             temp.add(c);
         }
 
-        initialize(temp, size);
-    }
-
-    private void initialize(Set<Character> validCharacters, int size)
-    {
-        Objects.requireNonNull(validCharacters);
-
-        if (validCharacters.size() < 2) {
-            throw new IllegalArgumentException("Need at least 2 valid characters");
-        }
-
-        // Pass in a set for uniqueness, convert to list for random access
-        this.validCharacters = new ArrayList<>(validCharacters);
-        this.size = size;
+        setValidCharacters(temp);
+        setSize(size);
     }
 
     public StringCreator(String validCharacters, int size) {
@@ -70,7 +64,8 @@ public class StringCreator extends AbstractLamarkComponent implements Supplier<S
             temp.add(c);
         }
 
-        initialize(temp, size);
+        setValidCharacters(temp);
+        setSize(size);
     }
 
     /**
@@ -133,4 +128,18 @@ public class StringCreator extends AbstractLamarkComponent implements Supplier<S
         return new StringCreator("0123456789ABCDEF",length);
     }
 
+    public void setValidCharacters(Set<Character> validCharacters) {
+        Objects.requireNonNull(validCharacters);
+
+        if (validCharacters.size() < 2) {
+            throw new IllegalArgumentException("Need at least 2 valid characters");
+        }
+
+        // Pass in a set for uniqueness, convert to list for random access
+        this.validCharacters = new ArrayList<>(validCharacters);
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
 }

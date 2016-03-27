@@ -36,22 +36,21 @@
 
     <!-- Jackson comes in for serialization/de-serialization -->
     <dependencies>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>${jackson-2-version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>${jackson-2-version}</version>
-        </dependency>
+
 
         <dependency>
             <groupId>com.erigir</groupId>
             <artifactId>lamark-core</artifactId>
             <version>LOCAL-SNAPSHOT</version>
         </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
     </dependencies>
 
 

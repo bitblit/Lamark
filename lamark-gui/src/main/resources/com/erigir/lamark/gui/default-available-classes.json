@@ -1,0 +1,40 @@
+{
+  "selectorClassNames": [
+    "com.erigir.lamark.selector.RouletteWheelSelector",
+    "com.erigir.lamark.selector.TournamentSelector"
+  ],
+  "creatorClassNames": [
+    "com.erigir.lamark.creator.ByteListCreator",
+    "com.erigir.lamark.creator.IntegerListCreator",
+    "com.erigir.lamark.creator.IntegerListPermutationCreator",
+    "com.erigir.lamark.creator.StringCreator"
+  ],
+  "fitnessFunctionClassNames": [
+    "com.erigir.lamark.fitness.StringFinderFitness",
+    "com.erigir.lamark.fitness.AllOnesFitness"
+  ],
+  "crossoverClassNames": [
+    "com.erigir.lamark.crossover.IntegerPermutationFill",
+    "com.erigir.lamark.crossover.IntegerPermutationLongestCommonSubsequence",
+    "com.erigir.lamark.crossover.IntegerPermutationLongestCommonSubstring",
+    "com.erigir.lamark.crossover.ListSinglePoint",
+    "com.erigir.lamark.crossover.ListTwoPoint",
+    "com.erigir.lamark.crossover.StringSinglePoint"
+  ],
+  "mutatorClassNames": [
+    "com.erigir.lamark.mutator.List2ExchangeMutator",
+    "com.erigir.lamark.mutator.ListSimpleMutator",
+    "com.erigir.lamark.mutator.StringSimpleMutator"
+  ],
+  "formatterClassNames": [
+    "com.erigir.lamark.DefaultFormatter"
+  ],
+  "fitnessFunctionConfiguration": {
+    "target": "LAMARK"
+  },
+  "creatorClass": "com.erigir.lamark.creator.StringCreator",
+  "creatorConfiguration": {
+    "validCharacters": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    "size": 6
+  }
+}

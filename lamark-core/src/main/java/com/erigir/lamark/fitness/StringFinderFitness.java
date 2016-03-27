@@ -18,6 +18,10 @@ public class StringFinderFitness implements ToDoubleFunction<String> {
      */
     private String target;
 
+    public StringFinderFitness() {
+        super();
+    }
+
     /**
      * Constructor that also defines the target string
      *
@@ -39,6 +43,14 @@ public class StringFinderFitness implements ToDoubleFunction<String> {
             }
         }
         return rval / (double) s.length();
+    }
+
+    public String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
     }
 }
 

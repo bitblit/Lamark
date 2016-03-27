@@ -53,24 +53,27 @@ public class MyFirstLamark implements LamarkEventListener {
     public void go() {
         Future<String> f;
 
-        Lamark<String> lamark = new Lamark.LamarkBuilder<String>()
+        Lamark<String> lamark = createBuilder().build();
+        // Setup self as a listener
+        lamark.addListener(this, new HashSet<>(Arrays.asList(BetterIndividualFoundEvent.class, PopulationCompleteEvent.class, ExceptionEvent.class, LastPopulationCompleteEvent.class)));
+
+        lamark.start();
+    }
+
+    public LamarkBuilder<String> createBuilder()
+    {
+        return new LamarkBuilder<String>()
                 .withCreator(StringCreator.alphaCreator(6))
                 .withCrossover(new StringSinglePointCrossover())
                 .withFitnessFunction(new StringFinderFitness("LAMARK"))
                 .withMutator(new StringSimpleMutator())
                 .withSelector(new TournamentSelector<>())
                 .withPopulationSize(50)
-                .withPMutation(.01)
-                .withPCrossover(1.0)
+                .withMutationProbability(.01)
+                .withCrossoverProbability(1.0)
                 .withUpperElitism(.1)
                 .withLowerElitism(.1)
-                .withTargetScore(1.0)
-                .build();
-
-        // Setup self as a listener
-        lamark.addListener(this, new HashSet<>(Arrays.asList(BetterIndividualFoundEvent.class, PopulationCompleteEvent.class, ExceptionEvent.class, LastPopulationCompleteEvent.class)));
-
-        lamark.start();
+                .withTargetScore(1.0);
     }
 
 
