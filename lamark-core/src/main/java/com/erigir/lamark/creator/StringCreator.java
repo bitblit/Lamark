@@ -42,29 +42,15 @@ public class StringCreator extends AbstractLamarkComponent implements Supplier<S
 
     public StringCreator(String validCharacters, int size, Random random) {
         super(random);
-        Objects.requireNonNull(validCharacters);
 
-        Set<Character> temp = new TreeSet<>();
-        for (char c:validCharacters.toCharArray())
-        {
-            temp.add(c);
-        }
-
-        setValidCharacters(temp);
+        setValidCharactersByString(validCharacters);
         setSize(size);
     }
 
     public StringCreator(String validCharacters, int size) {
         super();
-        Objects.requireNonNull(validCharacters);
 
-        Set<Character> temp = new TreeSet<>();
-        for (char c:validCharacters.toCharArray())
-        {
-            temp.add(c);
-        }
-
-        setValidCharacters(temp);
+        setValidCharactersByString(validCharacters);
         setSize(size);
     }
 
@@ -86,48 +72,6 @@ public class StringCreator extends AbstractLamarkComponent implements Supplier<S
         return sb.toString();
     }
 
-    public static StringCreator alphaAndSpaceCreator(int length, Random random)
-    {
-        return new StringCreator("ABCDEFGHIJKLMNOPQRSTUVWXYZ ",length,random);
-    }
-    public static StringCreator alphaCreator(int length, Random random)
-    {
-        return new StringCreator("ABCDEFGHIJKLMNOPQRSTUVWXYZ",length,random);
-    }
-    public static StringCreator binaryCreator(int length, Random random)
-    {
-        return new StringCreator("01",length,random);
-    }
-    public static StringCreator decimalCreator(int length, Random random)
-    {
-        return new StringCreator("0123456789",length,random);
-    }
-    public static StringCreator hexadecimalCreator(int length, Random random)
-    {
-        return new StringCreator("0123456789ABCDEF",length,random);
-    }
-
-    public static StringCreator alphaAndSpaceCreator(int length)
-    {
-        return new StringCreator("ABCDEFGHIJKLMNOPQRSTUVWXYZ ",length);
-    }
-    public static StringCreator alphaCreator(int length)
-    {
-        return new StringCreator("ABCDEFGHIJKLMNOPQRSTUVWXYZ",length);
-    }
-    public static StringCreator binaryCreator(int length)
-    {
-        return new StringCreator("01",length);
-    }
-    public static StringCreator decimalCreator(int length)
-    {
-        return new StringCreator("0123456789",length);
-    }
-    public static StringCreator hexadecimalCreator(int length)
-    {
-        return new StringCreator("0123456789ABCDEF",length);
-    }
-
     public void setValidCharacters(Set<Character> validCharacters) {
         Objects.requireNonNull(validCharacters);
 
@@ -138,6 +82,19 @@ public class StringCreator extends AbstractLamarkComponent implements Supplier<S
         // Pass in a set for uniqueness, convert to list for random access
         this.validCharacters = new ArrayList<>(validCharacters);
     }
+
+    public void setValidCharactersByString(String input)
+    {
+        Objects.requireNonNull(input);
+
+        Set<Character> temp = new TreeSet<>();
+        for (char c:input.toCharArray())
+        {
+            temp.add(c);
+        }
+        setValidCharacters(temp);
+    }
+
 
     public void setSize(int size) {
         this.size = size;

@@ -26,8 +26,8 @@
     "minimizeScore": false
   },
   "classNames": {
-    "creator": "com.erigir.lamark.creator.StringCreator",
-    "crossover": "com.erigir.lamark.crossover.StringSinglePointCrossover",
+    "creator": "com.erigir.lamark.creator.AlphaStringCreator",
+    "crossover": "com.erigir.lamark.crossover.StringSinglePoint",
     "fitnessFunction": "com.erigir.lamark.fitness.StringFinderFitness",
     "mutator": "com.erigir.lamark.mutator.StringSimpleMutator",
     "selector": "com.erigir.lamark.selector.TournamentSelector"

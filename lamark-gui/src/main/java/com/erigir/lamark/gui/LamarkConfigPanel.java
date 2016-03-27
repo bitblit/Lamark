@@ -136,10 +136,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      */
     private JLabel mutationProbabilityLabel = new JLabel("Mutation Prob (0-1)");
     /**
-     * Label for no. of threads control *
-     */
-    private JLabel numberOfWorkerThreadsLabel = new JLabel("Number of worker threads");
-    /**
      * Label for target score control *
      */
     private JLabel targetScoreLabel = new JLabel("Target Score (Blank for cont.)");
@@ -225,10 +221,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * Edit box holding mutation probability *
      */
     private JTextField mutationProbability = new JTextField();
-    /**
-     * Edit box holding no. of worker threads *
-     */
-    private JTextField numberOfWorkerThreads = new JTextField();
     /**
      * Edit box holding target score *
      */
@@ -321,7 +313,6 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         populationSize.setEnabled(enable);
         crossoverProbability.setEnabled(enable);
         mutationProbability.setEnabled(enable);
-        numberOfWorkerThreads.setEnabled(enable);
         targetScore.setEnabled(enable);
         randomSeed.setEnabled(enable);
     }
@@ -380,15 +371,13 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
                     } else {
                         // Need to massage the classpath and load default
                         URLClassLoader newClassLoader = new URLClassLoader(new URL[]{u}, Thread.currentThread().getContextClassLoader());
-                        //lamarkFactory = new LamarkFactory(newClassLoader);
-                        //json = readStreamToString(lamarkFactory.getClassLoader().getResourceAsStream("lamark.json"));
                     }
                 }
 
                 if (json != null) {
-
                     builder = LamarkBuilderSerializer.deserialize(json);
                     availableClasses.addBuilderClasses(builder);
+                    fillPanelValues();
                     // TODO: set the classes to be the same
                 } else {
                     throw new IllegalStateException("Failed to load configuration JSON file");
@@ -447,11 +436,9 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         north.setLayout(new GridLayout(0, 4));
         north.add(upperElitismLabel);
         north.add(lowerElitismLabel);
-        north.add(numberOfWorkerThreadsLabel);
         north.add(randomSeedLabel);
         north.add(upperElitism);
         north.add(lowerElitism);
-        north.add(numberOfWorkerThreads);
         north.add(randomSeed);
 
         JPanel south = new JPanel();
@@ -484,7 +471,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     }
 
     /**
-     * Builds and lays out the compoennt class panel.
+     * Builds and lays out the component class panel.
      *
      * @return JPanel containing the component class edit boxes.
      */
@@ -578,18 +565,16 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
                 box.addItem(formatClassName(c));
             }
         } else if (def != null) {
-            box.addItem(formatClassName(def));
+            box.addItem(formatClassName(def.getClass()));
         }
 
-        box.setSelectedItem(formatClassName(def));
+        box.setSelectedItem(formatClassName(def.getClass()));
     }
 
     /**
-     * Sets all values in the panel from the config object.
-     *
-     * @param lc Config object to load from.
+     * Sets all values in the panel from the AvailableClasses and Builder objects
      */
-    public void fromGUIConfig(LamarkAvailableClasses lc) {
+    public void fillPanelValues() {
 
         // Init the drop boxes
         setComboBoxValues(selector, availableClasses.toClasses(availableClasses.getSelectorClassNames()), builder.getSelector());
@@ -671,7 +656,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     }
 
     private Long nsLong(String value) {
-        return (value == null) ? null : new Long(value);
+        return (value == null || value.trim().length()==0) ? null : new Long(value);
     }
 
     /**
@@ -710,11 +695,10 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     /**
      * Converts a classname to combobox format (CLASS[PACKAGE])
      *
-     * @param obj Object to convert the classname of
+     * @param className String containing the name
      * @return String containing name in combo format
      */
-    private String formatClassName(Object obj) {
-        String className = (obj==null)?null:obj.getClass().getName();
+    private String formatClassName(String className) {
 
         if (className == null) {
             return null;
@@ -740,7 +724,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * Creates a properties object matching the state of the panel.
      *
      * @return Properties object matching the panel.
-     */
+     *
     public LamarkBuilder toBuilder() {
         LamarkBuilder p = new LamarkBuilder();
         p.withCreator((Supplier)availableClasses.safeInit(classFromCombo(creator)));
@@ -749,7 +733,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         p.withFitnessFunction((ToDoubleFunction) availableClasses.safeInit(classFromCombo(fitness)));
         p.withSelector((Selector)availableClasses.safeInit(classFromCombo(selector)));
 
-        /* TODO: Settings
+        * TODO: Settings
         p.setCreatorConfiguration(propertiesToMap(creatorProperties));
         p.setCrossoverConfiguration(propertiesToMap(crossoverProperties));
         p.setFitnessFunctionConfiguration(propertiesToMap(fitnessProperties));
@@ -757,7 +741,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         p.setSelectorConfiguration(propertiesToMap(selectorProperties));
 
         p.setPreCreatedIndividuals(new LinkedList<String>(preloads));
-        */
+        *
 
         p.withUpperElitism(percentToDouble(upperElitism.getText()));
         p.withLowerElitism(percentToDouble(lowerElitism.getText()));
@@ -768,17 +752,17 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         p.withTargetScore(nsDouble(targetScore.getText()));
         //p.setRandomSeed(nsLong(randomSeed.getText()));
 
-        /*
+        *
         for (String s : customListener) {
             Class c = lamarkFactory.safeLoadClass(s);
             if (c != null) {
                 p.getCustomListeners().add(c);
             }
         }
-        */
+        *
 
         return p;
-    }
+    }*/
 
     /**
      * Returns true if the given listener should be used.
@@ -907,5 +891,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         return rval;
     }
 
-
+    public LamarkBuilder getBuilder() {
+        return builder;
+    }
 }

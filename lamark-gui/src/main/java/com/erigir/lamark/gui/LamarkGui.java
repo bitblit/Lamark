@@ -6,6 +6,8 @@ package com.erigir.lamark.gui;
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.Util;
 import com.erigir.lamark.events.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -19,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * A class implementing a simple GUI for creating and running Lamark instances.
@@ -36,6 +39,7 @@ import java.util.concurrent.Executors;
  */
 
 public class LamarkGui extends JPanel implements LamarkEventListener, ActionListener {
+    private static final Logger LOG = LoggerFactory.getLogger(LamarkGui.class);
     /**
      * String containing the label of the open url button *
      */
@@ -216,7 +220,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
             output.setText("Starting new Lamark instance...\n\n");
 
                 // First, generate a new currentRunner
-                currentRunner = configPanel.toBuilder().build();
+                currentRunner = configPanel.getBuilder().build();
 
                 // Add this as a generic listener for timers
                 currentRunner.addListener(this);
@@ -252,7 +256,9 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
                 openUrl.setEnabled(false);
                 show.setEnabled(false);
                 configPanel.setEnabled(false);
-                Executors.newSingleThreadExecutor().submit(currentRunner);
+                Future f = Executors.newSingleThreadExecutor().submit(currentRunner);
+
+            LOG.info("got : {}",f);
 
         } else if (e.getSource() == show) {
             output.setText(configPanel.toGUIConfigString());
@@ -417,6 +423,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
             show.setEnabled(true);
             configPanel.setEnabled(true);
         }
+
         currentRuntime.setText("Runtime: "
                 + Util.formatISO(je.getLamark().getRunTime()));
         timeRemaining.setText("Remaining: "

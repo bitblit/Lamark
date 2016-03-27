@@ -135,96 +135,92 @@ public class Lamark<T> implements Callable<T> {
 
     public T call()
     {
-        started = System.currentTimeMillis();
-
-        // create generation
-        List<T> items = new ArrayList<>(populationSize);
-        for (int i=0;i<populationSize;i++)
-        {
-            items.add(creator.get());
-        }
-
-        LOG.debug("Items on startup: {}",items);
-        List<Individual<T>> curGen = null;
-
+        LOG.info("About to start the Lamark process");
         try {
-            curGen = items.stream().map(wrapper).collect(Collectors.toList());
+            started = System.currentTimeMillis();
+
+            // create generation
+            List<T> items = new ArrayList<>(populationSize);
+            for (int i = 0; i < populationSize; i++) {
+                items.add(creator.get());
+            }
+
+            LOG.debug("Items on startup: {}", items);
+            List<Individual<T>> curGen = null;
+
+            try {
+                curGen = items.stream().map(wrapper).collect(Collectors.toList());
+            } catch (Exception e) {
+                publishEvent(new ExceptionEvent(this, e));
+                this.stop();
+            }
+
+            while (finishType == null) {
+                try {
+                    // Start each generation with a list of individuals with no fitness value yet
+
+                    // Calc the fit values and sort
+                    curGen = curGen.stream().map(fitnessFunction).sorted().collect(Collectors.toList());
+
+                    // If we've found a new best, update and report
+                    if (minimizeScore) {
+                        if (bestSoFar == null || curGen.get(curGen.size() - 1).getFitness().compareTo(bestSoFar.getFitness()) < 0) {
+                            bestSoFar = curGen.get(curGen.size() - 1);
+                            publishEvent(new BetterIndividualFoundEvent(this, curGen, currentGeneration, bestSoFar));
+                        }
+                    } else {
+                        if (bestSoFar == null || curGen.get(0).getFitness().compareTo(bestSoFar.getFitness()) > 0) {
+                            bestSoFar = curGen.get(0);
+                            publishEvent(new BetterIndividualFoundEvent(this, curGen, currentGeneration, bestSoFar));
+                        }
+                    }
+
+                    // Calc total
+                    LOG.debug("Generation {}:{}", currentGeneration, curGen);
+                    LOG.debug("Stripped: {}", curGen.stream().map(stripper).collect(Collectors.toList()));
+
+                    double totalFitness = curGen.stream().mapToDouble((p) -> p.getFitness()).sum();
+                    LOG.debug("Total fitness: {}", totalFitness);
+
+                    // Select for crossover (select a bunch at once, and then create parent lists from them
+                    // Designed this way because the selectors typically do a bunch of calcs that can be reused
+                    // over and over
+                    List<Individual<T>> selected = selector.select(curGen, random, numberOfParents * populationSize, minimizeScore);
+                    // Stats - increment all of their selected counters
+                    selected.stream().forEach((p) -> p.incrementSelected());
+
+                    List<List<Individual<T>>> parents = new ArrayList<>(populationSize);
+                    for (int i = 0; i < populationSize; i++) {
+                        parents.add(selected.subList(i * numberOfParents, (i + 1) * numberOfParents));
+                    }
+                    publishEvent(new PopulationCompleteEvent(this, curGen, currentGeneration));
+
+                    // At the end of each cycle check exit conditions
+                    updateIfShouldKeepRunning(curGen);
+                    // --------------------
+                    // Next generation starts here
+                    // TODO: Upper/lower elitism
+
+                    currentGeneration++;
+                    // Apply crossover and mutation
+                    curGen = parents.stream().map(crossover).map(mutator).collect(Collectors.toList());
+                } catch (Exception e) {
+                    LOG.warn("Error", e);
+                    publishEvent(new ExceptionEvent(this, e));
+                }
+
+            }
+
+            publishEvent(new LastPopulationCompleteEvent<>(this, curGen, currentGeneration, finishType));
+            ended = System.currentTimeMillis();
+
+            return (bestSoFar == null) ? null : bestSoFar.getGenome();
         }
         catch (Exception e)
         {
-            publishEvent(new ExceptionEvent(this, e));
-            this.stop();
+            LOG.error("Main error capture in lamark class",e);
+            return null;
         }
-
-        while (finishType == null)
-        {
-            try {
-                // Start each generation with a list of individuals with no fitness value yet
-
-                // Calc the fit values and sort
-                curGen = curGen.stream().map(fitnessFunction).sorted().collect(Collectors.toList());
-
-                // If we've found a new best, update and report
-                if (minimizeScore)
-                {
-                    if (bestSoFar == null || curGen.get(curGen.size()-1).getFitness().compareTo(bestSoFar.getFitness()) < 0)
-                    {
-                        bestSoFar = curGen.get(curGen.size()-1);
-                        publishEvent(new BetterIndividualFoundEvent(this, curGen, currentGeneration , bestSoFar));
-                    }
-                }
-                else
-                {
-                    if (bestSoFar == null || curGen.get(0).getFitness().compareTo(bestSoFar.getFitness()) > 0)
-                    {
-                        bestSoFar = curGen.get(0);
-                        publishEvent(new BetterIndividualFoundEvent(this, curGen, currentGeneration , bestSoFar));
-                    }
-                }
-
-                // Calc total
-                LOG.debug("Generation {}:{}" , currentGeneration , curGen);
-                LOG.debug("Stripped: {}" , curGen.stream().map(stripper).collect(Collectors.toList()));
-
-                double totalFitness = curGen.stream().mapToDouble((p) -> p.getFitness()).sum();
-                LOG.debug("Total fitness: {}" , totalFitness);
-
-                // Select for crossover (select a bunch at once, and then create parent lists from them
-                // Designed this way because the selectors typically do a bunch of calcs that can be reused
-                // over and over
-                List<Individual<T>> selected = selector.select(curGen, random, numberOfParents*populationSize, minimizeScore);
-                // Stats - increment all of their selected counters
-                selected.stream().forEach((p)->p.incrementSelected());
-
-                List<List<Individual<T>>> parents = new ArrayList<>(populationSize);
-                for (int i = 0;i<populationSize;i++)
-                {
-                    parents.add(selected.subList(i*numberOfParents, (i+1)*numberOfParents));
-                }
-                publishEvent(new PopulationCompleteEvent(this, curGen,currentGeneration));
-
-                // At the end of each cycle check exit conditions
-                updateIfShouldKeepRunning(curGen);
-                // --------------------
-                // Next generation starts here
-                // TODO: Upper/lower elitism
-
-                currentGeneration++;
-                // Apply crossover and mutation
-                curGen = parents.stream().map(crossover).map(mutator).collect(Collectors.toList());
-            }
-            catch (Exception e)
-            {
-                LOG.warn("Error",e);
-                publishEvent(new ExceptionEvent(this, e));
-            }
-
-        }
-
-        publishEvent(new LastPopulationCompleteEvent<>(this, curGen, currentGeneration, finishType ));
-        ended = System.currentTimeMillis();
-
-        return (bestSoFar==null)?null:bestSoFar.getGenome();
     }
 
     public Long getRunTime()

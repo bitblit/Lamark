@@ -10,13 +10,13 @@ import java.util.function.Function;
 /**
  * Created by cweiss1271 on 3/24/16.
  */
-public class StringSinglePointCrossover extends AbstractLamarkComponent implements Function<List<String>,String> {
+public class StringSinglePoint extends AbstractLamarkComponent implements Function<List<String>,String> {
 
-    public StringSinglePointCrossover(Random random) {
+    public StringSinglePoint(Random random) {
         super(random);
     }
 
-    public StringSinglePointCrossover() {
+    public StringSinglePoint() {
         super();
     }
 

@@ -52,35 +52,38 @@ public class Util {
      * @param milliSecs The time interval to convert to a string.
      * @return A string representing the time interval.
      */
-    public static String formatISO(long milliSecs) {
-        int hours, minutes, seconds, milliseconds;
-        boolean isneg = false; // for handling negative times.
-        if (milliSecs < 0) {
-            isneg = true;
-            milliSecs = -milliSecs;
-        }
-        hours = (int) (milliSecs / MILLIS_IN_HOUR);
-        milliSecs %= MILLIS_IN_HOUR;
-        minutes = (int) (milliSecs / MILLIS_IN_MINUTE);
-        milliSecs %= MILLIS_IN_MINUTE;
-        seconds = (int) (milliSecs / MILLIS_IN_SECOND);
-        milliseconds = (int) (milliSecs % MILLIS_IN_SECOND);
-
+    public static String formatISO(Long milliSecs) {
         StringBuffer buf = new StringBuffer(32);
-        if (isneg) {
-            buf.append('-');
+
+        if (milliSecs!=null) {
+            int hours, minutes, seconds, milliseconds;
+            boolean isneg = false; // for handling negative times.
+            if (milliSecs < 0) {
+                isneg = true;
+                milliSecs = -milliSecs;
+            }
+            hours = (int) (milliSecs / MILLIS_IN_HOUR);
+            milliSecs %= MILLIS_IN_HOUR;
+            minutes = (int) (milliSecs / MILLIS_IN_MINUTE);
+            milliSecs %= MILLIS_IN_MINUTE;
+            seconds = (int) (milliSecs / MILLIS_IN_SECOND);
+            milliseconds = (int) (milliSecs % MILLIS_IN_SECOND);
+
+            if (isneg) {
+                buf.append('-');
+            }
+            buf.append(hours).append(':').append((char) (minutes / 10 + '0'))
+                    .append((char) (minutes % 10 + '0')).append(':').append(
+                    (char) (seconds / 10 + '0'))
+                    .append((char) (seconds % 10 + '0')).append('.');
+            // Make sure there are three digits in the milliseconds field.
+            if (milliseconds < 10) {
+                buf.append("00");
+            } else if (milliseconds < 100) {
+                buf.append('0');
+            }
+            buf.append(milliseconds);
         }
-        buf.append(hours).append(':').append((char) (minutes / 10 + '0'))
-                .append((char) (minutes % 10 + '0')).append(':').append(
-                (char) (seconds / 10 + '0'))
-                .append((char) (seconds % 10 + '0')).append('.');
-        // Make sure there are three digits in the milliseconds field.
-        if (milliseconds < 10) {
-            buf.append("00");
-        } else if (milliseconds < 100) {
-            buf.append('0');
-        }
-        buf.append(milliseconds);
         return buf.toString();
     }
 

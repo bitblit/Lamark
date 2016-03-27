@@ -1,7 +1,8 @@
 package com.erigir.lamark;
 
+import com.erigir.lamark.creator.AlphaStringCreator;
 import com.erigir.lamark.creator.StringCreator;
-import com.erigir.lamark.crossover.StringSinglePointCrossover;
+import com.erigir.lamark.crossover.StringSinglePoint;
 import com.erigir.lamark.events.*;
 import com.erigir.lamark.fitness.StringFinderFitness;
 import com.erigir.lamark.mutator.StringSimpleMutator;
@@ -9,8 +10,6 @@ import com.erigir.lamark.selector.TournamentSelector;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
@@ -63,8 +62,8 @@ public class MyFirstLamark implements LamarkEventListener {
     public LamarkBuilder<String> createBuilder()
     {
         return new LamarkBuilder<String>()
-                .withCreator(StringCreator.alphaCreator(6))
-                .withCrossover(new StringSinglePointCrossover())
+                .withCreator(new AlphaStringCreator(6))
+                .withCrossover(new StringSinglePoint())
                 .withFitnessFunction(new StringFinderFitness("LAMARK"))
                 .withMutator(new StringSimpleMutator())
                 .withSelector(new TournamentSelector<>())

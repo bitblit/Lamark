@@ -132,9 +132,9 @@ public class LamarkBuilderSerializer {
         if (className!=null)
         {
             try {
-                Class selectorClass = Class.forName(className);
+                Class clazz = Class.forName(className);
                 String defString = OBJECT_MAPPER.writeValueAsString(definition);
-                rval = OBJECT_MAPPER.readValue(defString, selectorClass);
+                rval = OBJECT_MAPPER.readValue(defString, clazz);
             }
             catch (ClassNotFoundException | IOException e)
             {

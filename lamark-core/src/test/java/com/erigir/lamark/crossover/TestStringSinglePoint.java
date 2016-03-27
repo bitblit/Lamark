@@ -20,7 +20,7 @@ public class TestStringSinglePoint {
         parents.add(p1);
         parents.add(p2);
 
-        StringSinglePointCrossover ssp = new StringSinglePointCrossover();
+        StringSinglePoint ssp = new StringSinglePoint();
         int case1 = 0;
         int case2 = 0;
         int case3 = 0;
