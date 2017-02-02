@@ -35,13 +35,6 @@
     </developers>
 
     <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-            <version>${junit.version}</version>
-        </dependency>
-
         <!--
         <dependency>
             <groupId>org.projectlombok</groupId>

@@ -22,17 +22,15 @@ public class TestDrawScoreListener {
         supplier.setUpperBound(80);
 
         ScoreFitness fitness = new ScoreFitness();
-        fitness.setLamark(lamark);
 
 
-        Individual<Score> i = supplier.create();
+        Score score = supplier.get();
 
-        Score score = i.getGenome();
         System.out.println(score);
 
-        System.out.println(fitness.fitnessValue(i));
+        System.out.println(fitness.applyAsDouble(score));
         DrawScoreListener dsl = new DrawScoreListener();
-        BetterIndividualFoundEvent bife = new BetterIndividualFoundEvent(null,null,i);
+        BetterIndividualFoundEvent bife = new BetterIndividualFoundEvent(null,null,1L,new Individual(score));
 
         dsl.handleEvent(bife);
 

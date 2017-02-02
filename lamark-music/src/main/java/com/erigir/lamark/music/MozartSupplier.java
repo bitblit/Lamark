@@ -1,6 +1,6 @@
 package com.erigir.lamark.music;
 
-import com.erigir.lamark.ISupplier;
+import com.erigir.lamark.AbstractLamarkComponent;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.music.phrase.PhraseUtils;
@@ -10,8 +10,9 @@ import jm.music.data.Score;
 import jm.music.data.Tempo;
 
 import java.util.List;
+import java.util.function.Supplier;
 
-public class MozartSupplier implements ISupplier<Score> {
+public class MozartSupplier extends AbstractLamarkComponent implements Supplier<Score>  {
     private static int SEARCH_ITERATIONS = 2;
 
     private int size;
@@ -21,7 +22,8 @@ public class MozartSupplier implements ISupplier<Score> {
     private Integer upperBound;
     private Lamark lamark;
 
-    public Individual<Score> create() {
+    @Override
+    public Score get() {
         Score s = new Score();
         if (null != signature) {
             s.setDenominator(signature.denominator());
@@ -36,13 +38,11 @@ public class MozartSupplier implements ISupplier<Score> {
             p.appendPhrase(generatePhrase());
         }
         s.add(p);
-
-        Individual i = new Individual(s);
-        return i;
+        return s;
     }
 
     private Phrase generatePhrase() {
-        Phrase first = PhraseUtils.generatePhrase(lamark.getRandom(), signature, scale, lowerBound, upperBound);
+        Phrase first = PhraseUtils.generatePhrase(rand(), signature, scale, lowerBound, upperBound);
 
         // Does a quick search for nearby improved phrases
         Phrase current = first;

@@ -371,6 +371,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
                     } else {
                         // Need to massage the classpath and load default
                         URLClassLoader newClassLoader = new URLClassLoader(new URL[]{u}, Thread.currentThread().getContextClassLoader());
+                        json = readStreamToString(newClassLoader.getResourceAsStream("/lamark.json"));
                     }
                 }
 

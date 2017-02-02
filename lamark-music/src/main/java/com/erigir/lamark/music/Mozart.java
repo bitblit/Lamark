@@ -1,10 +1,9 @@
 package com.erigir.lamark.music;
 
 import com.erigir.lamark.Lamark;
-import com.erigir.lamark.LamarkConfigurationFailedException;
-import com.erigir.lamark.LamarkFactory;
+import com.erigir.lamark.LamarkBuilder;
+import com.erigir.lamark.LamarkBuilderSerializer;
 import com.erigir.lamark.LamarkUtil;
-import com.erigir.lamark.config.LamarkGUIConfig;
 import com.erigir.lamark.events.*;
 import com.erigir.lamark.music.phrase.PhrasePool;
 import jm.music.data.Score;
@@ -16,9 +15,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
@@ -41,7 +39,6 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
     private JComboBox signatureSelect;
     private JComboBox rangeSelect;
     private JTextField barCountEntry;
-    private LamarkFactory lamarkFactory = new LamarkFactory();
 
 
     public Mozart() {
@@ -129,15 +126,15 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
             JMenuItem src = (JMenuItem) e.getSource();
             if (src.getText().equals("Exit")) {
                 if (currentRunner != null) {
-                    currentRunner.abort();
+                    currentRunner.stop();
                 }
                 frame.dispose();
             }
         } else if (e.getSource() == start) {
             // Start the engine
             currentRunner = mozartInstance();
-            currentRunner.addGenericListener(this);
-            currentRunner.addBetterIndividualFoundListener(new DrawScoreListener());
+            currentRunner.addListener(this);
+            currentRunner.addListener(new DrawScoreListener(), BetterIndividualFoundEvent.class);
 
             output.setText("");
             Executors.newSingleThreadExecutor().submit(currentRunner);
@@ -147,7 +144,7 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
             if (JOptionPane.showConfirmDialog(frame,
                     "Are you sure you want to stop the algorithm?",
                     "Confirm Cancel", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                currentRunner.abort();
+                currentRunner.stop();
                 start.setEnabled(true);
                 cancel.setEnabled(false);
             }
@@ -165,10 +162,8 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
     public Lamark mozartInstance(String keyS, String timeSigS, boolean fullRange, int barCount) {
         try {
 
-            Map<String, LamarkGUIConfig> configs = lamarkFactory.jsonToConfig(getClass().getResourceAsStream("/mozart.json"));
-            Lamark rval = lamarkFactory.createLamarkFromConfig(configs.values().iterator().next());
-
-            MozartSupplier supplier = (MozartSupplier) rval.getSupplier();
+            LamarkBuilder<Score> builder = LamarkBuilderSerializer.deserialize(getClass().getResourceAsStream("/mozart.json"));
+            MozartSupplier supplier = (MozartSupplier) builder.getSupplier();
 
             if (!keyS.equals("ANY")) {
                 supplier.setScale(ScaleEnum.valueOf(keyS));
@@ -184,14 +179,10 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
                 supplier.setUpperBound(81);
             }
             supplier.setSize(barCount);
+            PhrasePool.instance.initialize(builder.getRandom(), supplier.getSignature(), supplier.getScale(), supplier.getLowerBound(), supplier.getUpperBound());
 
-            PhrasePool.instance.initialize(rval.getRandom(), supplier.getSignature(), supplier.getScale(), supplier.getLowerBound(), supplier.getUpperBound());
+            return builder.build();
 
-            return rval;
-
-        } catch (LamarkConfigurationFailedException lcfe) {
-            JOptionPane.showMessageDialog(null, "Failed to load config: " + lcfe.getReasons());
-            return null;
         } catch (Exception e) {
             IllegalArgumentException e2 = new IllegalArgumentException("Couldnt load defaults");
             e2.initCause(e);
@@ -274,7 +265,7 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
             cancel.setEnabled(false);
         } else if (PopulationCompleteEvent.class.isAssignableFrom(je.getClass())) {
             //output.append("\n"+je.toString());
-            generationNumber.setText("Generation: " + ((PopulationCompleteEvent) je).getPopulation().getNumber());
+            generationNumber.setText("Generation: " + ((PopulationCompleteEvent) je).getGenerationNumber());
         } else if (UniformPopulationEvent.class.isAssignableFrom(je.getClass())) {
             output.insert(je.toString() + "\n", 0);
         } else if (ExceptionEvent.class.isAssignableFrom(je.getClass())) {
@@ -288,9 +279,9 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
         }
 
         currentRuntime.setText("Runtime: "
-                + LamarkUtil.formatISO(je.getLamark().currentRuntimeMS()));
+                + LamarkUtil.formatISO(je.getLamark().getRunTime()));
         timeRemaining.setText("Remaining: "
-                + LamarkUtil.formatISO(je.getLamark().estimatedRuntimeMS()));
+                + LamarkUtil.formatISO(je.getLamark().getEstimatedRunTime()));
 
     }
 

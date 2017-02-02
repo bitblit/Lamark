@@ -6,12 +6,12 @@ import jm.music.data.Score;
 
 import java.util.Collection;
 import java.util.Properties;
+import java.util.function.ToDoubleFunction;
 import java.util.logging.Logger;
 
-public class MozartFitness implements IFitnessFunction<Score> {
+public class MozartFitness implements ToDoubleFunction<Score>{
     private static Logger LOG = Logger.getLogger(MozartFitness.class.getName());
     private Collection<TraitWrapper> traits;
-    private Lamark lamark;
 
     public void initTraits(Collection<TraitWrapper> pTraits) {
         traits = pTraits;
@@ -31,13 +31,13 @@ public class MozartFitness implements IFitnessFunction<Score> {
         return rval;
     }
 
-    public double fitnessValue(Individual<Score> arg0) {
+    @Override
+    public double applyAsDouble(Score theScore) {
         if (null == traits) {
             throw new IllegalStateException("Traits must be set before calculating");
         }
         long start = System.currentTimeMillis();
         double fullScore = 0.0;
-        Score theScore = arg0.getGenome();
         ScoreAnalysis sa = new ScoreAnalysis(theScore);
 
         StringBuffer fitnessVals = new StringBuffer();
@@ -49,29 +49,12 @@ public class MozartFitness implements IFitnessFunction<Score> {
         }
         fitnessVals.append(")");
 
+        /*
         arg0.setAttribute("ANALYSIS", sa);
         arg0.setAttribute("SCORES", fitnessVals.toString());
+        */
 
         return fullScore;
-    }
-
-    public EFitnessType fitnessType() {
-        return EFitnessType.MAXIMUM_BEST;
-    }
-
-    public Class worksOn() {
-        return Score.class;
-    }
-
-    public void configure(Properties ignored) {
-    }
-
-    public Lamark getLamark() {
-        return lamark;
-    }
-
-    public void setLamark(Lamark lamark) {
-        this.lamark = lamark;
     }
 
 

@@ -81,7 +81,7 @@ public class WeightFinder {
         fitness.initTraits(test);
         for (int i = 0; i < songs.length; i++) {
             div.setGenome(songs[i]);
-            fitness.fitnessValue(div);
+            fitness.applyAsDouble(songs[i]);
             for (int j = 0; j < test.size(); j++) {
                 scores[i][j] = test.get(j).getFitness();
                 songAverageScore[j] += scores[i][j];

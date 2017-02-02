@@ -86,6 +86,11 @@ public class Lamark<T> implements Callable<T> {
         }
     }
 
+    public void addListener(LamarkEventListener listener, Class<? extends LamarkEvent>... filterTypes )
+    {
+        addListener(listener, new HashSet<>(Arrays.asList(filterTypes)));
+    }
+
     private void publishEvent(LamarkEvent event)
     {
         for (FilteredListener f:listeners)

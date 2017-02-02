@@ -1,22 +1,24 @@
 package com.erigir.lamark.music;
 
-import com.erigir.lamark.IMutator;
-import com.erigir.lamark.Individual;
+import com.erigir.lamark.AbstractLamarkComponent;
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.music.phrase.PhrasePool;
 import jm.music.data.Phrase;
 import jm.music.data.Score;
 
 import java.util.Properties;
+import java.util.function.Function;
 
-public class MozartMutator implements IMutator<Score> {
+public class MozartMutator extends AbstractLamarkComponent implements Function<Score,Score> {
     private double pMutation;
     private Lamark lamark;
 
-    public void mutate(Individual<Score> arg0) {
-        Score s = arg0.getGenome();
+
+    @Override
+    public Score apply(Score s) {
         Phrase[] pha = s.getPart(0).getPhraseArray();
-        pha[lamark.getRandom().nextInt(pha.length)] = PhrasePool.instance.getPhrase();
+        pha[rand().nextInt(pha.length)] = PhrasePool.instance.getPhrase();
+        return s; // TODO: should be new copy?
     }
 
     public void setMutationProbability(double arg0) {

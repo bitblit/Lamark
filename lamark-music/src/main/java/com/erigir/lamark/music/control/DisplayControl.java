@@ -98,7 +98,7 @@ public class DisplayControl implements Runnable, ActionListener {
             Individual<Score> i = new Individual<Score>();
             i.setGenome(song.getSong());
 
-            double fit = fitness.fitnessValue(i);
+            double fit = fitness.applyAsDouble(i.getGenome());
             double maxFit = fitness.maximumScore();
             double percent = (fit / maxFit) * 100;
             JOptionPane.showMessageDialog(frame, "Fitness:" + LamarkUtil.format(fit) + " out of " + LamarkUtil.format(maxFit) + " (" + LamarkUtil.format(percent) + "%)\n\n" + i.getAttribute("SCORES").toString());

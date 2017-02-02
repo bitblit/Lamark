@@ -27,8 +27,9 @@ public class PhraseUtils {
 
 
     public static double scorePhrase(Phrase p) {
-        Individual i = new Individual(new Score(new Part(p)));
-        return FITNESS_CALCULATOR.fitnessValue(i);
+        Score score = new Score(new Part(p));
+        Individual i = new Individual(score);
+        return FITNESS_CALCULATOR.applyAsDouble(score);
     }
 
     /**

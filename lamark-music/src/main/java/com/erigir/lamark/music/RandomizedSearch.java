@@ -385,8 +385,7 @@ public class RandomizedSearch implements Runnable, ActionListener {
         }
 
         private int fitness(Score s) {
-            Individual i = new Individual(s);
-            return (int) Math.floor(fitness.fitnessValue(i));
+            return (int)Math.floor(fitness.applyAsDouble(s));
         }
 
     }

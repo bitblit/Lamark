@@ -1,29 +1,22 @@
 package com.erigir.lamark.music;
 
-import com.erigir.lamark.ICrossover;
-import com.erigir.lamark.Individual;
-import com.erigir.lamark.Lamark;
+import com.erigir.lamark.AbstractLamarkComponent;
 import jm.music.data.Part;
 import jm.music.data.Phrase;
 import jm.music.data.Score;
 
 import java.util.List;
-import java.util.Properties;
+import java.util.function.Function;
 
-public class MozartCrossover implements ICrossover<Score> {
-    private double pCrossover;
-    private Lamark lamark;
+public class MozartCrossover  extends AbstractLamarkComponent implements Function<List<Score>, Score> {
 
+    @Override
+    public Score apply(List<Score> scores) {
+        Score rval = null;
 
-    public Individual<Score> crossover(List<Individual<Score>> arg0) {
-        //ArrayList<Individual> rval = new ArrayList<Individual>(2);
-        Individual<Score> rval = null;
+        Score s1 = scores.get(0);
+        Score s2 = scores.get(1);
 
-        Individual<Score> p1 = arg0.get(0);
-        Individual<Score> p2 = arg0.get(1);
-
-        Score s1 = p1.getGenome();
-        Score s2 = p2.getGenome();
         Part part1 = s1.getPart(0);
         Part part2 = s2.getPart(0);
 
@@ -34,8 +27,8 @@ public class MozartCrossover implements ICrossover<Score> {
             throw new IllegalStateException("Scores have different number of bars, 1=" + ph1a.length + " 2=" + ph2a.length);
         }
 
-        int split1 = lamark.getRandom().nextInt(ph1a.length - 1);
-        int split2 = (split1 + 1) + lamark.getRandom().nextInt(ph1a.length - (split1 + 1));
+        int split1 = rand().nextInt(ph1a.length - 1);
+        int split2 = (split1 + 1) + rand().nextInt(ph1a.length - (split1 + 1));
 
         Phrase[] np1 = new Phrase[ph1a.length];
         Phrase[] np2 = new Phrase[ph1a.length];
@@ -60,38 +53,8 @@ public class MozartCrossover implements ICrossover<Score> {
         new1.add(newPart1);
         new2.add(newPart2);
 
-        rval = new Individual<Score>(new1);
-        //rval.add(new Individual(new1));
-        //rval.add(new Individual(new2));
-        // Returning a single child (could do the other)
         return rval;
     }
 
-    public int parentCount() {
-        return 2;
-    }
-
-    public int childCount() {
-        return 2;
-    }
-
-    public void setCrossoverProbability(double arg0) {
-        pCrossover = arg0;
-    }
-
-    public void configure(Properties ignored) {
-    }
-
-    public Class worksOn() {
-        return Score.class;
-    }
-
-    public Lamark getLamark() {
-        return lamark;
-    }
-
-    public void setLamark(Lamark lamark) {
-        this.lamark = lamark;
-    }
 
 }

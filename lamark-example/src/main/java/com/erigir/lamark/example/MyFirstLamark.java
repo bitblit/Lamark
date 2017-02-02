@@ -46,7 +46,7 @@ public class MyFirstLamark{
 
         Lamark<String> lamark = createBuilder().build();
         // Setup self as a listener
-        lamark.addListener(new StandardOutLoggingListener(), new HashSet<>(Arrays.asList(BetterIndividualFoundEvent.class, PopulationCompleteEvent.class, ExceptionEvent.class, LastPopulationCompleteEvent.class)));
+        lamark.addListener(new StandardOutLoggingListener(), BetterIndividualFoundEvent.class, PopulationCompleteEvent.class, ExceptionEvent.class, LastPopulationCompleteEvent.class);
         ExecutorService executor = Executors.newFixedThreadPool(5);
 
         System.out.println("About to start lamark, will be allowed to run for 5 minutes max");
