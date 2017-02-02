@@ -1,7 +1,7 @@
 /*
  * Created on Mar 29, 2005
  */
-package com.erigir.lamark.creator;
+package com.erigir.lamark.supplier;
 
 import com.erigir.lamark.AbstractLamarkComponent;
 
@@ -14,7 +14,7 @@ import java.util.function.Supplier;
  * @author cweiss
  * @since 04/2006
  */
-public class StringCreator extends AbstractLamarkComponent implements Supplier<String> {
+public class StringSupplier extends AbstractLamarkComponent implements Supplier<String> {
     /**
      * Set of characters to create new strings from *
      */
@@ -24,30 +24,30 @@ public class StringCreator extends AbstractLamarkComponent implements Supplier<S
      */
     private int size;
 
-    public StringCreator() {
+    public StringSupplier() {
         super();
     }
 
-    public StringCreator(Set<Character> validCharacters, int size, Random random) {
+    public StringSupplier(Set<Character> validCharacters, int size, Random random) {
         super(random);
         setValidCharacters(validCharacters);
         setSize(size);
     }
 
-    public StringCreator(Set<Character> validCharacters, int size) {
+    public StringSupplier(Set<Character> validCharacters, int size) {
         super();
         setValidCharacters(validCharacters);
         setSize(size);
     }
 
-    public StringCreator(String validCharacters, int size, Random random) {
+    public StringSupplier(String validCharacters, int size, Random random) {
         super(random);
 
         setValidCharactersByString(validCharacters);
         setSize(size);
     }
 
-    public StringCreator(String validCharacters, int size) {
+    public StringSupplier(String validCharacters, int size) {
         super();
 
         setValidCharactersByString(validCharacters);

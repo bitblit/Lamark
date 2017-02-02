@@ -13,19 +13,19 @@ public class TestDrawScoreListener {
     @Test
     public void testDrawScore() {
         Lamark lamark = new Lamark();
-        MozartCreator creator = new MozartCreator();
-        creator.setLamark(lamark);
-        creator.setLowerBound(0);
-        creator.setScale(ScaleEnum.C);
-        creator.setSignature(TimeSignatureEnum.FOUR_FOUR);
-        creator.setSize(16);
-        creator.setUpperBound(80);
+        MozartSupplier supplier = new MozartSupplier();
+        supplier.setLamark(lamark);
+        supplier.setLowerBound(0);
+        supplier.setScale(ScaleEnum.C);
+        supplier.setSignature(TimeSignatureEnum.FOUR_FOUR);
+        supplier.setSize(16);
+        supplier.setUpperBound(80);
 
         ScoreFitness fitness = new ScoreFitness();
         fitness.setLamark(lamark);
 
 
-        Individual<Score> i = creator.create();
+        Individual<Score> i = supplier.create();
 
         Score score = i.getGenome();
         System.out.println(score);

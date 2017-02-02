@@ -4,7 +4,7 @@
 package com.erigir.lamark.gui;
 
 import com.erigir.lamark.Lamark;
-import com.erigir.lamark.Util;
+import com.erigir.lamark.LamarkUtil;
 import com.erigir.lamark.events.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -322,7 +322,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
             output.setEditable(false);
 
             textPane.add(outputScrollPane, BorderLayout.CENTER);
-            output.setText("Lamark\nGraphical User Interface\nVersion " + Util.getVersion() + "\n");
+            output.setText("Lamark\nGraphical User Interface\nVersion " + LamarkUtil.getVersion() + "\n");
 
             mainPanel.add(configPanel, BorderLayout.NORTH);
             mainPanel.add(textPane, BorderLayout.CENTER);
@@ -405,7 +405,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
      */
     public void handleEvent(LamarkEvent je) {
         if (BetterIndividualFoundEvent.class.isAssignableFrom(je.getClass())) {
-            bestScore.setText("Best: " + Util.format(((BetterIndividualFoundEvent) je).getNewBest().getFitness()));
+            bestScore.setText("Best: " + LamarkUtil.format(((BetterIndividualFoundEvent) je).getNewBest().getFitness()));
         } else if (LastPopulationCompleteEvent.class.isAssignableFrom(je.getClass())) {
             start.setEnabled(true);
             cancel.setEnabled(false);
@@ -425,9 +425,9 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
         }
 
         currentRuntime.setText("Runtime: "
-                + Util.formatISO(je.getLamark().getRunTime()));
+                + LamarkUtil.formatISO(je.getLamark().getRunTime()));
         timeRemaining.setText("Remaining: "
-                + Util.formatISO(je.getLamark().getEstimatedRunTime()));
+                + LamarkUtil.formatISO(je.getLamark().getEstimatedRunTime()));
 
         updateMemoryLabels();
     }

@@ -1,6 +1,6 @@
 package com.erigir.lamark.gui;
 
-import com.erigir.lamark.Util;
+import com.erigir.lamark.LamarkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +81,7 @@ public class LamarkApplication implements ActionListener {
         JFrame.setDefaultLookAndFeelDecorated(true);
 
         //Create and set up the window.
-        frame = new JFrame("Lamark - " + Util.getVersion());
+        frame = new JFrame("Lamark - " + LamarkUtil.getVersion());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Create the menu bar

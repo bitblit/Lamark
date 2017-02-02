@@ -1,7 +1,7 @@
 /*
  * Created on Mar 29, 2005
  */
-package com.erigir.lamark.creator;
+package com.erigir.lamark.supplier;
 
 import com.erigir.lamark.AbstractLamarkComponent;
 
@@ -12,23 +12,23 @@ import java.util.function.Supplier;
 
 
 /**
- * Creator that generates lists of integers that have the permuation property (0..size)
+ * Supplier that generates lists of integers that have the permuation property (0..size)
  *
  * @author cweiss
  * @since 04/2006
  */
-public class IntegerListPermutationCreator extends AbstractLamarkComponent implements Supplier<List<Integer>> {
+public class IntegerListPermutationSupplier extends AbstractLamarkComponent implements Supplier<List<Integer>> {
     /**
      * Size of the list to generate (REQUIRED)*
      */
     private Integer size;
 
-    public IntegerListPermutationCreator(int size, Random random) {
+    public IntegerListPermutationSupplier(int size, Random random) {
         super(random);
         this.size = size;
     }
 
-    public IntegerListPermutationCreator(int size) {
+    public IntegerListPermutationSupplier(int size) {
         super();
         this.size = size;
     }

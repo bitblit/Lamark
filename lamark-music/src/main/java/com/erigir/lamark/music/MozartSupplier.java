@@ -1,6 +1,6 @@
 package com.erigir.lamark.music;
 
-import com.erigir.lamark.ICreator;
+import com.erigir.lamark.ISupplier;
 import com.erigir.lamark.Individual;
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.music.phrase.PhraseUtils;
@@ -11,7 +11,7 @@ import jm.music.data.Tempo;
 
 import java.util.List;
 
-public class MozartCreator implements ICreator<Score> {
+public class MozartSupplier implements ISupplier<Score> {
     private static int SEARCH_ITERATIONS = 2;
 
     private int size;

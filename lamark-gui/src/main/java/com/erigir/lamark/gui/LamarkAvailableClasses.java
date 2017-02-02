@@ -10,15 +10,13 @@ import java.util.*;
  *
  * Classes implementing this interface serve as the source of option values in a Lamark GUI.
  *
- *
- *
  * Created by cweiss1271 on 3/26/16.
  */
 public class LamarkAvailableClasses {
     private static final Logger LOG = LoggerFactory.getLogger(LamarkAvailableClasses.class);
 
     private SortedSet<String> selectorClassNames = new TreeSet<>();
-    private SortedSet<String> creatorClassNames = new TreeSet<>();
+    private SortedSet<String> supplierClassNames = new TreeSet<>();
     private SortedSet<String> fitnessFunctionClassNames = new TreeSet<>();
     private SortedSet<String> crossoverClassNames = new TreeSet<>();
     private SortedSet<String> mutatorClassNames = new TreeSet<>();
@@ -32,12 +30,12 @@ public class LamarkAvailableClasses {
         this.selectorClassNames = selectorClassNames;
     }
 
-    public SortedSet<String> getCreatorClassNames() {
-        return creatorClassNames;
+    public SortedSet<String> getSupplierClassNames() {
+        return supplierClassNames;
     }
 
-    public void setCreatorClassNames(SortedSet<String> creatorClassNames) {
-        this.creatorClassNames = creatorClassNames;
+    public void setSupplierClassNames(SortedSet<String> supplierClassNames) {
+        this.supplierClassNames = supplierClassNames;
     }
 
     public SortedSet<String> getFitnessFunctionClassNames() {
@@ -77,7 +75,7 @@ public class LamarkAvailableClasses {
         if (builder!=null)
         {
             addClass(builder.getSelector(), selectorClassNames);
-            addClass(builder.getCreator(), creatorClassNames);
+            addClass(builder.getSupplier(), supplierClassNames);
             addClass(builder.getCrossover(), crossoverClassNames);
             addClass(builder.getFitnessFunction(), fitnessFunctionClassNames);
             addClass(builder.getFormatter(), formatterClassNames);

@@ -54,9 +54,9 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     private LamarkBuilder builder = new LamarkBuilder();
 
     /**
-     * Custom properties for creator *
+     * Custom properties for supplier *
      */
-    private Properties creatorProperties = new Properties();
+    private Properties supplierProperties = new Properties();
     /**
      * Custom properties for crossover *
      */
@@ -84,9 +84,9 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     private List<String> customListener = new ArrayList<String>();
 
     /**
-     * Button/Label for creator *
+     * Button/Label for supplier *
      */
-    private JButton creatorLabel = new JButton("Creator");
+    private JButton supplierLabel = new JButton("Supplier");
     /**
      * Button/Label for crossover *
      */
@@ -178,9 +178,9 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     private JCheckBox lUniformPop = new JCheckBox("Uniform Population");
 
     /**
-     * Combobox holding creator name *
+     * Combobox holding supplier name *
      */
-    private JComboBox creator = new JComboBox();
+    private JComboBox supplier = new JComboBox();
     /**
      * Combobox holding crossover name *
      */
@@ -284,7 +284,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * @see javax.swing.JComponent#setEnabled(boolean)
      */
     public void setEnabled(boolean enable) {
-        creatorLabel.setEnabled(enable);
+        supplierLabel.setEnabled(enable);
         crossoverLabel.setEnabled(enable);
         fitnessLabel.setEnabled(enable);
         mutatorLabel.setEnabled(enable);
@@ -302,7 +302,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         lPopPlanDone.setEnabled(enable);
         lUniformPop.setEnabled(enable);
 
-        creator.setEnabled(enable);
+        supplier.setEnabled(enable);
         crossover.setEnabled(enable);
         fitness.setEnabled(enable);
         mutator.setEnabled(enable);
@@ -479,18 +479,18 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         JPanel rval = new JPanel();
         rval.setBorder(BorderFactory.createTitledBorder("Classes"));
         rval.setLayout(new GridLayout(0, 5));
-        rval.add(creatorLabel);
+        rval.add(supplierLabel);
         rval.add(crossoverLabel);
         rval.add(fitnessLabel);
         rval.add(mutatorLabel);
         rval.add(selectorLabel);
-        rval.add(creator);
+        rval.add(supplier);
         rval.add(crossover);
         rval.add(fitness);
         rval.add(mutator);
         rval.add(selector);
 
-        creatorLabel.addActionListener(this);
+        supplierLabel.addActionListener(this);
         crossoverLabel.addActionListener(this);
         fitnessLabel.addActionListener(this);
         mutatorLabel.addActionListener(this);
@@ -504,8 +504,8 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      */
     public void actionPerformed(ActionEvent arg0) {
         JButton src = (JButton) arg0.getSource();
-        if (src == creatorLabel) {
-            creatorProperties = editProperties(creatorProperties, src.getText());
+        if (src == supplierLabel) {
+            supplierProperties = editProperties(supplierProperties, src.getText());
         } else if (src == crossoverLabel) {
             crossoverProperties = editProperties(crossoverProperties, src.getText());
         } else if (src == fitnessLabel) {
@@ -578,12 +578,12 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
 
         // Init the drop boxes
         setComboBoxValues(selector, availableClasses.toClasses(availableClasses.getSelectorClassNames()), builder.getSelector());
-        setComboBoxValues(creator, availableClasses.toClasses(availableClasses.getCreatorClassNames()), builder.getCreator());
+        setComboBoxValues(supplier, availableClasses.toClasses(availableClasses.getSupplierClassNames()), builder.getSupplier());
         setComboBoxValues(crossover, availableClasses.toClasses(availableClasses.getCrossoverClassNames()), builder.getCrossover());
         setComboBoxValues(fitness, availableClasses.toClasses(availableClasses.getFitnessFunctionClassNames()), builder.getFitnessFunction());
         setComboBoxValues(mutator, availableClasses.toClasses(availableClasses.getMutatorClassNames()), builder.getMutator());
 
-        /*creator.setSelectedItem(formatClassName(lc.defaultCreator()));
+        /*supplier.setSelectedItem(formatClassName(lc.defaultSupplier()));
         crossover.setSelectedItem(formatClassName(lc.defaultCrossover()));
         fitness.setSelectedItem(formatClassName(lc.defaultFitnessFunction()));
         mutator.setSelectedItem(formatClassName(lc.defaultMutator()));
@@ -598,7 +598,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         /*
         randomSeed.setText(ein(builder.getRandomSeed()));
 
-        creatorProperties = mapToProperties(lc.getCreatorConfiguration());
+        supplierProperties = mapToProperties(lc.getSupplierConfiguration());
         crossoverProperties = mapToProperties(lc.getCrossoverConfiguration());
         fitnessProperties = mapToProperties(lc.getFitnessFunctionConfiguration());
         mutatorProperties = mapToProperties(lc.getMutatorConfiguration());
@@ -727,14 +727,14 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      *
     public LamarkBuilder toBuilder() {
         LamarkBuilder p = new LamarkBuilder();
-        p.withCreator((Supplier)availableClasses.safeInit(classFromCombo(creator)));
+        p.withSupplier((Supplier)availableClasses.safeInit(classFromCombo(supplier)));
         p.withCrossover((Function) availableClasses.safeInit(classFromCombo(crossover)));
         p.withMutator((Function)availableClasses.safeInit(classFromCombo(mutator)));
         p.withFitnessFunction((ToDoubleFunction) availableClasses.safeInit(classFromCombo(fitness)));
         p.withSelector((Selector)availableClasses.safeInit(classFromCombo(selector)));
 
         * TODO: Settings
-        p.setCreatorConfiguration(propertiesToMap(creatorProperties));
+        p.setSupplierConfiguration(propertiesToMap(supplierProperties));
         p.setCrossoverConfiguration(propertiesToMap(crossoverProperties));
         p.setFitnessFunctionConfiguration(propertiesToMap(fitnessProperties));
         p.setMutatorConfiguration(propertiesToMap(mutatorProperties));

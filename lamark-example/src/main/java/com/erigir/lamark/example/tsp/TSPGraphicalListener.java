@@ -1,7 +1,7 @@
 package com.erigir.lamark.example.tsp;
 
 import com.erigir.lamark.Individual;
-import com.erigir.lamark.Util;
+import com.erigir.lamark.LamarkUtil;
 import com.erigir.lamark.events.BetterIndividualFoundEvent;
 import com.erigir.lamark.events.LamarkEvent;
 import com.erigir.lamark.gui.GUIEventListener;
@@ -193,9 +193,9 @@ public class TSPGraphicalListener implements GUIEventListener {
             Font thisFont = new Font("Arial", Font.PLAIN, fontSize);
             gc.setFont(thisFont);
 
-            String outputString = "Length : " + Util.format(permDistance);
+            String outputString = "Length : " + LamarkUtil.format(permDistance);
             if (bestKnown != -1) {
-                outputString += "  Error: " + Util.format(permDistance - bestKnown);
+                outputString += "  Error: " + LamarkUtil.format(permDistance - bestKnown);
             }
 
             // Draw the text specifying size

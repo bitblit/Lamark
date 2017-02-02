@@ -3,12 +3,8 @@
  */
 package com.erigir.lamark.example.simple;
 
-import com.erigir.lamark.AbstractLamarkComponent;
-import com.erigir.lamark.FitnessType;
-import com.erigir.lamark.IFitnessFunction;
-import com.erigir.lamark.Individual;
-
 import java.util.List;
+import java.util.function.ToDoubleFunction;
 
 /**
  * This fitness function sorts a list of integers by multiplying the position of
@@ -19,21 +15,10 @@ import java.util.List;
  * @author cweiss
  * @since 02/2005
  */
-public class IntegerSort extends AbstractLamarkComponent implements IFitnessFunction<List<Integer>> {
+public class IntegerSort implements ToDoubleFunction<List<Integer>> {
 
-    /**
-     * @see com.erigir.lamark.IFitnessFunction#fitnessType()
-     */
-    public FitnessType fitnessType() {
-        return FitnessType.MAXIMUM_BEST;
-    }
-
-    /**
-     * @see com.erigir.lamark.IFitnessFunction#fitnessValue(com.erigir.lamark.Individual)
-     */
-    public double fitnessValue(Individual div) {
-        List vals = (List) div.getGenome();
-
+    @Override
+    public double applyAsDouble(List<Integer> vals) {
         double score = 0;
         for (int i = 0; i < vals.size(); i++) {
             Integer next = (Integer) vals.get(i);

@@ -6,7 +6,7 @@
         "selectorClass": "com.erigir.lamark.selector.RouletteWheel",
         "upperElitism": 0.1,
         "fitnessFunctionClass": "com.erigir.lamark.example.cellular.CAMajorityFitness",
-        "creatorClass": "com.erigir.lamark.creator.BinaryStringCreator",
+        "supplierClass": "com.erigir.lamark.supplier.BinaryStringSupplier",
         "randomSeed": 1,
         "mutatorClass": "com.erigir.lamark.mutator.StringSimpleMutator",
         "mutationProbability": 0,
@@ -17,7 +17,7 @@
             "tableWidth": 100,
             "radius": 3
         },
-        "creatorConfiguration": {
+        "supplierConfiguration": {
             "size": 128
         },
         "customListeners": [
@@ -31,7 +31,7 @@
         "selectorClass": "com.erigir.lamark.selector.RouletteWheel",
         "upperElitism": 0.1,
         "fitnessFunctionClass": "com.erigir.lamark.example.schedule.ScheduleFitness",
-        "creatorClass": "com.erigir.lamark.creator.IntegerListPermutationCreator",
+        "supplierClass": "com.erigir.lamark.supplier.IntegerListPermutationSupplier",
         "randomSeed": 1,
         "mutatorClass": "com.erigir.lamark.mutator.ListSimpleMutator",
         "mutationProbability": 0,
@@ -39,7 +39,7 @@
         "lowerElitism": 0.1,
         "fitnessFunctionConfiguration": {
         },
-        "creatorConfiguration": {
+        "supplierConfiguration": {
             "size": 30
         },
         "customListeners": [
@@ -53,7 +53,7 @@
         "selectorClass": "com.erigir.lamark.selector.RouletteWheel",
         "upperElitism": 0.1,
         "fitnessFunctionClass": "com.erigir.lamark.example.simple.IntegerSort",
-        "creatorClass": "com.erigir.lamark.creator.IntegerListPermutationCreator",
+        "supplierClass": "com.erigir.lamark.supplier.IntegerListPermutationSupplier",
         "randomSeed": 1,
         "mutatorClass": "com.erigir.lamark.mutator.ListSimpleMutator",
         "mutationProbability": 0,
@@ -61,7 +61,7 @@
         "lowerElitism": 0.1,
         "fitnessFunctionConfiguration": {
         },
-        "creatorConfiguration": {
+        "supplierConfiguration": {
             "size": 30
         },
         "customListeners": [
@@ -74,7 +74,7 @@
         "selectorClass": "com.erigir.lamark.selector.RouletteWheel",
         "upperElitism": 0.1,
         "fitnessFunctionClass": "com.erigir.lamark.example.tsp.TSPFitness",
-        "creatorClass": "com.erigir.lamark.creator.IntegerListPermutationCreator",
+        "supplierClass": "com.erigir.lamark.supplier.IntegerListPermutationSupplier",
         "randomSeed": 1,
         "mutatorClass": "com.erigir.lamark.mutator.List2ExchangeMutator",
         "mutationProbability": 0,
@@ -84,7 +84,7 @@
             "tspFile": "berlin52.tsp",
             "bestKnown": 7542
         },
-        "creatorConfiguration": {
+        "supplierConfiguration": {
             "size": 52
         },
         "customListeners": [
@@ -98,7 +98,7 @@
         "selectorClass": "com.erigir.lamark.selector.RouletteWheel",
         "upperElitism": 0.1,
         "fitnessFunctionClass": "com.erigir.lamark.example.tsp.TSPFitness",
-        "creatorClass": "com.erigir.lamark.creator.IntegerListPermutationCreator",
+        "supplierClass": "com.erigir.lamark.supplier.IntegerListPermutationSupplier",
         "randomSeed": 1,
         "mutatorClass": "com.erigir.lamark.mutator.List2ExchangeMutator",
         "mutationProbability": 0,
@@ -108,7 +108,7 @@
             "tspFile": "bier127.tsp",
             "bestKnown": 118282
         },
-        "creatorConfiguration": {
+        "supplierConfiguration": {
             "size": 127
         },
         "customListeners": [
@@ -122,7 +122,7 @@
         "selectorClass": "com.erigir.lamark.selector.RouletteWheel",
         "upperElitism": 0.1,
         "fitnessFunctionClass": "com.erigir.lamark.example.tsp.TSPFitness",
-        "creatorClass": "com.erigir.lamark.creator.IntegerListPermutationCreator",
+        "supplierClass": "com.erigir.lamark.supplier.IntegerListPermutationSupplier",
         "randomSeed": 1,
         "mutatorClass": "com.erigir.lamark.mutator.List2ExchangeMutator",
         "mutationProbability": 0,
@@ -132,7 +132,7 @@
             "tspFile": "d15112.tsp",
             "bestKnown": 1573084
         },
-        "creatorConfiguration": {
+        "supplierConfiguration": {
             "size": 15112
         },
         "customListeners": [
@@ -146,7 +146,7 @@
         "selectorClass": "com.erigir.lamark.selector.RouletteWheel",
         "upperElitism": 0.1,
         "fitnessFunctionClass": "com.erigir.lamark.example.tsp.TSPFitness",
-        "creatorClass": "com.erigir.lamark.creator.IntegerListPermutationCreator",
+        "supplierClass": "com.erigir.lamark.supplier.IntegerListPermutationSupplier",
         "randomSeed": 1,
         "mutatorClass": "com.erigir.lamark.mutator.List2ExchangeMutator",
         "mutationProbability": 0,
@@ -156,7 +156,7 @@
             "tspFile": "ulysses16.tsp",
             "bestKnown": 6859
         },
-        "creatorConfiguration": {
+        "supplierConfiguration": {
             "size": 16
         },
         "customListeners": [

@@ -1,6 +1,6 @@
 package com.erigir.lamark.music;
 
-import com.erigir.lamark.Util;
+import com.erigir.lamark.LamarkUtil;
 import jm.music.data.Note;
 import jm.music.data.Part;
 import jm.music.data.Phrase;
@@ -69,19 +69,19 @@ public class ScoreAnalysis {
         sb.append(",Closest Scale:");
         sb.append(cacheClosestScaleFit);
         sb.append(",Percent in Closest Scale:");
-        sb.append(Util.format(cacheClosestScaleFitPercent));
+        sb.append(LamarkUtil.format(cacheClosestScaleFitPercent));
         sb.append(",Percent in Closest Scale Big Five:");
-        sb.append(Util.format(cacheClosestScaleBigFiveFitPercent));
+        sb.append(LamarkUtil.format(cacheClosestScaleBigFiveFitPercent));
         sb.append(",Closest Signature:");
         sb.append(cacheClosestTimeSignatureFit);
         sb.append(",Percent in Closest Signature:");
-        sb.append(Util.format(cacheClosestTimeSignatureFitPercent));
+        sb.append(LamarkUtil.format(cacheClosestTimeSignatureFitPercent));
         sb.append(",Median Note:");
         sb.append(medianNote);
         sb.append(",Mean Note:");
-        sb.append(Util.format(meanNote));
+        sb.append(LamarkUtil.format(meanNote));
         sb.append(",Note Std Dev:");
-        sb.append(Util.format(noteStandardDeviation));
+        sb.append(LamarkUtil.format(noteStandardDeviation));
         sb.append(",Note Direction Changes:");
         sb.append(noteDirectionChanges);
         sb.append("]");

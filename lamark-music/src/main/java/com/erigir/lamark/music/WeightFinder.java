@@ -1,7 +1,7 @@
 package com.erigir.lamark.music;
 
 import com.erigir.lamark.Individual;
-import com.erigir.lamark.Util;
+import com.erigir.lamark.LamarkUtil;
 import com.erigir.lamark.music.control.ControlSongs;
 import com.erigir.lamark.music.traits.*;
 import jm.music.data.Score;
@@ -134,15 +134,15 @@ public class WeightFinder {
 
                     LOG.info("Iteration #" + iteration);
                     double pctDone = iteration / iterationCount;
-                    LOG.info(Util.format(pctDone) + " percent done");
+                    LOG.info(LamarkUtil.format(pctDone) + " percent done");
                     long runtime = System.currentTimeMillis() - startTime;
                     long perIt = (long) ((iteration * 1000.0) / (double) runtime);
                     LOG.info(perIt + " iterations per second");
                     LOG.info("Trying " + Arrays.asList(weights));
-                    LOG.info("Current runtime:" + Util.formatISO(runtime));
+                    LOG.info("Current runtime:" + LamarkUtil.formatISO(runtime));
                     long estTime = (long) (runtime / pctDone);
-                    LOG.info("Est total time:" + Util.formatISO(estTime));
-                    LOG.info("Est rem time:" + Util.formatISO(estTime - runtime));
+                    LOG.info("Est total time:" + LamarkUtil.formatISO(estTime));
+                    LOG.info("Est rem time:" + LamarkUtil.formatISO(estTime - runtime));
                     LOG.info("\n\n");
                 }
 
@@ -155,7 +155,7 @@ public class WeightFinder {
 
                 currentPercent = sumFit / maxFit;
 
-                //LOG.info("Trying "+Arrays.asList(weights)+" pct = "+Util.format(currentPercent*100));
+                //LOG.info("Trying "+Arrays.asList(weights)+" pct = "+LamarkUtil.format(currentPercent*100));
 
                 if (currentPercent > bestPercentage) {
                     bestPercentage = currentPercent;

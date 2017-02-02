@@ -4,6 +4,8 @@ import com.erigir.lamark.Individual;
 import com.erigir.lamark.events.BetterIndividualFoundEvent;
 import com.erigir.lamark.events.LamarkEvent;
 import com.erigir.lamark.gui.GUIEventListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,6 +17,7 @@ import java.awt.*;
  * @since 04/2005
  */
 public class ScheduleGraphicalListener implements GUIEventListener {
+    private static final Logger LOG = LoggerFactory.getLogger(ScheduleGraphicalListener.class);
     /**
      * Handle to the creating window *
      */
@@ -45,7 +48,7 @@ public class ScheduleGraphicalListener implements GUIEventListener {
      */
     public void handleEvent(LamarkEvent je) {
         if ((je instanceof BetterIndividualFoundEvent) && null != parentComponent) {
-            je.getLamark().logFiner("Frame is " + parentComponent);
+            LOG.trace("Frame is {}" , parentComponent);
             verifyFrame();
             BetterIndividualFoundEvent bif = (BetterIndividualFoundEvent) je;
             displayPanel.div = bif.getNewBest();

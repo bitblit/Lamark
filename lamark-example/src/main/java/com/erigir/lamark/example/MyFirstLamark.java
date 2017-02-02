@@ -1,19 +1,23 @@
 package com.erigir.lamark.example;
 
+import com.erigir.lamark.Individual;
 import com.erigir.lamark.Lamark;
-import com.erigir.lamark.WorkPackage;
-import com.erigir.lamark.config.LamarkRuntimeParameters;
+import com.erigir.lamark.LamarkBuilder;
 import com.erigir.lamark.crossover.StringSinglePoint;
-import com.erigir.lamark.events.ExceptionEvent;
-import com.erigir.lamark.events.LamarkEvent;
-import com.erigir.lamark.events.LamarkEventListener;
-import com.erigir.lamark.events.LastPopulationCompleteEvent;
+import com.erigir.lamark.events.*;
+import com.erigir.lamark.fitness.StringFinderFitness;
+import com.erigir.lamark.listener.StandardOutLoggingListener;
 import com.erigir.lamark.mutator.StringSimpleMutator;
-import com.erigir.lamark.selector.RouletteWheel;
+import com.erigir.lamark.selector.TournamentSelector;
+import com.erigir.lamark.supplier.AlphaStringSupplier;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.concurrent.*;
 
 /**
  * A simple command-line program that searches for the word LAMARK using a GA.
- * &lt;p /&gt;
+ *
  * This class demonstrates how to simply wire a java command line client
  * to run Lamark internally.  Typically used as a stub for further work.
  * For serious work, I'd recommend the use of an inversion of control
@@ -23,87 +27,63 @@ import com.erigir.lamark.selector.RouletteWheel;
  * @author cweiss
  * @since 11/2007
  */
-public class MyFirstLamark implements LamarkEventListener {
+public class MyFirstLamark{
     /**
      * Bootstrap main to run from command line.
      *
      * @param ignored String[]
      */
     public static void main(String[] ignored) {
-        com.erigir.lamark.MyFirstLamark e = new com.erigir.lamark.MyFirstLamark();
+        MyFirstLamark e = new MyFirstLamark();
         e.go();
         System.exit(0);
     }
 
     /**
      * Creates an instance of lamark, configures it, and then runs it.
-     * &lt;p /&gt;
-     * NOTE: In this case, we are running lamark within the same thread as
-     * the CLI itself (although Lamark may start other threads as well, depending
-     * on the value of "numberOfWorkerThreads").  Typically, (especially in GUI
-     * apps) Lamark should be run in it's own thread, and monitored by listening for
-     * "last population" events.  This can be done by calling:
-     * new Thread(lamark).start();
-     * Since lamark implements Runnable.
      */
     public void go() {
-        Lamark lamark = new Lamark();
-        LamarkFinderFitness fitness = new LamarkFinderFitness();
-        lamark.setFitnessFunction(fitness);
-        lamark.setCrossover(new StringSinglePoint());
-        lamark.setSelector(new RouletteWheel());
-        lamark.setMutator(new StringSimpleMutator());
-        lamark.setCreator(new LamarkFinderCreator());
 
-        LamarkRuntimeParameters lrp = new LamarkRuntimeParameters();
-
-
-        lrp.setNumberOfWorkerThreads(400);
-        lrp.setPopulationSize(50);
-
-        lrp.setTargetScore(1.0);
-        lrp.setMutationProbability(.01);
-        lrp.setLowerElitism(.1);
-        lrp.setUpperElitism(.1);
-
-        lamark.setRuntimeParameters(lrp);
-
-
+        Lamark<String> lamark = createBuilder().build();
         // Setup self as a listener
-        lamark.addBetterIndividualFoundListener(this);
-        lamark.addPopulationCompleteListener(this);
-        lamark.addExceptionListener(this);
-        lamark.addLastPopulationCompleteListener(this);
+        lamark.addListener(new StandardOutLoggingListener(), new HashSet<>(Arrays.asList(BetterIndividualFoundEvent.class, PopulationCompleteEvent.class, ExceptionEvent.class, LastPopulationCompleteEvent.class)));
+        ExecutorService executor = Executors.newFixedThreadPool(5);
 
+        System.out.println("About to start lamark, will be allowed to run for 5 minutes max");
+        Future<String> future = executor.submit(lamark);
+        // Could run in the main thread by calling lamark.start() instead
+        // But then any timeouts have to be manually written
+        // If a "final" result is found (e.g., homogenous population) then this will return early.
+        try {
+            String result = future.get(5, TimeUnit.MINUTES);
+        }
+        catch (InterruptedException | ExecutionException ee)
+        {
+            System.out.println("Ran into an exception");
+            ee.printStackTrace();
+        }
+        catch (TimeoutException te)
+        {
+            Individual<String> best = lamark.getBestSoFar();
+            System.out.println("Timed out - best so far was "+best);
+        }
 
-        lamark.call();
     }
 
-
-    /**
-     * Implementation of listener function for lamark.
-     * In this simple case, we just output events recieved to the
-     * command line (standard out).
-     *
-     * @see com.erigir.lamark.events.LamarkEventListener#handleEvent(LamarkEvent)
-     */
-    public void handleEvent(LamarkEvent je) {
-        System.out.println("Received event: " + je);
-
-        if (je instanceof ExceptionEvent) {
-            ((ExceptionEvent) je).getException().printStackTrace();
-        }
-
-        if (je instanceof LastPopulationCompleteEvent) {
-            System.out.println("Finished, best found was: " + je.getLamark().getCurrentBest());
-            System.out.println("WP Queue size grew to: " + WorkPackage.queueSize() + " for a population size of " + je.getLamark().getRuntimeParameters().getPopulationSize());
-            System.out.println("Total time spent was: " + je.getLamark().getTotalRunTime() + " ms");
-            System.out.println("Total wait time was: " + je.getLamark().getTotalWaitTime() + " ms");
-            System.out.println("Average wait time was: " + je.getLamark().getAverageWaitTime() + " ms");
-            int pct = (int) (100.0 * je.getLamark().getPercentageTimeWaiting());
-            System.out.println("Wait time was: " + pct + "% of the total time");
-        }
-
+    public LamarkBuilder<String> createBuilder()
+    {
+        return new LamarkBuilder<String>()
+                .withSupplier(new AlphaStringSupplier(6))
+                .withCrossover(new StringSinglePoint())
+                .withFitnessFunction(new StringFinderFitness("LAMARK"))
+                .withMutator(new StringSimpleMutator())
+                .withSelector(new TournamentSelector<>())
+                .withPopulationSize(50)
+                .withMutationProbability(.01)
+                .withCrossoverProbability(1.0)
+                .withUpperElitism(.1)
+                .withLowerElitism(.1)
+                .withTargetScore(1.0);
     }
 
 }

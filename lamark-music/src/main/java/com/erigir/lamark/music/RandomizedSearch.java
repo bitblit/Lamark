@@ -1,7 +1,7 @@
 package com.erigir.lamark.music;
 
 import com.erigir.lamark.Individual;
-import com.erigir.lamark.Util;
+import com.erigir.lamark.LamarkUtil;
 import com.erigir.lamark.music.phrase.PhrasePool;
 import com.erigir.lamark.music.traits.TraitWrapper;
 import jm.gui.cpn.Notate;
@@ -79,23 +79,23 @@ public class RandomizedSearch implements Runnable, ActionListener {
     public String displayAnalysis(ScoreAnalysis sa, Double fitness) {
         StringBuffer sb = new StringBuffer();
         sb.append("Fitness : ");
-        sb.append(Util.format(fitness));
+        sb.append(LamarkUtil.format(fitness));
         sb.append("\nScore size:");
         sb.append(sa.getAllNotes().size());
         sb.append("\nClosest Scale:");
         sb.append(sa.closestScaleFit());
         sb.append("\nPercent in Closest Scale:");
-        sb.append(Util.format(sa.percentInClosestScale()));
+        sb.append(LamarkUtil.format(sa.percentInClosestScale()));
         sb.append("\nClosest Signature:");
         sb.append(sa.closestTimeSignatureFit());
         sb.append("\nPercent in Closest Signature:");
-        sb.append(Util.format(sa.percentInClosestTimeSignature()));
+        sb.append(LamarkUtil.format(sa.percentInClosestTimeSignature()));
         sb.append("\nMedian Note:");
         sb.append(sa.getMedianNote());
         sb.append("\nMean Note:");
-        sb.append(Util.format(sa.getMeanNote()));
+        sb.append(LamarkUtil.format(sa.getMeanNote()));
         sb.append("\nNote Std Dev:");
-        sb.append(Util.format(sa.getNoteStandardDeviation()));
+        sb.append(LamarkUtil.format(sa.getNoteStandardDeviation()));
         sb.append("\nNote Direction Changes:");
         sb.append(sa.getNoteDirectionChanges());
         return sb.toString();
@@ -180,7 +180,7 @@ public class RandomizedSearch implements Runnable, ActionListener {
 
         private void updateScreen() {
             musicFrame = new Notate(collapsePhrase(currentScore), 0, 100);
-            musicFrame.setTitle("Cycle:" + cycle + "  Fitness:" + Util.format(currentFitness));
+            musicFrame.setTitle("Cycle:" + cycle + "  Fitness:" + LamarkUtil.format(currentFitness));
             lastUpdate = currentFitness;
         }
 
@@ -209,7 +209,7 @@ public class RandomizedSearch implements Runnable, ActionListener {
             }
             // Pick a bar
             int barIdx = (cycle % data.length);
-            //int barIdx = Util.RAND.nextInt(data.length);
+            //int barIdx = LamarkUtil.RAND.nextInt(data.length);
 
             // Expand
             expand(rval[0], barIdx);

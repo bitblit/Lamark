@@ -45,7 +45,7 @@ public class MozartFitness implements IFitnessFunction<Score> {
         for (TraitWrapper tw : traits) {
             tw.getTrait().setScoreAnalysis(sa);
             fullScore += tw.getWeightedFitness();
-            fitnessVals.append(tw.getTrait().getClass().getSimpleName() + " = " + Util.format(tw.getFitness()) + "\n");
+            fitnessVals.append(tw.getTrait().getClass().getSimpleName() + " = " + LamarkUtil.format(tw.getFitness()) + "\n");
         }
         fitnessVals.append(")");
 

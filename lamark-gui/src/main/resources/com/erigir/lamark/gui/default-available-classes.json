@@ -3,11 +3,11 @@
     "com.erigir.lamark.selector.RouletteWheelSelector",
     "com.erigir.lamark.selector.TournamentSelector"
   ],
-  "creatorClassNames": [
-    "com.erigir.lamark.creator.ByteListCreator",
-    "com.erigir.lamark.creator.IntegerListCreator",
-    "com.erigir.lamark.creator.IntegerListPermutationCreator",
-    "com.erigir.lamark.creator.StringCreator"
+  "supplierClassNames": [
+    "com.erigir.lamark.supplier.ByteListSupplier",
+    "com.erigir.lamark.supplier.IntegerListSupplier",
+    "com.erigir.lamark.supplier.IntegerListPermutationSupplier",
+    "com.erigir.lamark.supplier.StringSupplier"
   ],
   "fitnessFunctionClassNames": [
     "com.erigir.lamark.fitness.StringFinderFitness",
@@ -32,8 +32,8 @@
   "fitnessFunctionConfiguration": {
     "target": "LAMARK"
   },
-  "creatorClass": "com.erigir.lamark.creator.StringCreator",
-  "creatorConfiguration": {
+  "supplierClass": "com.erigir.lamark.supplier.StringSupplier",
+  "supplierConfiguration": {
     "validCharacters": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
     "size": 6
   }

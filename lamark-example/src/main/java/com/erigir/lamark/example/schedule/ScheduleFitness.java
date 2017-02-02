@@ -3,11 +3,14 @@
  */
 package com.erigir.lamark.example.schedule;
 
-import com.erigir.lamark.*;
+import com.erigir.lamark.SelfValidating;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.ToDoubleFunction;
 
 /**
  * This class creates a psuedorandom schedule problem and uses the DynamicScheduler
@@ -18,7 +21,8 @@ import java.util.List;
  * @author cweiss
  * @since 04/2005
  */
-public class ScheduleFitness extends AbstractLamarkComponent implements IFitnessFunction<List>, IValidatable {
+public class ScheduleFitness implements ToDoubleFunction<List<Integer>>,SelfValidating {
+    private static final Logger LOG = LoggerFactory.getLogger(ScheduleFitness.class);
     /**
      * Holds the worst time found so we can track improvement.  Really should be done by a listeners *
      */
@@ -54,18 +58,17 @@ public class ScheduleFitness extends AbstractLamarkComponent implements IFitness
     /**
      * Makes sure that times and weights both exist, and are of the same length.
      *
-     * @see com.erigir.lamark.IValidatable#validate(java.util.List)
-     */
-    public void validate(List<String> errors) {
-        // TODO Auto-generated method stub
+     * see com.erigir.lamark.SelfValidating
+     **/
+    public void selfValidate() {
         if (times == null) {
-            errors.add("times cannot be null");
+            throw new IllegalArgumentException("times cannot be null");
         }
         if (weights == null) {
-            errors.add("weights cannot be null");
+            throw new IllegalArgumentException("weights cannot be null");
         }
         if (times != null && weights != null && times.length != weights.length) {
-            errors.add("times has " + times.length + " elements but weights has " + weights.length);
+            throw new IllegalArgumentException("times has " + times.length + " elements but weights has " + weights.length);
         }
     }
 
@@ -132,7 +135,7 @@ public class ScheduleFitness extends AbstractLamarkComponent implements IFitness
      */
     private int[] asPermutation(int[] source, Integer[] permutation) {
 
-        getLamark().logFiner("AsPermutation, src=" + Arrays.asList(source) + " perm=" + Arrays.asList(permutation));
+        LOG.trace("AsPermutation, src={} perm={}" , Arrays.asList(source) , Arrays.asList(permutation));
         if (source.length != permutation.length) {
             throw new IllegalArgumentException("Source length " + source.length + " but perm length " + permutation.length);
         }
@@ -143,21 +146,11 @@ public class ScheduleFitness extends AbstractLamarkComponent implements IFitness
         return rval;
     }
 
-
-    /**
-     * @see com.erigir.lamark.IFitnessFunction#fitnessType()
-     */
-    public FitnessType fitnessType() {
-        return FitnessType.MINIMUM_BEST;
-    }
-
     /**
      * Fitness function whos score is the length of the optimum schedule given this permutation.
-     *
-     * @see com.erigir.lamark.IFitnessFunction#fitnessValue(com.erigir.lamark.Individual)
      */
-    public double fitnessValue(Individual i) {
-        List<?> testList = (List<?>) i.getGenome();
+    @Override
+    public double applyAsDouble(List<Integer> testList) {
         Integer[] test = testList.toArray(new Integer[0]);
 
         DynamicScheduler ds = new DynamicScheduler();
@@ -169,14 +162,12 @@ public class ScheduleFitness extends AbstractLamarkComponent implements IFitness
         int totalWidth = totalWeightedTime + (5 * ds.splitPoints().length);
         int[] permTime = asPermutation(times, (Integer[]) testList.toArray(new Integer[0]));
         int[] permWeight = asPermutation(weights, (Integer[]) testList.toArray(new Integer[0]));
-        i.setAttribute("SCHEDULE", ds);
+        /*i.setAttribute("SCHEDULE", ds);
         i.setAttribute("WORST", worstFound);
         i.setAttribute("TOTALWIDTH", totalWidth);
         i.setAttribute("PERMTIME", permTime);
-        i.setAttribute("PERMWEIGHT", permWeight);
+        i.setAttribute("PERMWEIGHT", permWeight);*/
 
         return time;
     }
-
-
 }

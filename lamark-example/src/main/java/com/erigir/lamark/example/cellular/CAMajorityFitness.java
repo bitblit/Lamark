@@ -7,6 +7,7 @@ import com.erigir.lamark.*;
 
 import java.util.List;
 import java.util.Random;
+import java.util.function.ToDoubleFunction;
 
 /**
  * A fitness function that takes proposed solutions to a Cellular Automata and selects for
@@ -15,7 +16,7 @@ import java.util.Random;
  * @author cweiss
  * @since 03/2007
  */
-public class CAMajorityFitness extends AbstractLamarkComponent implements IFitnessFunction<String>, IValidatable {
+public class CAMajorityFitness implements ToDoubleFunction<String>, SelfValidating {
     /**
      * Number of tables used to test the CA rule *
      */
@@ -188,23 +189,14 @@ public class CAMajorityFitness extends AbstractLamarkComponent implements IFitne
         return (NUMBER_OF_CA_COLS * tableWidth) + NUMBER_OF_CA_COLS - 1;
     }
 
-    /**
-     * @see com.erigir.lamark.IFitnessFunction#fitnessType()
-     */
-    public FitnessType fitnessType() {
-        return FitnessType.MAXIMUM_BEST;
-    }
-
-    /**
-     * @see com.erigir.lamark.IFitnessFunction#fitnessValue(com.erigir.lamark.Individual)
-     */
-    public double fitnessValue(Individual div) {
+    @Override
+    public double applyAsDouble(String div) {
         CellularAutomata[] automata = new CellularAutomata[NUMBER_OF_TABLES];
 
         // For each table, see if it came out right
         int points = 0;
         for (int i = 0; i < NUMBER_OF_TABLES; i++) {
-            automata[i] = new CellularAutomata((String) div.getGenome(),
+            automata[i] = new CellularAutomata(div,
                     firstRows[i], tableHeight, radius);
             boolean majorityOne = automata[i].tableStartsMajorityTrue();
             if (majorityOne) {
@@ -216,28 +208,28 @@ public class CAMajorityFitness extends AbstractLamarkComponent implements IFitne
             }
         }
 
-        // Save the ca's in case we need to draw this guy
+        /* Save the ca's in case we need to draw this guy
         div.setAttribute("CADATA", automata);
         div.setAttribute("NUMBER_OF_CA_COLS", NUMBER_OF_CA_COLS);
         div.setAttribute("NUMBER_OF_CA_ROWS", NUMBER_OF_CA_ROWS);
         div.setAttribute("TABLE_WIDTH", tableWidth);
-        div.setAttribute("TABLE_HEIGHT", tableHeight);
+        div.setAttribute("TABLE_HEIGHT", tableHeight); */
 
         return points;
     }
 
     /**
-     * @see com.erigir.lamark.IValidatable#validate(java.util.List)
-     */
-    public void validate(List<String> errors) {
+     * see com.erigir.lamark.SelfValidating
+     **/
+    public void selfValidate() {
         if (tableWidth == null) {
-            errors.add("You must set tableWidth");
+            throw new IllegalArgumentException("You must set tableWidth");
         }
         if (tableHeight == null) {
-            errors.add("You must set tableHeight");
+            throw new IllegalArgumentException("You must set tableHeight");
         }
         if (radius == null) {
-            errors.add("You must set radius");
+            throw new IllegalArgumentException("You must set radius");
         }
     }
 

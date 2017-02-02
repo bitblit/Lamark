@@ -1,4 +1,4 @@
-package com.erigir.lamark;
+package com.erigir.lamark.listener;
 
 import com.erigir.lamark.events.LamarkEvent;
 import com.erigir.lamark.events.LamarkEventListener;

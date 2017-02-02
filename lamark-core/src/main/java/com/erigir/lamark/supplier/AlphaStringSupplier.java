@@ -1,22 +1,22 @@
-package com.erigir.lamark.creator;
+package com.erigir.lamark.supplier;
 
 import java.util.Random;
 
 /**
  * Created by cweiss1271 on 3/26/16.
  */
-public class AlphaStringCreator extends StringCreator {
-    public AlphaStringCreator()
+public class AlphaStringSupplier extends StringSupplier {
+    public AlphaStringSupplier()
     {
         super();
         setValidCharactersByString("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     }
 
-    public AlphaStringCreator(int size, Random random) {
+    public AlphaStringSupplier(int size, Random random) {
         super("ABCDEFGHIJKLMNOPQRSTUVWXYZ", size, random);
     }
 
-    public AlphaStringCreator(int size) {
+    public AlphaStringSupplier(int size) {
         super("ABCDEFGHIJKLMNOPQRSTUVWXYZ", size);
     }
 

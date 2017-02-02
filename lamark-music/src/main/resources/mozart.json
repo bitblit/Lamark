@@ -3,12 +3,12 @@
         "fitnessFunctionClass": "com.erigir.lamark.music.ScoreFitness",
         "fitnessFunctionConfiguration": {
         },
-        "creatorClass": "com.erigir.lamark.music.MozartCreator",
+        "supplierClass": "com.erigir.lamark.music.MozartSupplier",
         "crossoverClass": "com.erigir.lamark.music.MozartCrossover",
 
         "mutatorClass": "com.erigir.lamark.music.MozartMutator",
 
-        "creatorConfiguration": {
+        "supplierConfiguration": {
             "size": 4
         },
 

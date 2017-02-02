@@ -35,8 +35,8 @@
 
         <p>
 
-        <h3>Creators</h3>
-        A <em>Creator</em> is a class used to create new Individuals, typically randomly. How the creation
+        <h3>Suppliers</h3>
+        A <em>Supplier</em> is a class used to create new Individuals, typically randomly. How the creation
         is performed is problem dependant, and can range from very simple (e.g., pick a random number and use
         it as the genome) to the quite complex (select a 100-integer permutation and use it as the genome).
         </p>

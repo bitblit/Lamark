@@ -16,7 +16,7 @@ import java.util.Map;
  * &lt;p/&gt;
  * Individual is the wrapper class that holds a given genome together with its
  * fitness, and flags as to whether it was mutated or not.  Individual also contains a
- * generic "attributes" member, which the components (fitness function, creator, etc)
+ * generic "attributes" member, which the components (fitness function, supplier, etc)
  * can use as a catch-all to pass information along about the individual.  This
  * feature is added primarily to cache information that is useful in various places,
  * but may be computationally expensive to perform over and over again.  Users of

@@ -13,7 +13,7 @@ import java.text.DecimalFormat;
  * @author cweiss
  * @since 04/2006
  */
-public class Util {
+public class LamarkUtil {
     /**
      * Static constant *
      */
@@ -29,7 +29,7 @@ public class Util {
     /**
      * Static instance to hold cache values *
      */
-    private static Util instance = new Util();
+    private static LamarkUtil instance = new LamarkUtil();
     /**
      * Formatter instance *
      */
@@ -38,7 +38,7 @@ public class Util {
     /**
      * Private constructor to enforce singleton.
      */
-    private Util() {
+    private LamarkUtil() {
         super();
         formatter = new DecimalFormat();
         formatter.setMaximumFractionDigits(2);
@@ -93,7 +93,7 @@ public class Util {
      * @return String containing the version number
      */
     public static String getVersion() {
-        return Util.class.getPackage().getImplementationVersion();
+        return LamarkUtil.class.getPackage().getImplementationVersion();
     }
 
     /**
@@ -103,7 +103,9 @@ public class Util {
      * @return String contianing the formatted double
      */
     public static String format(double d) {
-        return Util.instance.formatter.format(d);
+        return LamarkUtil.instance.formatter.format(d);
     }
+
+
 
 }

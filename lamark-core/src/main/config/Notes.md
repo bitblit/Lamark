@@ -23,13 +23,13 @@ As in standard mode, but Jar containing single class downloaded from net
 System
 ======
 Each run has:
-* 1 each of Creator, Crossover, FitnessFunction, Formatter, Mutator, Selector
+* 1 each of Supplier, Crossover, FitnessFunction, Formatter, Mutator, Selector
 * 0 or more ParamProviders
 
 
 Use Cases
 =========
-Standard (Research) use case : we are solving a single problem which implies that the fitness function and creator are
+Standard (Research) use case : we are solving a single problem which implies that the fitness function and supplier are
 static, other things may change.
 
 Sample use case : Selecting 

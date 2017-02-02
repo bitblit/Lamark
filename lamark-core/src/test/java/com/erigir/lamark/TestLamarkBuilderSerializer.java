@@ -1,6 +1,11 @@
 package com.erigir.lamark;
 
-import com.erigir.lamark.creator.StringCreator;
+import com.erigir.lamark.crossover.StringSinglePoint;
+import com.erigir.lamark.fitness.StringFinderFitness;
+import com.erigir.lamark.mutator.StringSimpleMutator;
+import com.erigir.lamark.selector.TournamentSelector;
+import com.erigir.lamark.supplier.AlphaStringSupplier;
+import com.erigir.lamark.supplier.StringSupplier;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +21,7 @@ public class TestLamarkBuilderSerializer {
     @Test
     public void testRoundTrip()
     {
-        MyFirstLamark mfl = new MyFirstLamark();
-        LamarkBuilder lb = mfl.createBuilder();
+        LamarkBuilder lb = createBuilder();
 
         String serial = LamarkBuilderSerializer.serialize(lb);
 
@@ -25,7 +29,7 @@ public class TestLamarkBuilderSerializer {
 
         LamarkBuilder lb2 = LamarkBuilderSerializer.deserialize(serial);
 
-        assertEquals(lb.getCreator().getClass(), lb2.getCreator().getClass());
+        assertEquals(lb.getSupplier().getClass(), lb2.getSupplier().getClass());
         assertEquals(lb.getCrossover().getClass(), lb2.getCrossover().getClass());
         assertEquals(lb.getSelector().getClass(), lb2.getSelector().getClass());
         assertEquals(lb.getFitnessFunction().getClass(), lb2.getFitnessFunction().getClass());
@@ -38,11 +42,28 @@ public class TestLamarkBuilderSerializer {
 
         assertEquals(lb.getCrossoverProbability(), lb2.getCrossoverProbability(),0);
 
-        StringCreator sc = (StringCreator)lb.getCreator();
-        StringCreator sc2 = (StringCreator)lb.getCreator();
+        StringSupplier sc = (StringSupplier)lb.getSupplier();
+        StringSupplier sc2 = (StringSupplier)lb.getSupplier();
 
         assertEquals(sc.getSize(), sc2.getSize());
 
     }
+
+    public LamarkBuilder<String> createBuilder()
+    {
+        return new LamarkBuilder<String>()
+                .withSupplier(new AlphaStringSupplier(6))
+                .withCrossover(new StringSinglePoint())
+                .withFitnessFunction(new StringFinderFitness("LAMARK"))
+                .withMutator(new StringSimpleMutator())
+                .withSelector(new TournamentSelector<>())
+                .withPopulationSize(50)
+                .withMutationProbability(.01)
+                .withCrossoverProbability(1.0)
+                .withUpperElitism(.1)
+                .withLowerElitism(.1)
+                .withTargetScore(1.0);
+    }
+
 
 }

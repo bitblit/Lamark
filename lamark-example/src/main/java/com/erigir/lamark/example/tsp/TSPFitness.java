@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.function.ToDoubleFunction;
 
 /**
  * A fitness function for TSPs, where the fitness value is the length of the path.
@@ -24,7 +25,7 @@ import java.util.StringTokenizer;
  * @author cweiss
  * @since 04/2005
  */
-public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunction<List<Integer>>, IValidatable {
+public class TSPFitness  implements ToDoubleFunction<List<Integer>>, SelfValidating {
     private static final Logger LOG = LoggerFactory.getLogger(TSPFitness.class);
     /**
      * String handle to the original tsp file read *
@@ -83,19 +84,19 @@ public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunct
             if (tspFile != null) {
                 InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(tspFile);
                 if (is == null) {
-                    getLamark().logFiner("Couldnt find resource:" + tspFile + " ... trying as file");
+                    LOG.trace("Couldnt find resource:" + tspFile + " ... trying as file");
                     is = new FileInputStream(new File(tspFile));
                 }
                 if (is != null) {
                     InputStreamReader isr = new InputStreamReader(is);
                     initFromTSPReader(isr);
                 } else {
-                    getLamark().logSevere("Unable to load tsp as resource or file:" + tspFile);
+                    LOG.error("Unable to load tsp as resource or file:" + tspFile);
                 }
             }
         } catch (Exception e) {
             LOG.error("Error on TSP load points from {}", tspFile, e);
-            getLamark().logSevere("Error loading tspFile:" + e);
+            LOG.error("Error loading tspFile:" + e);
         }
     }
 
@@ -127,7 +128,7 @@ public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunct
      * @return double containing the permutation length
      */
     public double permutationDistance(Integer[] permutation) {
-        getLamark().logFiner("in perm distance, perm = " + Arrays.asList(permutation));
+        LOG.trace("in perm distance, perm = " + Arrays.asList(permutation));
         double rval = 0;
 
         if (permutation.length != points.size()) {
@@ -139,7 +140,7 @@ public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunct
             rval += distance(permutation[i].intValue(),
                     permutation[((i + 1) % permutation.length)].intValue());
         }
-        getLamark().logFiner("returning " + rval);
+        LOG.trace("returning " + rval);
         return rval;
     }
 
@@ -183,7 +184,7 @@ public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunct
                 }
             }
 
-            getLamark().logInfo("Finished processing read.  Found " + points.size()
+            LOG.info("Finished processing read.  Found " + points.size()
                     + " points");
         } catch (IOException ioe) {
             throw new RuntimeException("Error reading TSP Stream: " + ioe);
@@ -220,7 +221,7 @@ public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunct
      * @return MyPoint object from that line.
      */
     private MyPoint pointFromLine(String line) {
-        getLamark().logInfo("Parsing point from '" + line + "'");
+        LOG.info("Parsing point from '" + line + "'");
         Double x = null;
         Double y = null;
         Integer point = null;
@@ -241,42 +242,35 @@ public class TSPFitness extends AbstractLamarkComponent implements IFitnessFunct
         }
 
         MyPoint rval = new MyPoint(x.doubleValue(), y.doubleValue());
-        getLamark().logInfo("returning " + rval);
+        LOG.info("returning " + rval);
         return rval;
     }
 
-    /**
-     * @see com.erigir.lamark.IFitnessFunction#fitnessType()
-     */
-    public FitnessType fitnessType() {
-        return FitnessType.MINIMUM_BEST;
-    }
+    // TODO: Minimum best
 
-    /**
-     * @see com.erigir.lamark.IFitnessFunction#fitnessValue(com.erigir.lamark.Individual)
-     */
-    public double fitnessValue(Individual i) {
-        List<?> l = (List<?>) i.getGenome();
+    @Override
+    public double applyAsDouble(List<Integer> l) {
         Integer[] arr = l.toArray(new Integer[0]);
+        /*
         i.setAttribute("POINTS", points);
         i.setAttribute("MINX", minX);
         i.setAttribute("MINY", minY);
         i.setAttribute("MAXX", maxX);
         i.setAttribute("MAXY", maxY);
-        i.setAttribute("BESTKNOWN", getBestKnown());
+        i.setAttribute("BESTKNOWN", getBestKnown()); */
         return permutationDistance(arr);
     }
 
     /**
      * Guarantees that a set of points can be loaded.
      *
-     * @see com.erigir.lamark.IValidatable#validate(java.util.List)
-     */
-    public void validate(List<String> errors) {
+     * see com.erigir.lamark.SelfValidating
+     **/
+    public void selfValidate() {
         // try to load points
         loadPoints();
         if (points == null) {
-            errors.add("No TSP file loaded.  Set tspFile property to a filename or one of the included resources.");
+            throw new IllegalArgumentException("No TSP file loaded.  Set tspFile property to a filename or one of the included resources.");
         }
     }
 

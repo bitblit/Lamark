@@ -2,7 +2,7 @@
   "builder": {
     "random": null,
     "selector": {},
-    "creator": {
+    "supplier": {
       "size": 6
     },
     "fitnessFunction": {
@@ -26,7 +26,7 @@
     "minimizeScore": false
   },
   "classNames": {
-    "creator": "com.erigir.lamark.creator.AlphaStringCreator",
+    "supplier": "com.erigir.lamark.supplier.AlphaStringSupplier",
     "crossover": "com.erigir.lamark.crossover.StringSinglePoint",
     "fitnessFunction": "com.erigir.lamark.fitness.StringFinderFitness",
     "mutator": "com.erigir.lamark.mutator.StringSimpleMutator",

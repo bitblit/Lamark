@@ -45,7 +45,7 @@ public class LamarkBuilderSerializer {
 
         Map<String,String> classNames = new TreeMap<>();
         putClassName(classNames, "selector", builder.getSelector());
-        putClassName(classNames, "creator", builder.getCreator());
+        putClassName(classNames, "supplier", builder.getSupplier());
         putClassName(classNames, "fitnessFunction", builder.getFitnessFunction());
         putClassName(classNames, "crossover", builder.getCrossover());
         putClassName(classNames, "mutator", builder.getMutator());
@@ -108,7 +108,7 @@ public class LamarkBuilderSerializer {
 
         Selector selector = (Selector)createClass(classNames, "selector", builder.remove("selector"));
 
-        Supplier creator = (Supplier)createClass(classNames, "creator", builder.remove("creator"));
+        Supplier supplier = (Supplier)createClass(classNames, "supplier", builder.remove("supplier"));
         ToDoubleFunction fitness = (ToDoubleFunction)createClass(classNames, "fitnessFunction", builder.remove("fitnessFunction"));
         Function crossover = (Function)createClass(classNames, "crossover", builder.remove("crossover"));
         Function mutator = (Function)createClass(classNames, "mutator", builder.remove("mutator"));
@@ -116,7 +116,7 @@ public class LamarkBuilderSerializer {
 
         LamarkBuilder rval = OBJECT_MAPPER.readValue(OBJECT_MAPPER.writeValueAsString(builder),LamarkBuilder.class)
                 .withSelector(selector)
-                .withCreator(creator)
+                .withSupplier(supplier)
                 .withFitnessFunction(fitness)
                 .withCrossover(crossover)
                 .withMutator(mutator)

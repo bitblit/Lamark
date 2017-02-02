@@ -2,14 +2,15 @@ package com.erigir.lamark;
 
 
 import com.erigir.lamark.events.*;
-import com.erigir.lamark.selector.RouletteWheelSelector;
+import com.erigir.lamark.listener.FilteredListener;
 import com.erigir.lamark.selector.Selector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.function.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -35,7 +36,7 @@ public class Lamark<T> implements Callable<T> {
     Random random;
     Integer populationSize;
     Long maxGenerations;
-    Supplier<T> creator;
+    Supplier<T> supplier;
     InnerFitnessCalculator<T> fitnessFunction;
     InnerCrossover<T> crossover;
     InnerMutator<T> mutator;
@@ -142,7 +143,7 @@ public class Lamark<T> implements Callable<T> {
             // create generation
             List<T> items = new ArrayList<>(populationSize);
             for (int i = 0; i < populationSize; i++) {
-                items.add(creator.get());
+                items.add(supplier.get());
             }
 
             LOG.debug("Items on startup: {}", items);

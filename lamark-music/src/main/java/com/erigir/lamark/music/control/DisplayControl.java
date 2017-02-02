@@ -1,7 +1,7 @@
 package com.erigir.lamark.music.control;
 
 import com.erigir.lamark.Individual;
-import com.erigir.lamark.Util;
+import com.erigir.lamark.LamarkUtil;
 import com.erigir.lamark.music.ScaleEnum;
 import com.erigir.lamark.music.ScoreAnalysis;
 import com.erigir.lamark.music.ScoreFitness;
@@ -101,7 +101,7 @@ public class DisplayControl implements Runnable, ActionListener {
             double fit = fitness.fitnessValue(i);
             double maxFit = fitness.maximumScore();
             double percent = (fit / maxFit) * 100;
-            JOptionPane.showMessageDialog(frame, "Fitness:" + Util.format(fit) + " out of " + Util.format(maxFit) + " (" + Util.format(percent) + "%)\n\n" + i.getAttribute("SCORES").toString());
+            JOptionPane.showMessageDialog(frame, "Fitness:" + LamarkUtil.format(fit) + " out of " + LamarkUtil.format(maxFit) + " (" + LamarkUtil.format(percent) + "%)\n\n" + i.getAttribute("SCORES").toString());
         } else if (e.getSource() == timeAnalyze) {
             JOptionPane.showMessageDialog(frame, timeAnalyze(song.getSong()));
         } else if (e.getSource() == noteAnalyze) {
@@ -116,23 +116,23 @@ public class DisplayControl implements Runnable, ActionListener {
     public String displayAnalysis(ScoreAnalysis sa, Double fitness) {
         StringBuffer sb = new StringBuffer();
         sb.append("Fitness : ");
-        sb.append(Util.format(fitness));
+        sb.append(LamarkUtil.format(fitness));
         sb.append("\nScore size:");
         sb.append(sa.getAllNotes().size());
         sb.append("\nClosest Scale:");
         sb.append(sa.closestScaleFit());
         sb.append("\nPercent in Closest Scale:");
-        sb.append(Util.format(sa.percentInClosestScale()));
+        sb.append(LamarkUtil.format(sa.percentInClosestScale()));
         sb.append("\nClosest Signature:");
         sb.append(sa.closestTimeSignatureFit());
         sb.append("\nPercent in Closest Signature:");
-        sb.append(Util.format(sa.percentInClosestTimeSignature()));
+        sb.append(LamarkUtil.format(sa.percentInClosestTimeSignature()));
         sb.append("\nMedian Note:");
         sb.append(sa.getMedianNote());
         sb.append("\nMean Note:");
-        sb.append(Util.format(sa.getMeanNote()));
+        sb.append(LamarkUtil.format(sa.getMeanNote()));
         sb.append("\nNote Std Dev:");
-        sb.append(Util.format(sa.getNoteStandardDeviation()));
+        sb.append(LamarkUtil.format(sa.getNoteStandardDeviation()));
         sb.append("\nNote Direction Changes:");
         sb.append(sa.getNoteDirectionChanges());
         return sb.toString();
@@ -144,7 +144,7 @@ public class DisplayControl implements Runnable, ActionListener {
         TimeSignatureEnum[] sigs = TimeSignatureEnum.values();
         for (int i = 0; i < sigs.length; i++) {
             sb.append(sigs[i].name() + " EIGHTHS = ");
-            sb.append(Util.format(sigs[i].percentInTime(ScoreAnalysis.partToNoteList(s.getPart(0)))));
+            sb.append(LamarkUtil.format(sigs[i].percentInTime(ScoreAnalysis.partToNoteList(s.getPart(0)))));
             sb.append("\n");
         }
         return sb.toString();
@@ -156,7 +156,7 @@ public class DisplayControl implements Runnable, ActionListener {
         ScaleEnum[] scales = ScaleEnum.values();
         for (int i = 0; i < scales.length; i++) {
             sb.append(scales[i].name() + " = ");
-            sb.append(Util.format(scales[i].percentInScale(ScoreAnalysis.partToNoteList(s.getPart(0)))));
+            sb.append(LamarkUtil.format(scales[i].percentInScale(ScoreAnalysis.partToNoteList(s.getPart(0)))));
             sb.append("\n");
         }
         return sb.toString();

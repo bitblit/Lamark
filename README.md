@@ -55,9 +55,9 @@ of familiarity with the terrain. If you lack this, try one of these books:
 Parts of a GA
 -------------
 
-### Creators
+### Suppliers
 
-A _Creator_ is a class used to create new Individuals, typically randomly. How the creation
+A _Supplier_ is a class used to create new Individuals, typically randomly. How the creation
 is performed is problem dependant, and can range from very simple (e.g., pick a random number and use
 it as the genome) to the quite complex (select a 100-integer permutation and use it as the genome).
 

@@ -1,20 +1,22 @@
 /*
  * Created on Mar 29, 2005
  */
-package com.erigir.lamark.creator;
+package com.erigir.lamark.supplier;
 
 import com.erigir.lamark.AbstractLamarkComponent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.function.Supplier;
 
 /**
- * Creator that generates lists of integers, optionally bounded.
+ * Supplier that generates lists of integers, optionally bounded.
  *
  * @author cweiss
  * @since 03/2005
  */
-public class IntegerListCreator  extends AbstractLamarkComponent implements Supplier<List<Integer>> {
+public class IntegerListSupplier extends AbstractLamarkComponent implements Supplier<List<Integer>> {
 
     /**
      * Size of the string to generate (REQUIRED)*
@@ -24,14 +26,14 @@ public class IntegerListCreator  extends AbstractLamarkComponent implements Supp
     private Integer lowerBound;
     private Integer upperBound;
 
-    public IntegerListCreator(int size, Integer lowerBound, Integer upperBound,Random random) {
+    public IntegerListSupplier(int size, Integer lowerBound, Integer upperBound, Random random) {
         super(random);
         this.size = size;
         this.lowerBound = lowerBound;
         this.upperBound = upperBound;
     }
 
-    public IntegerListCreator(int size, Integer lowerBound, Integer upperBound) {
+    public IntegerListSupplier(int size, Integer lowerBound, Integer upperBound) {
         super();
         this.size = size;
         this.lowerBound = lowerBound;

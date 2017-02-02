@@ -3,7 +3,10 @@ package com.erigir.lamark;
 import com.erigir.lamark.selector.RouletteWheelSelector;
 import com.erigir.lamark.selector.Selector;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
@@ -15,7 +18,7 @@ public class LamarkBuilder<T> {
     private Random random;
 
     private Selector selector;
-    private Supplier<T> creator;
+    private Supplier<T> supplier;
     private ToDoubleFunction<T> fitnessFunction;
     private Function<List<T>,T> crossover;
     private Function<T,T> mutator;
@@ -42,7 +45,7 @@ public class LamarkBuilder<T> {
 
     public Lamark<T> build()
     {
-        Objects.requireNonNull(creator);
+        Objects.requireNonNull(supplier);
         Objects.requireNonNull(fitnessFunction);
         Objects.requireNonNull(crossover);
         Objects.requireNonNull(mutator);
@@ -57,7 +60,7 @@ public class LamarkBuilder<T> {
         Lamark<T> rval = new Lamark<>();
         rval.random = (random==null)?new Random():random;
         rval.maxGenerations = maxGenerations;
-        rval.creator = creator;
+        rval.supplier = supplier;
         rval.crossover = new InnerCrossover<>(crossover, crossoverProbability, rval.random);
         rval.mutator = new InnerMutator<>(mutator, mutationProbability, rval.random);
         rval.initialValues = initialValues;
@@ -70,6 +73,14 @@ public class LamarkBuilder<T> {
         rval.minimizeScore = minimizeScore;
         rval.numberOfParents = numberOfParents;
 
+        // Perform any self validation supplied
+        for (Object o: Arrays.asList(supplier, fitnessFunction, crossover,mutator, rval.selector))
+        {
+            if (SelfValidating.class.isAssignableFrom(o.getClass()))
+            {
+                ((SelfValidating)o).selfValidate();
+            }
+        }
 
         return rval;
     }
@@ -85,8 +96,8 @@ public class LamarkBuilder<T> {
         return this;
     }
 
-    public LamarkBuilder withCreator(final Supplier<T> creator) {
-        this.creator = creator;
+    public LamarkBuilder withSupplier(final Supplier<T> supplier) {
+        this.supplier = supplier;
         return this;
     }
 
@@ -184,8 +195,8 @@ public class LamarkBuilder<T> {
         return maxGenerations;
     }
 
-    public Supplier<T> getCreator() {
-        return creator;
+    public Supplier<T> getSupplier() {
+        return supplier;
     }
 
     public List<T> getInitialValues() {
