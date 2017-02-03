@@ -4,6 +4,7 @@ import com.erigir.lamark.Individual;
 import com.erigir.lamark.events.BetterIndividualFoundEvent;
 import com.erigir.lamark.events.LamarkEvent;
 import com.erigir.lamark.gui.GUIEventListener;
+import javafx.stage.Stage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,9 +23,9 @@ import java.awt.geom.Line2D;
  */
 public class CAGraphicalListener implements GUIEventListener {
     /**
-     * Handle to parent component for close messages *
+     * Handle to the parent stage *
      */
-    private Component parentComponent;
+    private Stage parentStage;
 
     /**
      * Handle to the frame this panel goes in *
@@ -38,10 +39,10 @@ public class CAGraphicalListener implements GUIEventListener {
 
 
     /**
-     * @see com.erigir.lamark.gui.GUIEventListener#setParentComponent(java.awt.Component)
+     * @see com.erigir.lamark.gui.GUIEventListener#setParentStage(Stage)
      */
-    public void setParentComponent(Component pComponent) {
-        parentComponent = pComponent;
+    public void setParentStage(Stage parentStage) {
+        parentStage = parentStage;
     }
 
 
@@ -51,7 +52,7 @@ public class CAGraphicalListener implements GUIEventListener {
      * @see com.erigir.lamark.events.LamarkEventListener#handleEvent(com.erigir.lamark.events.LamarkEvent)
      */
     public void handleEvent(LamarkEvent je) {
-        if ((je instanceof BetterIndividualFoundEvent) && null != parentComponent) {
+        if ((je instanceof BetterIndividualFoundEvent) && null != parentStage) {
             verifyFrame();
             BetterIndividualFoundEvent bif = (BetterIndividualFoundEvent) je;
             displayPanel.div = bif.getNewBest();

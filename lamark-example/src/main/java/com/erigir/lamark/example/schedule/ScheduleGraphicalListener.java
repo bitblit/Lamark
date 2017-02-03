@@ -4,6 +4,7 @@ import com.erigir.lamark.Individual;
 import com.erigir.lamark.events.BetterIndividualFoundEvent;
 import com.erigir.lamark.events.LamarkEvent;
 import com.erigir.lamark.gui.GUIEventListener;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,9 +20,9 @@ import java.awt.*;
 public class ScheduleGraphicalListener implements GUIEventListener {
     private static final Logger LOG = LoggerFactory.getLogger(ScheduleGraphicalListener.class);
     /**
-     * Handle to the creating window *
+     * Handle to the parent stage *
      */
-    private Component parentComponent;
+    private Stage parentStage;
 
     /**
      * Handle to the frame that the schedule is displayed in *
@@ -35,10 +36,10 @@ public class ScheduleGraphicalListener implements GUIEventListener {
 
 
     /**
-     * @see com.erigir.lamark.gui.GUIEventListener#setParentComponent(java.awt.Component)
+     * @see com.erigir.lamark.gui.GUIEventListener#setParentStage(Stage)
      */
-    public void setParentComponent(Component pComponent) {
-        parentComponent = pComponent;
+    public void setParentStage(Stage parentStage) {
+        parentStage = parentStage;
     }
 
     /**
@@ -47,8 +48,8 @@ public class ScheduleGraphicalListener implements GUIEventListener {
      * @see com.erigir.lamark.events.LamarkEventListener#handleEvent(com.erigir.lamark.events.LamarkEvent)
      */
     public void handleEvent(LamarkEvent je) {
-        if ((je instanceof BetterIndividualFoundEvent) && null != parentComponent) {
-            LOG.trace("Frame is {}" , parentComponent);
+        if ((je instanceof BetterIndividualFoundEvent) && null != parentStage) {
+            LOG.trace("Frame is {}" , parentStage);
             verifyFrame();
             BetterIndividualFoundEvent bif = (BetterIndividualFoundEvent) je;
             displayPanel.div = bif.getNewBest();

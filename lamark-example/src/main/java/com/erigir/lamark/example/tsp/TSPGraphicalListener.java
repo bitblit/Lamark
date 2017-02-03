@@ -5,6 +5,7 @@ import com.erigir.lamark.LamarkUtil;
 import com.erigir.lamark.events.BetterIndividualFoundEvent;
 import com.erigir.lamark.events.LamarkEvent;
 import com.erigir.lamark.gui.GUIEventListener;
+import javafx.stage.Stage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,9 +23,9 @@ import java.util.List;
  */
 public class TSPGraphicalListener implements GUIEventListener {
     /**
-     * Handle to the parent window *
+     * Handle to the parent stage *
      */
-    private Component parentComponent;
+    private Stage parentStage;
     /**
      * Handle to the containing frame *
      */
@@ -38,12 +39,11 @@ public class TSPGraphicalListener implements GUIEventListener {
      */
     private Individual current;
 
-
     /**
-     * @see com.erigir.lamark.gui.GUIEventListener#setParentComponent(java.awt.Component)
+     * @see com.erigir.lamark.gui.GUIEventListener#setParentStage(Stage)
      */
-    public void setParentComponent(Component pComponent) {
-        parentComponent = pComponent;
+    public void setParentStage(Stage parentStage) {
+        parentStage = parentStage;
     }
 
     /**
@@ -52,7 +52,7 @@ public class TSPGraphicalListener implements GUIEventListener {
      * @see com.erigir.lamark.events.LamarkEventListener#handleEvent(com.erigir.lamark.events.LamarkEvent)
      */
     public void handleEvent(LamarkEvent je) {
-        if ((je instanceof BetterIndividualFoundEvent) && (parentComponent != null)) {
+        if ((je instanceof BetterIndividualFoundEvent) && (parentStage != null)) {
             current = ((BetterIndividualFoundEvent) je).getNewBest();
             verifyFrame();
             List<?> perm = (List<?>) current.getGenome();
