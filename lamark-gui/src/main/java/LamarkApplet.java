@@ -1,4 +1,8 @@
 import com.erigir.lamark.gui.LamarkGui;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.Group;
+import javafx.scene.Scene;
 
 import javax.swing.*;
 
@@ -15,18 +19,46 @@ import javax.swing.*;
  * @since 11/07
  */
 public class LamarkApplet extends JApplet {
+    private Scene scene;
+    private Group root;
+
     /**
      * Wrapped gui object *
      */
     private LamarkGui gui = new LamarkGui(getParameter("initialLocation"), getParameter("initialSelection"));
 
-    /**
-     * Bootstraps the LamarkGUI, and if a resource was supplied, load it.
-     */
     @Override
-    public void init() {
-        super.init();
-        add(gui);
+    public final void init() { // This method is invoked when applet is loaded
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                initSwing();
+            }
+        });
+    }
+
+    private void initSwing() { // This method is invoked on Swing thread
+        final JFXPanel fxPanel = new JFXPanel();
+        add(fxPanel);
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                initFX(fxPanel);
+                initApplet();
+            }
+        });
+    }
+
+    private void initFX(JFXPanel fxPanel) { // This method is invoked on JavaFX thread
+        root = new Group();
+        scene = new Scene(root);
+        root.getChildren().add(gui);
+        fxPanel.setScene(scene);
+    }
+
+    public void initApplet() {
+        // Add custom initialization code here
     }
 
     /**

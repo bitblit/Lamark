@@ -1,6 +1,7 @@
 package com.erigir.lamark.gui;
 
 import com.erigir.lamark.events.LamarkEventListener;
+import javafx.stage.Stage;
 
 import java.awt.*;
 
@@ -22,5 +23,5 @@ public interface GUIEventListener extends LamarkEventListener {
      *
      * @param parent Component reference to the parent window
      */
-    void setParentComponent(Component parent);
+    void setParentStage(Stage parent);
 }

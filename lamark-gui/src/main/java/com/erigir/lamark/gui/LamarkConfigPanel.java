@@ -2,16 +2,16 @@ package com.erigir.lamark.gui;
 
 import com.erigir.lamark.LamarkBuilder;
 import com.erigir.lamark.LamarkBuilderSerializer;
-import com.erigir.lamark.selector.Selector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,9 +22,6 @@ import java.net.URLClassLoader;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.function.ToDoubleFunction;
 
 /**
  * A panel for holding and organizing the various properties controls for LamarkGUI.
@@ -35,7 +32,7 @@ import java.util.function.ToDoubleFunction;
  * @author cweiss
  * @since 10/2007
  */
-public class LamarkConfigPanel extends JPanel implements ActionListener {
+public class LamarkConfigPanel extends BorderPane {
     /**
      * Logging instance *
      */
@@ -86,149 +83,149 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     /**
      * Button/Label for supplier *
      */
-    private JButton supplierLabel = new JButton("Supplier");
+    private Button supplierLabel = new Button("Supplier");
     /**
      * Button/Label for crossover *
      */
-    private JButton crossoverLabel = new JButton("Crossover");
+    private Button crossoverLabel = new Button("Crossover");
     /**
      * Button/Label for fitness *
      */
-    private JButton fitnessLabel = new JButton("Fitness Function");
+    private Button fitnessLabel = new Button("Fitness Function");
     /**
      * Button/Label for mutator *
      */
-    private JButton mutatorLabel = new JButton("Mutator");
+    private Button mutatorLabel = new Button("Mutator");
     /**
      * Button/Label for selector *
      */
-    private JButton selectorLabel = new JButton("Selector");
+    private Button selectorLabel = new Button("Selector");
     /**
      * Button/Label for preloads *
      */
-    private JButton preloadButton = new JButton("Preloads...");
+    private Button preloadButton = new Button("Preloads...");
     /**
      * Button/Label for custom listeners *
      */
-    private JButton customListenerButton = new JButton("Custom Listeners...");
+    private Button customListenerButton = new Button("Custom Listeners...");
     /**
      * Label for upper elitism control *
      */
-    private JLabel upperElitismLabel = new JLabel("Upper Elitism (%)");
+    private Label upperElitismLabel = new Label("Upper Elitism (%)");
     /**
      * Label for lower elitism control *
      */
-    private JLabel lowerElitismLabel = new JLabel("Lower Elitism (%)");
+    private Label lowerElitismLabel = new Label("Lower Elitism (%)");
     /**
      * Label for max pop control *
      */
-    private JLabel maximumPopulationsLabel = new JLabel("Max. Populations (Blank for cont.)");
+    private Label maximumPopulationsLabel = new Label("Max. Populations (Blank for cont.)");
     /**
      * Label for pop size control *
      */
-    private JLabel populationSizeLabel = new JLabel("Population Size");
+    private Label populationSizeLabel = new Label("Population Size");
     /**
      * Label for crossover prob control *
      */
-    private JLabel crossoverProbabilityLabel = new JLabel("Crossover Prob (0-1)");
+    private Label crossoverProbabilityLabel = new Label("Crossover Prob (0-1)");
     /**
      * Label for mutation prob control *
      */
-    private JLabel mutationProbabilityLabel = new JLabel("Mutation Prob (0-1)");
+    private Label mutationProbabilityLabel = new Label("Mutation Prob (0-1)");
     /**
      * Label for target score control *
      */
-    private JLabel targetScoreLabel = new JLabel("Target Score (Blank for cont.)");
+    private Label targetScoreLabel = new Label("Target Score (Blank for cont.)");
     /**
      * Label for random seed control *
      */
-    private JLabel randomSeedLabel = new JLabel("Random Seed");
+    private Label randomSeedLabel = new Label("Random Seed");
 
     /**
      * Better individual listener enabler *
      */
-    private JCheckBox lBetterIndividualFound = new JCheckBox("Better Individual Found");
+    private CheckBox lBetterIndividualFound = new CheckBox("Better Individual Found");
     /**
      * Exception listener enabler *
      */
-    private JCheckBox lException = new JCheckBox("Exception");
+    private CheckBox lException = new CheckBox("Exception");
     /**
      * Last Population listener enabler *
      */
-    private JCheckBox lLastPopDone = new JCheckBox("Last Population Done");
+    private CheckBox lLastPopDone = new CheckBox("Last Population Done");
     /**
      * Abort listener enabler *
      */
-    private JCheckBox lAbort = new JCheckBox("Aborted");
+    private CheckBox lAbort = new CheckBox("Aborted");
     /**
      * Log listener enabler *
      */
-    private JCheckBox lLog = new JCheckBox("Log");
+    private CheckBox lLog = new CheckBox("Log");
     /**
      * Population Done listener enabler *
      */
-    private JCheckBox lPopulationComplete = new JCheckBox("Population Done");
+    private CheckBox lPopulationComplete = new CheckBox("Population Done");
     /**
      * Population Plan listener enabler *
      */
-    private JCheckBox lPopPlanDone = new JCheckBox("Population Plan Done");
+    private CheckBox lPopPlanDone = new CheckBox("Population Plan Done");
     /**
      * Uniform Population listener enabler *
      */
-    private JCheckBox lUniformPop = new JCheckBox("Uniform Population");
+    private CheckBox lUniformPop = new CheckBox("Uniform Population");
 
     /**
      * Combobox holding supplier name *
      */
-    private JComboBox supplier = new JComboBox();
+    private ComboBox supplier = new ComboBox();
     /**
      * Combobox holding crossover name *
      */
-    private JComboBox crossover = new JComboBox();
+    private ComboBox crossover = new ComboBox();
     /**
      * Combobox holding fitness name *
      */
-    private JComboBox fitness = new JComboBox();
+    private ComboBox fitness = new ComboBox();
     /**
      * Combobox holding mutator name *
      */
-    private JComboBox mutator = new JComboBox();
+    private ComboBox mutator = new ComboBox();
     /**
      * Combobox holding selector name *
      */
-    private JComboBox selector = new JComboBox();
+    private ComboBox selector = new ComboBox();
     /**
      * Edit box holding upper elitism *
      */
-    private JTextField upperElitism = new JTextField();
+    private TextField upperElitism = new TextField();
     /**
      * Edit box holding lower elitism *
      */
-    private JTextField lowerElitism = new JTextField();
+    private TextField lowerElitism = new TextField();
     /**
      * Edit box holding maximum populations *
      */
-    private JTextField maximumPopulations = new JTextField();
+    private TextField maximumPopulations = new TextField();
     /**
      * Edit box holding population size *
      */
-    private JTextField populationSize = new JTextField();
+    private TextField populationSize = new TextField();
     /**
      * Edit box holding crossover probability *
      */
-    private JTextField crossoverProbability = new JTextField();
+    private TextField crossoverProbability = new TextField();
     /**
      * Edit box holding mutation probability *
      */
-    private JTextField mutationProbability = new JTextField();
+    private TextField mutationProbability = new TextField();
     /**
      * Edit box holding target score *
      */
-    private JTextField targetScore = new JTextField();
+    private TextField targetScore = new TextField();
     /**
      * Edit box holding random seed *
      */
-    private JTextField randomSeed = new JTextField();
+    private TextField randomSeed = new TextField();
 
     /**
      * Default constructor.
@@ -239,10 +236,9 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     public LamarkConfigPanel(final String inConfigResource) {
         super();
 
-        setLayout(new BorderLayout());
-        add(classPanel(), BorderLayout.NORTH);
-        add(panel1(), BorderLayout.CENTER);
-        add(panel2(), BorderLayout.SOUTH);
+        setTop(classPanel());
+        setCenter(panel1());
+        setBottom(panel2());
 
         // Finally, initialize
         String configResource = (inConfigResource == null) ? DEFAULT_CONFIG_LOCATION : inConfigResource;
@@ -284,6 +280,8 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * @see javax.swing.JComponent#setEnabled(boolean)
      */
     public void setEnabled(boolean enable) {
+        this.setDisable(!enable);
+        /*
         supplierLabel.setEnabled(enable);
         crossoverLabel.setEnabled(enable);
         fitnessLabel.setEnabled(enable);
@@ -315,6 +313,7 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         mutationProbability.setEnabled(enable);
         targetScore.setEnabled(enable);
         randomSeed.setEnabled(enable);
+        */
     }
 
     public void reset() {
@@ -401,25 +400,37 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     /**
      * Lays out and returns the first panel
      *
-     * @return JPanel containing the first row.
+     * @return Pane containing the first row.
      */
-    private JPanel panel1() {
-        JPanel rval = new JPanel();
-        rval.setLayout(new GridLayout(0, 6));
-        rval.add(populationSizeLabel);
-        rval.add(crossoverProbabilityLabel);
-        rval.add(mutationProbabilityLabel);
-        rval.add(maximumPopulationsLabel);
-        rval.add(targetScoreLabel);
-        rval.add(customListenerButton);
-        rval.add(populationSize);
-        rval.add(crossoverProbability);
-        rval.add(mutationProbability);
-        rval.add(maximumPopulations);
-        rval.add(targetScore);
-        rval.add(preloadButton);
-        customListenerButton.addActionListener(this);
-        preloadButton.addActionListener(this);
+    private Pane panel1() {
+        Pane rval = new Pane();
+        rval.getChildren().add(populationSizeLabel);
+        rval.getChildren().add(crossoverProbabilityLabel);
+        rval.getChildren().add(mutationProbabilityLabel);
+        rval.getChildren().add(maximumPopulationsLabel);
+        rval.getChildren().add(targetScoreLabel);
+        rval.getChildren().add(customListenerButton);
+        rval.getChildren().add(populationSize);
+        rval.getChildren().add(crossoverProbability);
+        rval.getChildren().add(mutationProbability);
+        rval.getChildren().add(maximumPopulations);
+        rval.getChildren().add(targetScore);
+        rval.getChildren().add(preloadButton);
+
+        customListenerButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                customListener = editStringList(customListener, customListenerButton.getText());
+            }
+        });
+
+        preloadButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                 preloads = editStringList(preloads, preloadButton.getText());
+            }
+        });
+
         return rval;
 
     }
@@ -427,23 +438,22 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     /**
      * Lays out and returns the second panel.
      *
-     * @return JPanel containing the second row.
+     * @return Pane containing the second row.
      */
-    private JPanel panel2() {
-        JPanel rval = new JPanel();
-        rval.setLayout(new BorderLayout());
+    private BorderPane panel2() {
+        BorderPane rval = new BorderPane();
 
-        JPanel north = new JPanel();
-        north.setLayout(new GridLayout(0, 4));
-        north.add(upperElitismLabel);
-        north.add(lowerElitismLabel);
-        north.add(randomSeedLabel);
-        north.add(upperElitism);
-        north.add(lowerElitism);
-        north.add(randomSeed);
+        Pane north = new Pane();
+        //north.setLayout(new GridLayout(0, 4));
+        north.getChildren().add(upperElitismLabel);
+        north.getChildren().add(lowerElitismLabel);
+        north.getChildren().add(randomSeedLabel);
+        north.getChildren().add(upperElitism);
+        north.getChildren().add(lowerElitism);
+        north.getChildren().add(randomSeed);
 
-        JPanel south = new JPanel();
-        south.setBorder(BorderFactory.createTitledBorder("Listeners"));
+        Pane south = new Pane();
+        south.getChildren().add(new Label("Listeners"));
 
         lBetterIndividualFound.setSelected(true);
         lException.setSelected(true);
@@ -455,18 +465,18 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
         lPopPlanDone.setSelected(false);
         lUniformPop.setSelected(false);
 
-        south.add(lBetterIndividualFound);
-        south.add(lException);
-        south.add(lLastPopDone);
-        south.add(lAbort);
+        south.getChildren().add(lBetterIndividualFound);
+        south.getChildren().add(lException);
+        south.getChildren().add(lLastPopDone);
+        south.getChildren().add(lAbort);
 
-        south.add(lLog);
-        south.add(lPopulationComplete);
-        south.add(lPopPlanDone);
-        south.add(lUniformPop);
+        south.getChildren().add(lLog);
+        south.getChildren().add(lPopulationComplete);
+        south.getChildren().add(lPopPlanDone);
+        south.getChildren().add(lUniformPop);
 
-        rval.add(north, BorderLayout.NORTH);
-        rval.add(south, BorderLayout.SOUTH);
+        rval.setTop(north);
+        rval.setBottom(south);
 
         return rval;
     }
@@ -474,53 +484,60 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
     /**
      * Builds and lays out the component class panel.
      *
-     * @return JPanel containing the component class edit boxes.
+     * @return Pane containing the component class edit boxes.
      */
-    private JPanel classPanel() {
-        JPanel rval = new JPanel();
-        rval.setBorder(BorderFactory.createTitledBorder("Classes"));
-        rval.setLayout(new GridLayout(0, 5));
-        rval.add(supplierLabel);
-        rval.add(crossoverLabel);
-        rval.add(fitnessLabel);
-        rval.add(mutatorLabel);
-        rval.add(selectorLabel);
-        rval.add(supplier);
-        rval.add(crossover);
-        rval.add(fitness);
-        rval.add(mutator);
-        rval.add(selector);
+    private Pane classPanel() {
+        Pane rval = new Pane();
+        rval.getChildren().add(new Label("Classes"));
+        rval.getChildren().add(supplierLabel);
+        rval.getChildren().add(crossoverLabel);
+        rval.getChildren().add(fitnessLabel);
+        rval.getChildren().add(mutatorLabel);
+        rval.getChildren().add(selectorLabel);
+        rval.getChildren().add(supplier);
+        rval.getChildren().add(crossover);
+        rval.getChildren().add(fitness);
+        rval.getChildren().add(mutator);
+        rval.getChildren().add(selector);
 
-        supplierLabel.addActionListener(this);
-        crossoverLabel.addActionListener(this);
-        fitnessLabel.addActionListener(this);
-        mutatorLabel.addActionListener(this);
-        selectorLabel.addActionListener(this);
+        supplierLabel.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                editProperties(supplierProperties, supplierLabel.getText());
+            }
+        });
+
+        crossoverLabel.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                editProperties(crossoverProperties, crossoverLabel.getText());
+            }
+        });
+
+        fitnessLabel.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                editProperties(fitnessProperties, fitnessLabel.getText());
+            }
+        });
+
+        mutatorLabel.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                editProperties(mutatorProperties, mutatorLabel.getText());
+            }
+        });
+
+        selectorLabel.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                editProperties(selectorProperties, selectorLabel.getText());
+            }
+        });
 
         return rval;
     }
 
-    /**
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    public void actionPerformed(ActionEvent arg0) {
-        JButton src = (JButton) arg0.getSource();
-        if (src == supplierLabel) {
-            supplierProperties = editProperties(supplierProperties, src.getText());
-        } else if (src == crossoverLabel) {
-            crossoverProperties = editProperties(crossoverProperties, src.getText());
-        } else if (src == fitnessLabel) {
-            fitnessProperties = editProperties(fitnessProperties, src.getText());
-        } else if (src == mutatorLabel) {
-            mutatorProperties = editProperties(mutatorProperties, src.getText());
-        } else if (src == selectorLabel) {
-            selectorProperties = editProperties(selectorProperties, src.getText());
-        } else if (src == preloadButton) {
-            preloads = editStringList(preloads, src.getText());
-        } else if (src == customListenerButton) {
-            customListener = editStringList(customListener, src.getText());
-        }
-    }
 
     /**
      * Opens a dialog box to edit a string list
@@ -553,23 +570,23 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * All properties whos key starts with the given prefix will be loaded as
      * options into the combo box.
      *
-     * @param box     JComboBox to load from the properties object
+     * @param box     ComboBox to load from the properties object
      * @param classes List of class objects to load from
      * @param def     Class to default select
      */
-    private void setComboBoxValues(JComboBox box, List<? extends Class> classes, Object def) {
+    private void setComboBoxValues(ComboBox box, List<? extends Class> classes, Object def) {
         box.setEditable(true);
 
-        box.removeAllItems();
+        box.getItems().retainAll(Collections.EMPTY_LIST);
         if (classes != null) {
             for (Class c : classes) {
-                box.addItem(formatClassName(c));
+                box.getItems().add(formatClassName(c));
             }
         } else if (def != null) {
-            box.addItem(formatClassName(def.getClass()));
+            box.getItems().add(formatClassName(def.getClass()));
         }
 
-        box.setSelectedItem(formatClassName(def.getClass()));
+        box.getSelectionModel().select(formatClassName(def.getClass()));
     }
 
     /**
@@ -676,13 +693,13 @@ public class LamarkConfigPanel extends JPanel implements ActionListener {
      * @param cb ComboBox to read classname from
      * @return String containing the class name
      */
-    private Class classFromCombo(JComboBox cb) {
+    private Class classFromCombo(ComboBox cb) {
         // First, try reading it as a class name.  If it works, use that
         try {
-            String test = (String) cb.getSelectedItem();
+            String test = (String) cb.getSelectionModel().getSelectedItem();
             return Thread.currentThread().getContextClassLoader().loadClass(test);
         } catch (Exception e) {
-            String start = (String) cb.getSelectedItem();
+            String start = (String) cb.getSelectionModel().getSelectedItem();
 
             int pi = start.indexOf("[");
             String classN = start.substring(0, pi);

@@ -6,19 +6,24 @@ package com.erigir.lamark.gui;
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.LamarkUtil;
 import com.erigir.lamark.events.*;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -38,7 +43,7 @@ import java.util.concurrent.Future;
  * @since 02-2005
  */
 
-public class LamarkGui extends JPanel implements LamarkEventListener, ActionListener {
+public class LamarkGui extends Pane {
     private static final Logger LOG = LoggerFactory.getLogger(LamarkGui.class);
     /**
      * String containing the label of the open url button *
@@ -47,59 +52,59 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
     /**
      * Handle to the central panel *
      */
-    private JPanel mainPanel;
+    private BorderPane mainPanel;
     /**
      * Button for starting the GA *
      */
-    private JButton start;
+    private Button start;
     /**
      * Button for cancelling the GA *
      */
-    private JButton cancel;
+    private Button cancel;
     /**
      * Button for showing the current properties *
      */
-    private JButton show;
+    private Button show;
     /**
      * Button for opening a URL to load *
      */
-    private JButton openUrl;
+    private Button openUrl;
     /**
      * Button for resetting the instance to initial state *
      */
-    private JButton reset;
+    private Button reset;
     /**
      * Output area for showing any messages *
      */
-    private JTextArea output;
+    private TextArea output;
     /**
      * Label holding current running time *
      */
-    private JLabel currentRuntime;
+    private Label currentRuntime;
     /**
      * Label showing estimated time remaining *
      */
-    private JLabel timeRemaining;
+    private Label timeRemaining;
     /**
      * Label showing current generation number *
      */
-    private JLabel generationNumber;
+    private Label generationNumber;
     /**
      * Label showing best score to date *
      */
-    private JLabel bestScore;
+    private Label bestScore;
     /**
      * Label showing the current classloader *
      */
-    private JLabel classLoaderLabel;
+    private Label classLoaderLabel;
     /**
      * Label showing the amount of total memory taken from OS *
      */
-    private JLabel totalMemory;
+    private Label totalMemory;
     /**
      * Label showing the amount of free memory in java currently *
      */
-    private JLabel freeMemory;
+    private Label freeMemory;
     /**
      * Handle to the current instnace of Lamark, if any *
      */
@@ -117,65 +122,147 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
      * @param initialSelection String containing the initial item to select
      */
     public LamarkGui(String initialLocation, String initialSelection) {
-
         configPanel = new LamarkConfigPanel(initialLocation);
+        // Build mainpanel
 
-        setLayout(new BorderLayout());
+        ToolBar toolbar = new ToolBar();
+        start = new Button("Start",icon("start.png"));
+        start.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                {
+                    output.setText("Starting new Lamark instance...\n\n");
 
-        JToolBar toolbar = new JToolBar();
-        start = new JButton(icon("start.png"));
-        start.addActionListener(this);
-        cancel = new JButton(icon("stop.png"));
-        cancel.setEnabled(false);
-        cancel.addActionListener(this);
-        show = new JButton(icon("show.png"));
-        show.setEnabled(true);
-        show.addActionListener(this);
-        reset = new JButton(icon("new.png"));
-        reset.setEnabled(true);
-        reset.addActionListener(this);
-        openUrl = new JButton(icon("open.png"));
-        openUrl.setEnabled(true);
-        openUrl.addActionListener(this);
+                    // First, generate a new currentRunner
+                    currentRunner = configPanel.getBuilder().build();
 
-        currentRuntime = new JLabel("Runtime: n/a");
-        timeRemaining = new JLabel("Remaining: n/a");
-        generationNumber = new JLabel("Generation: n/a");
-        bestScore = new JLabel("Best: n/a");
-        classLoaderLabel = new JLabel("Classloader: default");
+                    // Add this as a generic listener for timers
+                    currentRunner.addListener(new OutputListener(output));
 
-        totalMemory = new JLabel("");
-        freeMemory = new JLabel("");
+                    // Add any defined listeners
+                    OutputListener ol = new OutputListener(output);
+                    Set<Class> outputListenerClasses = new HashSet<>();
+                    if (configPanel.listenAbort()) {
+                        outputListenerClasses.add(AbortedEvent.class);
+                    }
+                    if (configPanel.listenBetterIndividualFound()) {
+                        outputListenerClasses.add(BetterIndividualFoundEvent.class);
+                    }
+                    if (configPanel.listenException()) {
+                        outputListenerClasses.add(ExceptionEvent.class);
+                    }
+                    if (configPanel.listenLastPopDone()) {
+                        outputListenerClasses.add(LastPopulationCompleteEvent.class);
+                    }
+                    if (configPanel.listenPopulationComplete()) {
+                        outputListenerClasses.add(PopulationCompleteEvent.class);
+                    }
+                    if (configPanel.listenUniformPop()) {
+                        outputListenerClasses.add(UniformPopulationEvent.class);
+                    }
+                    currentRunner.addListener(ol,outputListenerClasses);
+
+                    output.setText("");
+                    start.setDisable(true);
+                    cancel.setDisable(false);
+                    reset.setDisable(true);
+                    openUrl.setDisable(true);
+                    show.setDisable(true);
+
+                    configPanel.setEnabled(false);
+                    Future f = Executors.newSingleThreadExecutor().submit(currentRunner);
+
+                    LOG.info("got : {}",f);
+                }
+            }
+        });
+        start.setDisable(false);
+
+        cancel = new Button("Stop",icon("stop.png"));
+        cancel.setDisable(true);
+        cancel.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Confirm Cancel");
+                alert.setHeaderText("Confirm Cancel");
+                alert.setContentText("Are you sure you want to stop the algorithm?");
+
+                Optional<ButtonType> result = alert.showAndWait();
+
+                if (result.get() == ButtonType.OK){
+                    currentRunner.stop();
+                    start.setDisable(false);
+                    cancel.setDisable(true);
+                    reset.setDisable(false);
+                    openUrl.setDisable(false);
+                    show.setDisable(false);
+                    configPanel.setEnabled(true);
+                }
+            }
+        });
+
+        show = new Button("Show",icon("show.png"));
+        show.setDisable(false);
+        show.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                output.setText(configPanel.toGUIConfigString());
+            }
+        });
+
+        reset = new Button("New",icon("new.png"));
+        reset.setDisable(false);
+        reset.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                resetToNew();
+            }
+        });
+
+        openUrl = new Button("Open",icon("open.png"));
+        openUrl.setDisable(false);
+        openUrl.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                openUrlDialog();
+            }
+        });
+
+        currentRuntime = new Label("Runtime: n/a");
+        timeRemaining = new Label("Remaining: n/a");
+        generationNumber = new Label("Generation: n/a");
+        bestScore = new Label("Best: n/a");
+        classLoaderLabel = new Label("Classloader: default");
+
+        totalMemory = new Label("");
+        freeMemory = new Label("");
         updateMemoryLabels();
 
-        toolbar.add(start);
-        toolbar.add(cancel);
-        toolbar.add(show);
-        toolbar.setFloatable(false);
+        toolbar.getItems().add(start);
+        toolbar.getItems().add(cancel);
+        toolbar.getItems().add(show);
 
-        toolbar.addSeparator();
-        toolbar.add(generationNumber);
-        toolbar.addSeparator();
-        toolbar.add(bestScore);
-        toolbar.addSeparator();
-        toolbar.add(currentRuntime);
-        toolbar.addSeparator();
-        toolbar.add(timeRemaining);
-        toolbar.addSeparator();
-        toolbar.add(totalMemory);
-        toolbar.addSeparator();
-        toolbar.add(freeMemory);
-        toolbar.addSeparator();
-        toolbar.add(classLoaderLabel);
-        toolbar.setFloatable(false);
+        toolbar.getItems().add(new Separator());
+        toolbar.getItems().add(generationNumber);
+        toolbar.getItems().add(new Separator());
+        toolbar.getItems().add(bestScore);
+        toolbar.getItems().add(new Separator());
+        toolbar.getItems().add(currentRuntime);
+        toolbar.getItems().add(new Separator());
+        toolbar.getItems().add(timeRemaining);
+        toolbar.getItems().add(new Separator());
+        toolbar.getItems().add(totalMemory);
+        toolbar.getItems().add(new Separator());
+        toolbar.getItems().add(freeMemory);
+        toolbar.getItems().add(new Separator());
+        toolbar.getItems().add(classLoaderLabel);
+        //TODO : toolbar.setFloatable(false);
 
-        JPanel toolPanel = new JPanel();
-        toolPanel.setLayout(new GridLayout(1, 8));
-        toolPanel.add(toolbar);
+        mainPanel.setTop(toolbar);
+        mainPanel.setCenter(getMainPanel());
 
-        add(toolPanel, BorderLayout.NORTH);
-        add(getMainPanel(), BorderLayout.CENTER);
-
+        this.getChildren().add(mainPanel);
     }
 
     /**
@@ -184,9 +271,9 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
      * @param iconFile String containing name of the file
      * @return ImageIcon for use on buttons
      */
-    private ImageIcon icon(String iconFile) {
+    private ImageView icon(String iconFile) {
         try {
-            return new ImageIcon(ImageIO.read(getClass().getResourceAsStream(iconFile)));
+            return new ImageView(new Image(getClass().getResourceAsStream(iconFile)));
         } catch (Exception e) {
             throw new IllegalStateException("Unable to load icon " + iconFile + " :" + e);
         }
@@ -213,89 +300,19 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
     }
 
     /**
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == start) {
-            output.setText("Starting new Lamark instance...\n\n");
-
-                // First, generate a new currentRunner
-                currentRunner = configPanel.getBuilder().build();
-
-                // Add this as a generic listener for timers
-                currentRunner.addListener(this);
-
-                // Add any defined listeners
-                OutputListener ol = new OutputListener(output);
-                Set<Class> outputListenerClasses = new HashSet<>();
-                if (configPanel.listenAbort()) {
-                    outputListenerClasses.add(AbortedEvent.class);
-                }
-                if (configPanel.listenBetterIndividualFound()) {
-                    outputListenerClasses.add(BetterIndividualFoundEvent.class);
-                }
-                if (configPanel.listenException()) {
-                    outputListenerClasses.add(ExceptionEvent.class);
-                }
-                if (configPanel.listenLastPopDone()) {
-                    outputListenerClasses.add(LastPopulationCompleteEvent.class);
-                }
-                if (configPanel.listenPopulationComplete()) {
-                    outputListenerClasses.add(PopulationCompleteEvent.class);
-                }
-                if (configPanel.listenUniformPop()) {
-                    outputListenerClasses.add(UniformPopulationEvent.class);
-                }
-                currentRunner.addListener(ol,outputListenerClasses);
-
-
-                output.setText("");
-                start.setEnabled(false);
-                cancel.setEnabled(true);
-                reset.setEnabled(false);
-                openUrl.setEnabled(false);
-                show.setEnabled(false);
-                configPanel.setEnabled(false);
-                Future f = Executors.newSingleThreadExecutor().submit(currentRunner);
-
-            LOG.info("got : {}",f);
-
-        } else if (e.getSource() == show) {
-            output.setText(configPanel.toGUIConfigString());
-
-
-        } else if (e.getSource() == cancel) {
-            if (JOptionPane.showConfirmDialog(this,
-                    "Are you sure you want to stop the algorithm?",
-                    "Confirm Cancel", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                currentRunner.stop();
-                start.setEnabled(true);
-                cancel.setEnabled(false);
-                reset.setEnabled(true);
-                openUrl.setEnabled(true);
-                show.setEnabled(true);
-                configPanel.setEnabled(true);
-            }
-        } else if (e.getSource() == openUrl) {
-            openUrlDialog();
-        } else if (e.getSource() == reset) {
-            resetToNew();
-        }
-    }
-
-    /**
      * Opens a dialog to type in a URL, then loads Lamark from the URL if possible.
      */
     public void openUrlDialog() {
-        String url = (String) JOptionPane.showInputDialog(
-                this,
-                "Enter a url to a config file (json file) or jar file",
-                OPEN_REMOTE,
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                null,
-                null);
-        configPanel.loadFromLocation(url);
+        TextInputDialog dialog = new TextInputDialog("");
+        dialog.setTitle("Load configuration from URL");
+        dialog.setHeaderText(OPEN_REMOTE);
+        dialog.setContentText("Enter a url to a config file (json file) or jar file:");
+
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent())
+        {
+            configPanel.loadFromLocation(result.get());
+        }
     }
 
     public String configJSON() {
@@ -306,29 +323,28 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
     /**
      * Builds the main panel of the gui.
      *
-     * @return JPanel containing the main controls
+     * @return Pane containing the main controls
      */
-    private JPanel getMainPanel() {
+    private Pane getMainPanel() {
         if (mainPanel == null) {
-            mainPanel = new JPanel(new BorderLayout());
-            JPanel textPane = new JPanel(new BorderLayout());
-
-            output = new JTextArea();
-            output.setRows(20);
-            output.setColumns(80);
-            JScrollPane outputScrollPane = new JScrollPane(output,
-                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            mainPanel = new BorderPane();
+            
+            output = new TextArea();
+            output.setPrefRowCount(20);
+            output.setPrefColumnCount(80);
+            //JScrollPane outputScrollPane = new JScrollPane(output,
+            //        JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+             //       JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
             output.setEditable(false);
 
-            textPane.add(outputScrollPane, BorderLayout.CENTER);
+            //textPane.add(outputScrollPane, BorderLayout.CENTER);
             output.setText("Lamark\nGraphical User Interface\nVersion " + LamarkUtil.getVersion() + "\n");
 
-            mainPanel.add(configPanel, BorderLayout.NORTH);
-            mainPanel.add(textPane, BorderLayout.CENTER);
+            mainPanel.setTop(configPanel);
+            mainPanel.setCenter(output);
             /**
              TODO: Add stats panel when its built
-             mainPanel.add(getStatsPanel(),BorderLayout.SOUTH);
+             mainPanel.setBottom(getStatsPanel(),BorderLayout.SOUTH);
              */
 
         }
@@ -341,11 +357,11 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
     public void abortIfRunning() {
         if (currentRunner != null && currentRunner.isRunning()) {
             currentRunner.stop();
-            start.setEnabled(true);
-            cancel.setEnabled(false);
-            reset.setEnabled(true);
-            openUrl.setEnabled(true);
-            show.setEnabled(true);
+            start.setDisable(false);
+            cancel.setDisable(true);
+            reset.setDisable(false);
+            openUrl.setDisable(false);
+            show.setDisable(false);
             configPanel.setEnabled(true);
         }
     }
@@ -374,7 +390,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
      */
     public void appendOutput(Object o) {
         if (o != null) {
-            output.append(o.toString());
+            output.appendText(o.toString());
         }
     }
 
@@ -385,15 +401,15 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
      */
     public void prependOutput(Object o) {
         if (o != null) {
-            output.insert(o.toString(), 0);
+            output.insertText(0,o.toString());
         }
     }
     
     /*
-    private JPanel getStatsPanel()
+    private Pane getStatsPanel()
     {
-        JPanel rval = new JPanel();
-        rval.add(new JLabel("TODO: Statistics Panel Will Go Here"));
+        Pane rval = new Pane();
+        rval.add(new Label("TODO: Statistics Panel Will Go Here"));
         return rval;
     }
     */
@@ -407,20 +423,20 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
         if (BetterIndividualFoundEvent.class.isAssignableFrom(je.getClass())) {
             bestScore.setText("Best: " + LamarkUtil.format(((BetterIndividualFoundEvent) je).getNewBest().getFitness()));
         } else if (LastPopulationCompleteEvent.class.isAssignableFrom(je.getClass())) {
-            start.setEnabled(true);
-            cancel.setEnabled(false);
-            reset.setEnabled(true);
-            openUrl.setEnabled(true);
-            show.setEnabled(true);
+            start.setDisable(false);
+            cancel.setDisable(true);
+            reset.setDisable(false);
+            openUrl.setDisable(false);
+            show.setDisable(false);
             configPanel.setEnabled(true);
         } else if (PopulationCompleteEvent.class.isAssignableFrom(je.getClass())) {
             generationNumber.setText("Generation: " + ((PopulationCompleteEvent) je).getGenerationNumber());
         } else if (ExceptionEvent.class.isAssignableFrom(je.getClass())) {
-            start.setEnabled(true);
-            cancel.setEnabled(false);
-            reset.setEnabled(true);
-            openUrl.setEnabled(true);
-            show.setEnabled(true);
+            start.setDisable(false);
+            cancel.setDisable(true);
+            reset.setDisable(false);
+            openUrl.setDisable(false);
+            show.setDisable(false);
             configPanel.setEnabled(true);
         }
 
@@ -465,7 +481,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
         /**
          * Handle to the output area *
          */
-        private JTextArea output;
+        private TextArea output;
 
 
         /**
@@ -473,7 +489,7 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
          *
          * @param pOutput JTextArea output pane
          */
-        public OutputListener(JTextArea pOutput) {
+        public OutputListener(TextArea pOutput) {
             super();
             output = pOutput;
         }
@@ -489,11 +505,11 @@ public class LamarkGui extends JPanel implements LamarkEventListener, ActionList
                 StringWriter sw = new StringWriter();
                 t.printStackTrace(new PrintWriter(sw));
                 String msg = "\nAn error occurred while attempting to run the algorithm:\n\n" + t + "\n\n" + sw.toString() + "\n";
-                output.insert(msg, 0);
-                start.setEnabled(true);
-                cancel.setEnabled(false);
+                output.insertText(0, msg);
+                start.setDisable(false);
+                cancel.setDisable(true);
             } else {
-                output.insert(je.toString() + " \n\n", 0);
+                output.insertText(0,je.toString() + " \n\n");
             }
         }
     }
