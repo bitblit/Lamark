@@ -6,15 +6,14 @@ package com.erigir.lamark.gui;
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.LamarkUtil;
 import com.erigir.lamark.events.*;
+import com.sun.javafx.scene.control.behavior.TextAreaBehavior;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
-import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,12 +42,12 @@ import java.util.concurrent.Future;
  * @since 02-2005
  */
 
-public class LamarkGui extends Pane {
-    private static final Logger LOG = LoggerFactory.getLogger(LamarkGui.class);
+public class LamarkGui extends BorderPane {
     /**
      * String containing the label of the open url button *
      */
     public static final String OPEN_REMOTE = "Open URL...";
+    private static final Logger LOG = LoggerFactory.getLogger(LamarkGui.class);
     /**
      * Handle to the central panel *
      */
@@ -118,15 +117,16 @@ public class LamarkGui extends Pane {
     /**
      * Default constructor.
      * Lays out all the controls.
-     * @param initialLocation String containing the initial location to load
+     *
+     * @param initialLocation  String containing the initial location to load
      * @param initialSelection String containing the initial item to select
      */
     public LamarkGui(String initialLocation, String initialSelection) {
         configPanel = new LamarkConfigPanel(initialLocation);
-        // Build mainpanel
+        mainPanel = buildMainPanel();
 
         ToolBar toolbar = new ToolBar();
-        start = new Button("Start",icon("start.png"));
+        start = new Button("Start", icon("start.png"));
         start.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -138,6 +138,8 @@ public class LamarkGui extends Pane {
 
                     // Add this as a generic listener for timers
                     currentRunner.addListener(new OutputListener(output));
+                    currentRunner.addListener(new ButtonUpdateListener());
+
 
                     // Add any defined listeners
                     OutputListener ol = new OutputListener(output);
@@ -160,7 +162,7 @@ public class LamarkGui extends Pane {
                     if (configPanel.listenUniformPop()) {
                         outputListenerClasses.add(UniformPopulationEvent.class);
                     }
-                    currentRunner.addListener(ol,outputListenerClasses);
+                    currentRunner.addListener(ol, outputListenerClasses);
 
                     output.setText("");
                     start.setDisable(true);
@@ -172,13 +174,13 @@ public class LamarkGui extends Pane {
                     configPanel.setEnabled(false);
                     Future f = Executors.newSingleThreadExecutor().submit(currentRunner);
 
-                    LOG.info("got : {}",f);
+                    LOG.info("got : {}", f);
                 }
             }
         });
         start.setDisable(false);
 
-        cancel = new Button("Stop",icon("stop.png"));
+        cancel = new Button("Stop", icon("stop.png"));
         cancel.setDisable(true);
         cancel.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -190,7 +192,7 @@ public class LamarkGui extends Pane {
 
                 Optional<ButtonType> result = alert.showAndWait();
 
-                if (result.get() == ButtonType.OK){
+                if (result.get() == ButtonType.OK) {
                     currentRunner.stop();
                     start.setDisable(false);
                     cancel.setDisable(true);
@@ -202,7 +204,7 @@ public class LamarkGui extends Pane {
             }
         });
 
-        show = new Button("Show",icon("show.png"));
+        show = new Button("Show", icon("show.png"));
         show.setDisable(false);
         show.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -211,7 +213,7 @@ public class LamarkGui extends Pane {
             }
         });
 
-        reset = new Button("New",icon("new.png"));
+        reset = new Button("New", icon("new.png"));
         reset.setDisable(false);
         reset.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -220,7 +222,7 @@ public class LamarkGui extends Pane {
             }
         });
 
-        openUrl = new Button("Open",icon("open.png"));
+        openUrl = new Button("Open", icon("open.png"));
         openUrl.setDisable(false);
         openUrl.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -259,10 +261,8 @@ public class LamarkGui extends Pane {
         toolbar.getItems().add(classLoaderLabel);
         //TODO : toolbar.setFloatable(false);
 
-        mainPanel.setTop(toolbar);
-        mainPanel.setCenter(getMainPanel());
-
-        this.getChildren().add(mainPanel);
+        this.setTop(toolbar);
+        this.setCenter(mainPanel);
     }
 
     /**
@@ -304,13 +304,12 @@ public class LamarkGui extends Pane {
      */
     public void openUrlDialog() {
         TextInputDialog dialog = new TextInputDialog("");
-        dialog.setTitle("Load configuration from URL");
-        dialog.setHeaderText(OPEN_REMOTE);
-        dialog.setContentText("Enter a url to a config file (json file) or jar file:");
+        dialog.setTitle(OPEN_REMOTE);
+        dialog.setHeaderText("Enter a url to a config file (json file) or jar file");
+        dialog.setContentText("URL:");
 
         Optional<String> result = dialog.showAndWait();
-        if (result.isPresent())
-        {
+        if (result.isPresent()) {
             configPanel.loadFromLocation(result.get());
         }
     }
@@ -325,30 +324,28 @@ public class LamarkGui extends Pane {
      *
      * @return Pane containing the main controls
      */
-    private Pane getMainPanel() {
-        if (mainPanel == null) {
-            mainPanel = new BorderPane();
-            
-            output = new TextArea();
-            output.setPrefRowCount(20);
-            output.setPrefColumnCount(80);
-            //JScrollPane outputScrollPane = new JScrollPane(output,
-            //        JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-             //       JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            output.setEditable(false);
+    private BorderPane buildMainPanel() {
+        BorderPane rval = new BorderPane();
 
-            //textPane.add(outputScrollPane, BorderLayout.CENTER);
-            output.setText("Lamark\nGraphical User Interface\nVersion " + LamarkUtil.getVersion() + "\n");
+        output = new TextArea("Lamark\nGraphical User Interface\nVersion " + LamarkUtil.getVersion() + "\n");
+        output.setPrefRowCount(20);
+        output.setPrefColumnCount(80);
+        output.setWrapText(true);
+        output.setEditable(false);
 
-            mainPanel.setTop(configPanel);
-            mainPanel.setCenter(output);
-            /**
-             TODO: Add stats panel when its built
-             mainPanel.setBottom(getStatsPanel(),BorderLayout.SOUTH);
-             */
+        ScrollPane outputScrollPane = new ScrollPane();
+        outputScrollPane.setContent(output);
+        outputScrollPane.setFitToWidth(true);
+        //outputScrollPane.setFitToHeight(true);
 
-        }
-        return mainPanel;
+        rval.setTop(configPanel);
+        rval.setCenter(outputScrollPane);
+        /**
+         TODO: Add stats panel when its built
+         mainPanel.setBottom(getStatsPanel(),BorderLayout.SOUTH);
+         */
+
+        return rval;
     }
 
     /**
@@ -401,7 +398,7 @@ public class LamarkGui extends Pane {
      */
     public void prependOutput(Object o) {
         if (o != null) {
-            output.insertText(0,o.toString());
+            output.insertText(0, o.toString());
         }
     }
     
@@ -413,40 +410,6 @@ public class LamarkGui extends Pane {
         return rval;
     }
     */
-
-    /**
-     * This handleEvent updates the toolbar, not the output pane, which is handled by the custom handler below.
-     *
-     * @see com.erigir.lamark.events.LamarkEventListener#handleEvent(com.erigir.lamark.events.LamarkEvent)
-     */
-    public void handleEvent(LamarkEvent je) {
-        if (BetterIndividualFoundEvent.class.isAssignableFrom(je.getClass())) {
-            bestScore.setText("Best: " + LamarkUtil.format(((BetterIndividualFoundEvent) je).getNewBest().getFitness()));
-        } else if (LastPopulationCompleteEvent.class.isAssignableFrom(je.getClass())) {
-            start.setDisable(false);
-            cancel.setDisable(true);
-            reset.setDisable(false);
-            openUrl.setDisable(false);
-            show.setDisable(false);
-            configPanel.setEnabled(true);
-        } else if (PopulationCompleteEvent.class.isAssignableFrom(je.getClass())) {
-            generationNumber.setText("Generation: " + ((PopulationCompleteEvent) je).getGenerationNumber());
-        } else if (ExceptionEvent.class.isAssignableFrom(je.getClass())) {
-            start.setDisable(false);
-            cancel.setDisable(true);
-            reset.setDisable(false);
-            openUrl.setDisable(false);
-            show.setDisable(false);
-            configPanel.setEnabled(true);
-        }
-
-        currentRuntime.setText("Runtime: "
-                + LamarkUtil.formatISO(je.getLamark().getRunTime()));
-        timeRemaining.setText("Remaining: "
-                + LamarkUtil.formatISO(je.getLamark().getEstimatedRunTime()));
-
-        updateMemoryLabels();
-    }
 
     /**
      * Updates the contents of the memory labels.
@@ -469,6 +432,46 @@ public class LamarkGui extends Pane {
     }
 
     /**
+     * A listener for Lamark events that updates the toolbar, not the output pane, which is handled by the custom handler below.
+     *
+     * @see com.erigir.lamark.events.LamarkEventListener#handleEvent(com.erigir.lamark.events.LamarkEvent)
+     */
+    class ButtonUpdateListener implements LamarkEventListener {
+        @Override
+        public void handleEvent(LamarkEvent je) {
+            Platform.runLater(()->{
+                if (BetterIndividualFoundEvent.class.isAssignableFrom(je.getClass())) {
+                    bestScore.setText("Best: " + LamarkUtil.format(((BetterIndividualFoundEvent) je).getNewBest().getFitness()));
+                } else if (LastPopulationCompleteEvent.class.isAssignableFrom(je.getClass())) {
+                    start.setDisable(false);
+                    cancel.setDisable(true);
+                    reset.setDisable(false);
+                    openUrl.setDisable(false);
+                    show.setDisable(false);
+                    configPanel.setEnabled(true);
+                } else if (PopulationCompleteEvent.class.isAssignableFrom(je.getClass())) {
+                    generationNumber.setText("Generation: " + ((PopulationCompleteEvent) je).getGenerationNumber());
+                } else if (ExceptionEvent.class.isAssignableFrom(je.getClass())) {
+                    start.setDisable(false);
+                    cancel.setDisable(true);
+                    reset.setDisable(false);
+                    openUrl.setDisable(false);
+                    show.setDisable(false);
+                    configPanel.setEnabled(true);
+                }
+
+                currentRuntime.setText("Runtime: "
+                        + LamarkUtil.formatISO(je.getLamark().getRunTime()));
+                timeRemaining.setText("Remaining: "
+                        + LamarkUtil.formatISO(je.getLamark().getEstimatedRunTime()));
+
+                updateMemoryLabels();
+            });
+        }
+    }
+
+
+    /**
      * A class to wrap a lamarklistener around the output panel of the gui.
      * &lt;p /&gt;
      * This class catches the selected events and outputs their
@@ -487,7 +490,7 @@ public class LamarkGui extends Pane {
         /**
          * Constructor that passes handle to the output pane
          *
-         * @param pOutput JTextArea output pane
+         * @param pOutput TextArea output pane
          */
         public OutputListener(TextArea pOutput) {
             super();
@@ -500,17 +503,20 @@ public class LamarkGui extends Pane {
          * @see com.erigir.lamark.events.LamarkEventListener#handleEvent(com.erigir.lamark.events.LamarkEvent)
          */
         public void handleEvent(LamarkEvent je) {
-            if (ExceptionEvent.class.isAssignableFrom(je.getClass())) {
-                Throwable t = ((ExceptionEvent) je).getException();
-                StringWriter sw = new StringWriter();
-                t.printStackTrace(new PrintWriter(sw));
-                String msg = "\nAn error occurred while attempting to run the algorithm:\n\n" + t + "\n\n" + sw.toString() + "\n";
-                output.insertText(0, msg);
-                start.setDisable(false);
-                cancel.setDisable(true);
-            } else {
-                output.insertText(0,je.toString() + " \n\n");
-            }
+            Platform.runLater(()->{
+                if (ExceptionEvent.class.isAssignableFrom(je.getClass())) {
+                    Throwable t = ((ExceptionEvent) je).getException();
+                    StringWriter sw = new StringWriter();
+                    t.printStackTrace(new PrintWriter(sw));
+                    String msg = "\nAn error occurred while attempting to run the algorithm:\n\n" + t + "\n\n" + sw.toString() + "\n";
+
+                    output.insertText(0, msg);
+                    start.setDisable(false);
+                    cancel.setDisable(true);
+                } else {
+                    output.insertText(0, je.toString() + " \n\n");
+                }
+            });
         }
     }
 }

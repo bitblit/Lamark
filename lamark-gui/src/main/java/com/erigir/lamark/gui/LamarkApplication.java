@@ -2,6 +2,7 @@ package com.erigir.lamark.gui;
 
 import com.erigir.lamark.LamarkUtil;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -111,19 +112,23 @@ public class LamarkApplication extends Application {
                 //fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
                 File f = fc.showOpenDialog(primaryStage);
-                if (f.exists()) {
-                    try {
-                        gui.appendOutput("\n\nOpening file " + f + "...\n");
-                        gui.getConfigPanel().loadFromLocation(f.toURI().toString());
-                        lastFile = f;
-                    } catch (Exception ioe) {
-                        LOG.warn("Error opening file", ioe);
-                        gui.clearOutput();
-                        gui.appendOutput(ioe);
-                        new Alert(Alert.AlertType.ERROR,"Error reading file:" + ioe).show();
+                if (f!=null)
+                {
+                    if (f.exists() && f.isFile()) {
+                        try {
+                            gui.appendOutput("\n\nOpening file " + f + "...\n");
+                            gui.getConfigPanel().loadFromLocation(f.toURI().toString());
+                            lastFile = f;
+                        } catch (Exception ioe) {
+                            LOG.warn("Error opening file", ioe);
+                            gui.clearOutput();
+                            gui.appendOutput(ioe);
+                            new Alert(Alert.AlertType.ERROR,"Error reading file:" + ioe).show();
+                        }
+                    } else {
+                        gui.appendOutput("\n\nERROR: File " + f + " doesn't exist\n\n");
                     }
-                } else {
-                    gui.appendOutput("\n\nERROR: File " + f + " doesn't exist\n\n");
+
                 }
                 }
         });
@@ -163,11 +168,9 @@ public class LamarkApplication extends Application {
             @Override
             public void handle(ActionEvent event) {
                 gui.abortIfRunning();
-                //frame.dispose();
+                Platform.exit();
             }
         });
-
-
 
         file.getItems().add(fileNew);
         file.getItems().add(fileOpenLocal);
@@ -187,6 +190,7 @@ public class LamarkApplication extends Application {
         layout.setCenter(gui);
 
         primaryStage.setScene(new Scene(layout));
+        primaryStage.show();
     }
 
 }
