@@ -39,7 +39,7 @@ public class ScheduleGraphicalListener implements GUIEventListener {
      * @see com.erigir.lamark.gui.GUIEventListener#setParentStage(Stage)
      */
     public void setParentStage(Stage parentStage) {
-        parentStage = parentStage;
+        this.parentStage = parentStage;
     }
 
     /**
