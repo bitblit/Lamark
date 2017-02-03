@@ -83,7 +83,7 @@ public class LamarkAvailableClasses {
         }
     }
 
-    public List<Class> toClasses(Set<String> classNames)
+    public static List<Class> toClasses(Set<String> classNames)
     {
         List<Class> rval = new ArrayList<>(classNames.size());
         for (String s:classNames)
@@ -97,7 +97,7 @@ public class LamarkAvailableClasses {
         return rval;
     }
 
-    public Class safeLoadClass(String className)
+    public static Class safeLoadClass(String className)
     {
         Class rval = null;
         try
@@ -111,7 +111,7 @@ public class LamarkAvailableClasses {
         return rval;
     }
 
-    public Object safeInit(Class clazz)
+    public static Object safeInit(Class clazz)
     {
         Object rval = null;
         if (clazz!=null) {

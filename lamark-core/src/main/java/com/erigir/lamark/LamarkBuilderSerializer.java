@@ -2,6 +2,7 @@ package com.erigir.lamark;
 
 import com.erigir.lamark.selector.Selector;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.slf4j.Logger;
@@ -23,10 +24,11 @@ public class LamarkBuilderSerializer {
     private static final Logger LOG = LoggerFactory.getLogger(LamarkBuilderSerializer.class);
     private static ObjectMapper OBJECT_MAPPER = createMapper();
 
-    private static ObjectMapper createMapper()
+    public static ObjectMapper createMapper()
     {
         ObjectMapper rval = new ObjectMapper();
         rval.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        rval.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
         return rval;
     }
 

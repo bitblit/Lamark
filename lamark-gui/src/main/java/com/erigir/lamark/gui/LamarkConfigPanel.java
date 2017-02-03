@@ -2,13 +2,12 @@ package com.erigir.lamark.gui;
 
 import com.erigir.lamark.LamarkBuilder;
 import com.erigir.lamark.LamarkBuilderSerializer;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.erigir.lamark.events.*;
+import com.erigir.lamark.selector.Selector;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,9 +18,11 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.function.ToDoubleFunction;
 
 /**
  * A panel for holding and organizing the various properties controls for LamarkGUI.
@@ -41,35 +42,17 @@ public class LamarkConfigPanel extends BorderPane {
      * Location of the default file
      */
     private static final String DEFAULT_CONFIG_LOCATION = "classpath:com/erigir/lamark/gui/default-lamark.json";
-    /**
-    * The shared ObjectMapper instance
-     */
-    private static final ObjectMapper MAPPER = createObjectMapper();
 
     private LamarkAvailableClasses availableClasses = loadAvailableClasses();
 
-    private LamarkBuilder builder = new LamarkBuilder();
+    private LamarkBuilder builder=null;
 
-    /**
-     * Custom properties for supplier *
-     */
-    private Properties supplierProperties = new Properties();
-    /**
-     * Custom properties for crossover *
-     */
-    private Properties crossoverProperties = new Properties();
-    /**
-     * Custom properties for fitness *
-     */
-    private Properties fitnessProperties = new Properties();
-    /**
-     * Custom properties for mutator *
-     */
-    private Properties mutatorProperties = new Properties();
-    /**
-     * Custom properties for selector *
-     */
-    private Properties selectorProperties = new Properties();
+    // These hold the selections as well as the custom properties
+    private LamarkComponentConfigPanel<Supplier> supplierConfigPane=new LamarkComponentConfigPanel();
+    private LamarkComponentConfigPanel<Function> crossoverConfigPane=new LamarkComponentConfigPanel();
+    private LamarkComponentConfigPanel<ToDoubleFunction> fitnessConfigPane=new LamarkComponentConfigPanel();
+    private LamarkComponentConfigPanel<Function> mutatorConfigPane=new LamarkComponentConfigPanel();
+    private LamarkComponentConfigPanel<Selector> selectorConfigPane=new LamarkComponentConfigPanel();
 
     /**
      * List of strings to convert into preload individuals *
@@ -80,26 +63,6 @@ public class LamarkConfigPanel extends BorderPane {
      */
     private List<String> customListener = new ArrayList<String>();
 
-    /**
-     * Button/Label for supplier *
-     */
-    private Button supplierLabel = new Button("Supplier");
-    /**
-     * Button/Label for crossover *
-     */
-    private Button crossoverLabel = new Button("Crossover");
-    /**
-     * Button/Label for fitness *
-     */
-    private Button fitnessLabel = new Button("Fitness Function");
-    /**
-     * Button/Label for mutator *
-     */
-    private Button mutatorLabel = new Button("Mutator");
-    /**
-     * Button/Label for selector *
-     */
-    private Button selectorLabel = new Button("Selector");
     /**
      * Button/Label for preloads *
      */
@@ -127,11 +90,11 @@ public class LamarkConfigPanel extends BorderPane {
     /**
      * Label for crossover prob control *
      */
-    private Label crossoverProbabilityLabel = new Label("Crossover Prob (0-1)");
+    private Label crossoverProbabilityLabel = new Label("Crossover Prob (%)");
     /**
      * Label for mutation prob control *
      */
-    private Label mutationProbabilityLabel = new Label("Mutation Prob (0-1)");
+    private Label mutationProbabilityLabel = new Label("Mutation Prob (%)");
     /**
      * Label for target score control *
      */
@@ -158,50 +121,22 @@ public class LamarkConfigPanel extends BorderPane {
      */
     private CheckBox lAbort = new CheckBox("Aborted");
     /**
-     * Log listener enabler *
-     */
-    private CheckBox lLog = new CheckBox("Log");
-    /**
      * Population Done listener enabler *
      */
     private CheckBox lPopulationComplete = new CheckBox("Population Done");
-    /**
-     * Population Plan listener enabler *
-     */
-    private CheckBox lPopPlanDone = new CheckBox("Population Plan Done");
     /**
      * Uniform Population listener enabler *
      */
     private CheckBox lUniformPop = new CheckBox("Uniform Population");
 
     /**
-     * Combobox holding supplier name *
-     */
-    private ComboBox supplier = new ComboBox();
-    /**
-     * Combobox holding crossover name *
-     */
-    private ComboBox crossover = new ComboBox();
-    /**
-     * Combobox holding fitness name *
-     */
-    private ComboBox fitness = new ComboBox();
-    /**
-     * Combobox holding mutator name *
-     */
-    private ComboBox mutator = new ComboBox();
-    /**
-     * Combobox holding selector name *
-     */
-    private ComboBox selector = new ComboBox();
-    /**
      * Edit box holding upper elitism *
      */
-    private TextField upperElitism = new TextField();
+    private Spinner<Integer> upperElitism = new Spinner<Integer>(0,100,10);
     /**
      * Edit box holding lower elitism *
      */
-    private TextField lowerElitism = new TextField();
+    private Spinner<Integer>  lowerElitism = new Spinner<Integer>(0,100,10);
     /**
      * Edit box holding maximum populations *
      */
@@ -209,15 +144,15 @@ public class LamarkConfigPanel extends BorderPane {
     /**
      * Edit box holding population size *
      */
-    private TextField populationSize = new TextField();
+    private Spinner<Integer>  populationSize = new Spinner<Integer>();
     /**
      * Edit box holding crossover probability *
      */
-    private TextField crossoverProbability = new TextField();
+    private Spinner<Integer>  crossoverProbability = new Spinner<Integer>(0,100,10);
     /**
      * Edit box holding mutation probability *
      */
-    private TextField mutationProbability = new TextField();
+    private Spinner<Integer>  mutationProbability = new Spinner<Integer>(0,100,10);
     /**
      * Edit box holding target score *
      */
@@ -244,36 +179,6 @@ public class LamarkConfigPanel extends BorderPane {
         String configResource = (inConfigResource == null) ? DEFAULT_CONFIG_LOCATION : inConfigResource;
 
         loadFromLocation(configResource);
-    }
-
-    private static ObjectMapper createObjectMapper()
-    {
-        ObjectMapper rval = new ObjectMapper();
-        rval.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
-        return rval;
-    }
-
-    public static Map<String, Object> propertiesToMap(Properties p) {
-        Map<String, Object> rval = null;
-        if (p != null) {
-            rval = new TreeMap<String, Object>();
-            for (Map.Entry<Object, Object> e : p.entrySet()) {
-                rval.put((String) e.getKey(), (String) e.getValue());
-            }
-        }
-        return rval;
-    }
-
-    public static Properties mapToProperties(Map<String, Object> m) {
-        Properties rval = null;
-        if (m != null) {
-            rval = new Properties();
-            for (Map.Entry<String, Object> e : m.entrySet()) {
-                rval.setProperty(e.getKey(), String.valueOf(e.getValue()));
-            }
-        }
-        return rval;
-
     }
 
     /**
@@ -402,21 +307,37 @@ public class LamarkConfigPanel extends BorderPane {
      *
      * @return Pane containing the first row.
      */
-    private Pane panel1() {
-        Pane rval = new Pane();
-        rval.getChildren().add(populationSizeLabel);
-        rval.getChildren().add(crossoverProbabilityLabel);
-        rval.getChildren().add(mutationProbabilityLabel);
-        rval.getChildren().add(maximumPopulationsLabel);
-        rval.getChildren().add(targetScoreLabel);
-        rval.getChildren().add(customListenerButton);
-        rval.getChildren().add(populationSize);
-        rval.getChildren().add(crossoverProbability);
-        rval.getChildren().add(mutationProbability);
-        rval.getChildren().add(maximumPopulations);
-        rval.getChildren().add(targetScore);
-        rval.getChildren().add(preloadButton);
+    private GridPane panel1() {
+        GridPane rval = new GridPane();
+        GridPane.setConstraints(populationSizeLabel,0,0);
+        GridPane.setConstraints(crossoverProbabilityLabel,1,0);
+        GridPane.setConstraints(mutationProbabilityLabel,2,0);
+        GridPane.setConstraints(maximumPopulationsLabel,3,0);
+        GridPane.setConstraints(targetScoreLabel,4,0);
+        GridPane.setConstraints(customListenerButton,5,0);
+        
+        GridPane.setConstraints(populationSize,0,1);
+        GridPane.setConstraints(crossoverProbability,1,1);
+        GridPane.setConstraints(mutationProbability,2,1);
+        GridPane.setConstraints(maximumPopulations,3,1);
+        GridPane.setConstraints(targetScore,4,1);
+        GridPane.setConstraints(preloadButton,5,1);
 
+        rval.getChildren().addAll(populationSizeLabel
+        ,crossoverProbabilityLabel
+        ,mutationProbabilityLabel
+        ,maximumPopulationsLabel
+        ,targetScoreLabel
+        ,customListenerButton
+
+        ,populationSize
+        ,crossoverProbability
+        ,mutationProbability
+        ,maximumPopulations
+        ,targetScore
+        ,preloadButton);
+
+        
         customListenerButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -443,36 +364,32 @@ public class LamarkConfigPanel extends BorderPane {
     private BorderPane panel2() {
         BorderPane rval = new BorderPane();
 
-        Pane north = new Pane();
-        //north.setLayout(new GridLayout(0, 4));
-        north.getChildren().add(upperElitismLabel);
-        north.getChildren().add(lowerElitismLabel);
-        north.getChildren().add(randomSeedLabel);
-        north.getChildren().add(upperElitism);
-        north.getChildren().add(lowerElitism);
-        north.getChildren().add(randomSeed);
+        GridPane north = new GridPane();
+        GridPane.setConstraints(upperElitismLabel,0,0);
+        GridPane.setConstraints(lowerElitismLabel,1,0);
+        GridPane.setConstraints(randomSeedLabel,2,0);
+        GridPane.setConstraints(upperElitism,0,1);
+        GridPane.setConstraints(lowerElitism,1,1);
+        GridPane.setConstraints(randomSeed,2,1);
+        north.getChildren().addAll(upperElitismLabel,lowerElitismLabel,randomSeedLabel,
+                upperElitism,lowerElitism,randomSeed);
 
-        Pane south = new Pane();
-        south.getChildren().add(new Label("Listeners"));
+        HBox south = new HBox();
+        south.setSpacing(5.0);
 
         lBetterIndividualFound.setSelected(true);
         lException.setSelected(true);
         lLastPopDone.setSelected(true);
         lAbort.setSelected(true);
 
-        lLog.setSelected(false);
         lPopulationComplete.setSelected(false);
-        lPopPlanDone.setSelected(false);
         lUniformPop.setSelected(false);
 
         south.getChildren().add(lBetterIndividualFound);
         south.getChildren().add(lException);
         south.getChildren().add(lLastPopDone);
         south.getChildren().add(lAbort);
-
-        south.getChildren().add(lLog);
         south.getChildren().add(lPopulationComplete);
-        south.getChildren().add(lPopPlanDone);
         south.getChildren().add(lUniformPop);
 
         rval.setTop(north);
@@ -486,54 +403,16 @@ public class LamarkConfigPanel extends BorderPane {
      *
      * @return Pane containing the component class edit boxes.
      */
-    private Pane classPanel() {
-        Pane rval = new Pane();
-        rval.getChildren().add(new Label("Classes"));
-        rval.getChildren().add(supplierLabel);
-        rval.getChildren().add(crossoverLabel);
-        rval.getChildren().add(fitnessLabel);
-        rval.getChildren().add(mutatorLabel);
-        rval.getChildren().add(selectorLabel);
-        rval.getChildren().add(supplier);
-        rval.getChildren().add(crossover);
-        rval.getChildren().add(fitness);
-        rval.getChildren().add(mutator);
-        rval.getChildren().add(selector);
+    private GridPane classPanel() {
+        GridPane rval = new GridPane();
 
-        supplierLabel.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                editProperties(supplierProperties, supplierLabel.getText());
-            }
-        });
+        GridPane.setConstraints(supplierConfigPane,0,0);
+        GridPane.setConstraints(crossoverConfigPane,1,0);
+        GridPane.setConstraints(fitnessConfigPane,2,0);
+        GridPane.setConstraints(mutatorConfigPane,3,0);
+        GridPane.setConstraints(selectorConfigPane,4,0);
 
-        crossoverLabel.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                editProperties(crossoverProperties, crossoverLabel.getText());
-            }
-        });
-
-        fitnessLabel.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                editProperties(fitnessProperties, fitnessLabel.getText());
-            }
-        });
-
-        mutatorLabel.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                editProperties(mutatorProperties, mutatorLabel.getText());
-            }
-        });
-
-        selectorLabel.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                editProperties(selectorProperties, selectorLabel.getText());
-            }
-        });
+        rval.getChildren().addAll(supplierConfigPane,crossoverConfigPane,fitnessConfigPane,mutatorConfigPane,selectorConfigPane);
 
         return rval;
     }
@@ -566,52 +445,23 @@ public class LamarkConfigPanel extends BorderPane {
     }
 
     /**
-     * Sets the values in the frop for a combo box from a properties object.
-     * All properties whos key starts with the given prefix will be loaded as
-     * options into the combo box.
-     *
-     * @param box     ComboBox to load from the properties object
-     * @param classes List of class objects to load from
-     * @param def     Class to default select
-     */
-    private void setComboBoxValues(ComboBox box, List<? extends Class> classes, Object def) {
-        box.setEditable(true);
-
-        box.getItems().retainAll(Collections.EMPTY_LIST);
-        if (classes != null) {
-            for (Class c : classes) {
-                box.getItems().add(formatClassName(c));
-            }
-        } else if (def != null) {
-            box.getItems().add(formatClassName(def.getClass()));
-        }
-
-        box.getSelectionModel().select(formatClassName(def.getClass()));
-    }
-
-    /**
      * Sets all values in the panel from the AvailableClasses and Builder objects
      */
     public void fillPanelValues() {
 
         // Init the drop boxes
-        setComboBoxValues(selector, availableClasses.toClasses(availableClasses.getSelectorClassNames()), builder.getSelector());
-        setComboBoxValues(supplier, availableClasses.toClasses(availableClasses.getSupplierClassNames()), builder.getSupplier());
-        setComboBoxValues(crossover, availableClasses.toClasses(availableClasses.getCrossoverClassNames()), builder.getCrossover());
-        setComboBoxValues(fitness, availableClasses.toClasses(availableClasses.getFitnessFunctionClassNames()), builder.getFitnessFunction());
-        setComboBoxValues(mutator, availableClasses.toClasses(availableClasses.getMutatorClassNames()), builder.getMutator());
+        supplierConfigPane.load("Supplier", new Properties(), availableClasses.toClasses(availableClasses.getSupplierClassNames()), builder.getSupplier().getClass());
+        crossoverConfigPane.load("Crossover", new Properties(), availableClasses.toClasses(availableClasses.getCrossoverClassNames()), builder.getCrossover().getClass());
+        fitnessConfigPane.load("Fitness", new Properties(), availableClasses.toClasses(availableClasses.getFitnessFunctionClassNames()), builder.getFitnessFunction().getClass());
+        mutatorConfigPane.load("Mutator", new Properties(), availableClasses.toClasses(availableClasses.getMutatorClassNames()), builder.getMutator().getClass());
+        selectorConfigPane.load("Selector", new Properties(), availableClasses.toClasses(availableClasses.getSelectorClassNames()), builder.getSelector().getClass());
 
-        /*supplier.setSelectedItem(formatClassName(lc.defaultSupplier()));
-        crossover.setSelectedItem(formatClassName(lc.defaultCrossover()));
-        fitness.setSelectedItem(formatClassName(lc.defaultFitnessFunction()));
-        mutator.setSelectedItem(formatClassName(lc.defaultMutator()));
-        selector.setSelectedItem(formatClassName(lc.defaultSelector()));*/
-        upperElitism.setText(doubleToPercent(builder.getUpperElitismPercentage()));
-        lowerElitism.setText(doubleToPercent(builder.getLowerElitismPercentage()));
+        upperElitism.getValueFactory().setValue((int)(builder.getUpperElitismPercentage()*100));
+        lowerElitism.getValueFactory().setValue((int)(builder.getLowerElitismPercentage()*100));
         maximumPopulations.setText(ein(builder.getMaxGenerations()));
-        populationSize.setText(ein(builder.getPopulationSize()));
-        crossoverProbability.setText(ein(builder.getCrossoverProbability()));
-        mutationProbability.setText(ein(builder.getMutationProbability()));
+        populationSize.getEditor().setText(ein(builder.getPopulationSize()));
+        crossoverProbability.getValueFactory().setValue((int)(builder.getCrossoverProbability()*100));
+        mutationProbability.getValueFactory().setValue((int)(builder.getMutationProbability()*100));
         targetScore.setText(ein(builder.getTargetScore()));
         /*
         randomSeed.setText(ein(builder.getRandomSeed()));
@@ -634,43 +484,36 @@ public class LamarkConfigPanel extends BorderPane {
 
     }
 
+    /**
+     * Determines whether to output an event.
+     * Note - in real life, you'd just listen to the correct events, but in here we allow filtering for easy output, plus
+     * this allows it to be modified in real time (otherwise it'd be created just before the run)
+     * to the GUI.
+     * @param event
+     * @return true if the event should be logged
+     */
+    public boolean eventOutputEnabled(LamarkEvent event)
+    {
+        return
+                checkEventFilterMatch(lBetterIndividualFound, BetterIndividualFoundEvent.class, event)
+                        || checkEventFilterMatch(lException, ExceptionEvent.class, event)
+                        || checkEventFilterMatch(lLastPopDone, LastPopulationCompleteEvent.class, event)
+                        || checkEventFilterMatch(lAbort, AbortedEvent.class, event)
+                        || checkEventFilterMatch(lPopulationComplete, PopulationCompleteEvent.class, event)
+                        || checkEventFilterMatch(lUniformPop, UniformPopulationEvent.class, event);
+   }
+
+    private boolean checkEventFilterMatch(CheckBox box, Class eventClass, Object event)
+    {
+        return box.isSelected() && event!=null && event.getClass().equals(eventClass);
+    }
+
     public String toGUIConfigString() {
         return LamarkBuilderSerializer.serialize(builder);
     }
 
-    /**
-     * Converts a double 0-1 value to a percent 0-100, both in strings.
-     *
-     * @param value String to parse and convert.
-     * @return String containing the percent value.
-     */
-    private String doubleToPercent(Double value) {
-        Double d = new Double(value);
-        d *= 100;
-        return NumberFormat.getIntegerInstance().format(d);
-    }
-
-    /**
-     * Converts a percent value 0-100 to double 0-1, both in strings.
-     *
-     * @param value String containing the percent
-     * @return String containing the double
-     */
-    private Double percentToDouble(String value) {
-        if (value == null || value.trim().length() == 0) {
-            return null;
-        }
-        Double d = new Double(value);
-        d /= 100;
-        return d;
-    }
-
     private Double nsDouble(String value) {
         return (value == null || value.trim().length() == 0) ? null : new Double(value);
-    }
-
-    private Integer nsInteger(String value) {
-        return (value == null || value.trim().length() == 0) ? null : new Integer(value);
     }
 
     private Long nsLong(String value) {
@@ -688,170 +531,39 @@ public class LamarkConfigPanel extends BorderPane {
     }
 
     /**
-     * Creates a classname from the contents of the combobox.
-     *
-     * @param cb ComboBox to read classname from
-     * @return String containing the class name
-     */
-    private Class classFromCombo(ComboBox cb) {
-        // First, try reading it as a class name.  If it works, use that
-        try {
-            String test = (String) cb.getSelectionModel().getSelectedItem();
-            return Thread.currentThread().getContextClassLoader().loadClass(test);
-        } catch (Exception e) {
-            String start = (String) cb.getSelectionModel().getSelectedItem();
-
-            int pi = start.indexOf("[");
-            String classN = start.substring(0, pi);
-            String packageN = start.substring(pi + 1, start.length() - 1);
-            String fullN = packageN + "." + classN;
-            return availableClasses.safeLoadClass(fullN);
-        }
-
-    }
-
-    /**
-     * Converts a classname to combobox format (CLASS[PACKAGE])
-     *
-     * @param className String containing the name
-     * @return String containing name in combo format
-     */
-    private String formatClassName(String className) {
-
-        if (className == null) {
-            return null;
-        }
-        int idx = className.lastIndexOf(".");
-        if (idx == -1) {
-            return className;
-        }
-        return className.substring(idx + 1) + "[" + className.substring(0, idx) + "]";
-    }
-
-    /**
-     * Converts a classname to combobox format (CLASS[PACKAGE])
-     *
-     * @param clazz Class to convert
-     * @return String containing name in combo format
-     */
-    private String formatClassName(Class clazz) {
-        return (clazz == null) ? null : formatClassName(clazz.getName());
-    }
-
-    /**
      * Creates a properties object matching the state of the panel.
      *
      * @return Properties object matching the panel.
-     *
+     */
     public LamarkBuilder toBuilder() {
         LamarkBuilder p = new LamarkBuilder();
-        p.withSupplier((Supplier)availableClasses.safeInit(classFromCombo(supplier)));
-        p.withCrossover((Function) availableClasses.safeInit(classFromCombo(crossover)));
-        p.withMutator((Function)availableClasses.safeInit(classFromCombo(mutator)));
-        p.withFitnessFunction((ToDoubleFunction) availableClasses.safeInit(classFromCombo(fitness)));
-        p.withSelector((Selector)availableClasses.safeInit(classFromCombo(selector)));
+        p.withSupplier(supplierConfigPane.createConfiguredInstance());
+        p.withCrossover(crossoverConfigPane.createConfiguredInstance());
+        p.withMutator(mutatorConfigPane.createConfiguredInstance());
+        p.withFitnessFunction(fitnessConfigPane.createConfiguredInstance());
+        p.withSelector(selectorConfigPane.createConfiguredInstance());
 
-        * TODO: Settings
-        p.setSupplierConfiguration(propertiesToMap(supplierProperties));
-        p.setCrossoverConfiguration(propertiesToMap(crossoverProperties));
-        p.setFitnessFunctionConfiguration(propertiesToMap(fitnessProperties));
-        p.setMutatorConfiguration(propertiesToMap(mutatorProperties));
-        p.setSelectorConfiguration(propertiesToMap(selectorProperties));
+        p.withInitialValues(new LinkedList<String>(preloads));
 
-        p.setPreCreatedIndividuals(new LinkedList<String>(preloads));
-        *
-
-        p.withUpperElitism(percentToDouble(upperElitism.getText()));
-        p.withLowerElitism(percentToDouble(lowerElitism.getText()));
+        p.withUpperElitism(upperElitism.getValue()/100.0);
+        p.withLowerElitism(lowerElitism.getValue()/100.0);
         p.withMaxGenerations(nsLong(maximumPopulations.getText()));
-        p.withPopulationSize(nsInteger(populationSize.getText()));
-        p.withCrossoverProbability(nsDouble(crossoverProbability.getText()));
-        p.withMutationProbability(nsDouble(mutationProbability.getText()));
+        p.withPopulationSize(populationSize.getValue());
+        p.withCrossoverProbability(crossoverProbability.getValue()/100.0);
+        p.withMutationProbability(mutationProbability.getValue()/100.0);
         p.withTargetScore(nsDouble(targetScore.getText()));
-        //p.setRandomSeed(nsLong(randomSeed.getText()));
 
-        *
+        /*
         for (String s : customListener) {
-            Class c = lamarkFactory.safeLoadClass(s);
+            Class c = LamarkAvailableClasses.safeLoadClass(s);
             if (c != null) {
                 p.getCustomListeners().add(c);
             }
         }
-        *
+        TODO: listeners get added to the lamark instance?
+        */
 
         return p;
-    }*/
-
-    /**
-     * Returns true if the given listener should be used.
-     *
-     * @return true if the given listener should be used
-     */
-    public boolean listenAbort() {
-        return lAbort.isSelected();
-    }
-
-    /**
-     * Returns true if the given listener should be used.
-     *
-     * @return true if the given listener should be used
-     */
-    public boolean listenBetterIndividualFound() {
-        return lBetterIndividualFound.isSelected();
-    }
-
-    /**
-     * Returns true if the given listener should be used.
-     *
-     * @return true if the given listener should be used
-     */
-    public boolean listenException() {
-        return lException.isSelected();
-    }
-
-    /**
-     * Returns true if the given listener should be used.
-     *
-     * @return true if the given listener should be used
-     */
-    public boolean listenLastPopDone() {
-        return lLastPopDone.isSelected();
-    }
-
-    /**
-     * Returns true if the given listener should be used.
-     *
-     * @return true if the given listener should be used
-     */
-    public boolean listenLog() {
-        return lLog.isSelected();
-    }
-
-    /**
-     * Returns true if the given listener should be used.
-     *
-     * @return true if the given listener should be used
-     */
-    public boolean listenPopPlanDone() {
-        return lPopPlanDone.isSelected();
-    }
-
-    /**
-     * Returns true if the given listener should be used.
-     *
-     * @return true if the given listener should be used
-     */
-    public boolean listenPopulationComplete() {
-        return lPopulationComplete.isSelected();
-    }
-
-    /**
-     * Returns true if the given listener should be used.
-     *
-     * @return true if the given listener should be used
-     */
-    public boolean listenUniformPop() {
-        return lUniformPop.isSelected();
     }
 
     /**
@@ -861,15 +573,6 @@ public class LamarkConfigPanel extends BorderPane {
      */
     public List<String> getCustomListener() {
         return customListener;
-    }
-
-    /**
-     * Accessor method.
-     *
-     * @return List containing the property
-     */
-    public List<String> getPreloads() {
-        return preloads;
     }
 
     private LamarkAvailableClasses loadAvailableClasses()
@@ -898,7 +601,7 @@ public class LamarkConfigPanel extends BorderPane {
                 InputStream is = getClass().getResourceAsStream(path);
                 if (is!=null)
                 {
-                    rval = MAPPER.readValue(is, LamarkAvailableClasses.class);
+                    rval = LamarkBuilderSerializer.createMapper().readValue(is, LamarkAvailableClasses.class);
                 }
             }
             catch (IOException ioe)

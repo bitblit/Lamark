@@ -140,30 +140,6 @@ public class LamarkGui extends BorderPane {
                     currentRunner.addListener(new OutputListener(output));
                     currentRunner.addListener(new ButtonUpdateListener());
 
-
-                    // Add any defined listeners
-                    OutputListener ol = new OutputListener(output);
-                    Set<Class> outputListenerClasses = new HashSet<>();
-                    if (configPanel.listenAbort()) {
-                        outputListenerClasses.add(AbortedEvent.class);
-                    }
-                    if (configPanel.listenBetterIndividualFound()) {
-                        outputListenerClasses.add(BetterIndividualFoundEvent.class);
-                    }
-                    if (configPanel.listenException()) {
-                        outputListenerClasses.add(ExceptionEvent.class);
-                    }
-                    if (configPanel.listenLastPopDone()) {
-                        outputListenerClasses.add(LastPopulationCompleteEvent.class);
-                    }
-                    if (configPanel.listenPopulationComplete()) {
-                        outputListenerClasses.add(PopulationCompleteEvent.class);
-                    }
-                    if (configPanel.listenUniformPop()) {
-                        outputListenerClasses.add(UniformPopulationEvent.class);
-                    }
-                    currentRunner.addListener(ol, outputListenerClasses);
-
                     output.setText("");
                     start.setDisable(true);
                     cancel.setDisable(false);
@@ -504,17 +480,22 @@ public class LamarkGui extends BorderPane {
          */
         public void handleEvent(LamarkEvent je) {
             Platform.runLater(()->{
-                if (ExceptionEvent.class.isAssignableFrom(je.getClass())) {
-                    Throwable t = ((ExceptionEvent) je).getException();
-                    StringWriter sw = new StringWriter();
-                    t.printStackTrace(new PrintWriter(sw));
-                    String msg = "\nAn error occurred while attempting to run the algorithm:\n\n" + t + "\n\n" + sw.toString() + "\n";
+                // Dynamic filter at runtime
+                if (configPanel.eventOutputEnabled(je))
+                {
+                    if (ExceptionEvent.class.isAssignableFrom(je.getClass())) {
+                        Throwable t = ((ExceptionEvent) je).getException();
+                        StringWriter sw = new StringWriter();
+                        t.printStackTrace(new PrintWriter(sw));
+                        String msg = "\nAn error occurred while attempting to run the algorithm:\n\n" + t + "\n\n" + sw.toString() + "\n";
 
-                    output.insertText(0, msg);
-                    start.setDisable(false);
-                    cancel.setDisable(true);
-                } else {
-                    output.insertText(0, je.toString() + " \n\n");
+                        output.insertText(0, msg);
+                        start.setDisable(false);
+                        cancel.setDisable(true);
+                    } else {
+                        output.insertText(0, je.toString() + " \n\n");
+                    }
+
                 }
             });
         }
