@@ -1,35 +1,79 @@
 {
-  "builder": {
-    "random": null,
-    "selector": {},
-    "supplier": {
-      "size": 6
-    },
-    "fitnessFunction": {
-      "target": "LAMARK"
-    },
-    "crossover": {},
-    "mutator": {},
-    "formatter": null,
-    "crossoverProbability": 1.0,
-    "mutationProbability": 0.01,
-    "populationSize": 50,
-    "numberOfParents": 2,
-    "maxGenerations": null,
-    "initialValues": null,
-    "upperElitismPercentage": 0.1,
-    "lowerElitismPercentage": 0.1,
-    "targetScore": 1.0,
-    "trackParentage": false,
-    "abortOnUniformPopulation": false,
-    "runParallel": false,
-    "minimizeScore": false
-  },
-  "classNames": {
-    "supplier": "com.erigir.lamark.supplier.AlphaStringSupplier",
-    "crossover": "com.erigir.lamark.crossover.StringSinglePoint",
-    "fitnessFunction": "com.erigir.lamark.fitness.StringFinderFitness",
-    "mutator": "com.erigir.lamark.mutator.StringSimpleMutator",
-    "selector": "com.erigir.lamark.selector.TournamentSelector"
+  "notes" : "The built in set of features for Lamark",
+  "configurations" : {
+    "Default": {
+      "parameters": {
+        "random": null,
+        "crossoverProbability": 1.0,
+        "mutationProbability": 0.01,
+        "populationSize": 50,
+        "numberOfParents": 2,
+        "maxGenerations": null,
+        "initialValues": null,
+        "upperElitismPercentage": 0.1,
+        "lowerElitismPercentage": 0.1,
+        "targetScore": 1.0,
+        "trackParentage": false,
+        "abortOnUniformPopulation": false,
+        "runParallel": false,
+        "minimizeScore": false
+      },
+      "components" : {
+        "supplier": {
+          "config": {
+            "validCharactersByString": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            "size": 6
+          },
+          "classes": [
+            "com.erigir.lamark.supplier.AlphaStringSupplier",
+            "com.erigir.lamark.supplier.ByteListSupplier",
+            "com.erigir.lamark.supplier.IntegerListSupplier",
+            "com.erigir.lamark.supplier.IntegerListPermutationSupplier",
+            "com.erigir.lamark.supplier.StringSupplier"
+          ]
+        },
+        "crossover": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.crossover.StringSinglePoint",
+            "com.erigir.lamark.crossover.IntegerPermutationFill",
+            "com.erigir.lamark.crossover.IntegerPermutationLongestCommonSubsequence",
+            "com.erigir.lamark.crossover.IntegerPermutationLongestCommonSubstring",
+            "com.erigir.lamark.crossover.ListSinglePoint",
+            "com.erigir.lamark.crossover.ListTwoPoint"
+          ]
+        },
+        "fitnessFunction": {
+          "config": {
+            "target": "LAMARK"
+          },
+          "classes": [
+            "com.erigir.lamark.fitness.StringFinderFitness",
+            "com.erigir.lamark.fitness.AllOnesFitness"
+          ]
+        },
+        "mutator": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.mutator.StringSimpleMutator",
+            "com.erigir.lamark.mutator.List2ExchangeMutator",
+            "com.erigir.lamark.mutator.ListSimpleMutator"
+          ]
+        },
+        "selector": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.selector.TournamentSelector",
+            "com.erigir.lamark.selector.RouletteWheelSelector"
+          ]
+        },
+        "formatter": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.DefaultFormatter"
+          ]
+        }
+      }
+    }
   }
 }

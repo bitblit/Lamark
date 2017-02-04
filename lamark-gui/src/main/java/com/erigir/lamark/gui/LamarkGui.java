@@ -4,7 +4,9 @@
 package com.erigir.lamark.gui;
 
 import com.erigir.lamark.Lamark;
+import com.erigir.lamark.LamarkBuilder;
 import com.erigir.lamark.LamarkUtil;
+import com.erigir.lamark.config.LamarkSerializer;
 import com.erigir.lamark.events.*;
 import com.sun.javafx.scene.control.behavior.TextAreaBehavior;
 import javafx.application.Platform;
@@ -134,7 +136,8 @@ public class LamarkGui extends BorderPane {
                     output.setText("Starting new Lamark instance...\n\n");
 
                     // First, generate a new currentRunner
-                    currentRunner = configPanel.getBuilder().build();
+                    LamarkBuilder builder = configPanel.toBuilder();
+                    currentRunner = builder.build();
 
                     // Add this as a generic listener for timers
                     currentRunner.addListener(new OutputListener(output));
@@ -185,7 +188,7 @@ public class LamarkGui extends BorderPane {
         show.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                output.setText(configPanel.toGUIConfigString());
+                output.setText(LamarkSerializer.singleConfigurationToString("CURRENT", configPanel.convertToConfiguration()));
             }
         });
 
@@ -289,11 +292,6 @@ public class LamarkGui extends BorderPane {
             configPanel.loadFromLocation(result.get());
         }
     }
-
-    public String configJSON() {
-        return configPanel.toGUIConfigString();
-    }
-
 
     /**
      * Builds the main panel of the gui.

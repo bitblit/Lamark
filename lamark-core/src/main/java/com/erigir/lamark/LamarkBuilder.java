@@ -73,7 +73,7 @@ public class LamarkBuilder<T> {
         rval.minimizeScore = minimizeScore;
         rval.numberOfParents = numberOfParents;
 
-        // Perform any self validation supplied
+        // Perform any self vai
         for (Object o: Arrays.asList(supplier, fitnessFunction, crossover,mutator, rval.selector))
         {
             if (SelfValidating.class.isAssignableFrom(o.getClass()))

@@ -1,5 +1,6 @@
 package com.erigir.lamark.gui;
 
+import com.erigir.lamark.config.LamarkComponentDetails;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
@@ -9,9 +10,7 @@ import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * A pane for selecting and editing a specific component type
@@ -22,7 +21,7 @@ public class LamarkComponentConfigPanel<T> extends VBox {
 
     // The items on creation
     private String title;
-    private Properties customProperties = new Properties();
+    private Map<String,String> customProperties = new TreeMap<>();
 
     private List<Class> availableClasses;
     private Class defaultSelection;
@@ -36,7 +35,18 @@ public class LamarkComponentConfigPanel<T> extends VBox {
         super();
     }
 
-    public void load(String title, Properties customProperties, List<Class> availableClasses, Class defaultSelection) {
+    public LamarkComponentDetails toComponentDetails()
+    {
+        return LamarkComponentDetails.createSingle(comboBox.getSelectionModel().getSelectedItem(), customProperties);
+    }
+
+
+    public void loadDefault(String title, LamarkComponentDetails details)
+    {
+        load(title,details.getConfig(),details.getClasses(),details.getDefault());
+    }
+
+    public void load(String title, Map<String,String> customProperties, List<Class> availableClasses, Class defaultSelection) {
         this.title = Objects.requireNonNull(title);
         this.customProperties = Objects.requireNonNull(customProperties);
         this.availableClasses = Objects.requireNonNull(availableClasses);

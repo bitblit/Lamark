@@ -1,6 +1,7 @@
 package com.erigir.lamark.gui;
 
 import com.erigir.lamark.LamarkUtil;
+import com.erigir.lamark.config.LamarkSerializer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -153,7 +154,7 @@ public class LamarkApplication extends Application {
                 if (f!=null) {
                     try {
                         FileWriter fos = new FileWriter(f);
-                        String json = gui.configJSON();
+                        String json = LamarkSerializer.singleConfigurationToString(f.getName(),gui.getConfigPanel().convertToConfiguration());
                         fos.write(json);
                         fos.close();
                         lastFile = f;

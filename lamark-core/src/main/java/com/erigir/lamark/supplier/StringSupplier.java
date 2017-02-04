@@ -99,4 +99,7 @@ public class StringSupplier extends AbstractLamarkComponent implements Supplier<
     public void setSize(int size) {
         this.size = size;
     }
+    public void setSize(String size) {
+        this.size = Integer.parseInt(size);
+    }
 }

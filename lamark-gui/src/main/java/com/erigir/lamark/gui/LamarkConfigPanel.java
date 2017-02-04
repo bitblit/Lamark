@@ -1,13 +1,16 @@
 package com.erigir.lamark.gui;
 
+import com.erigir.lamark.Lamark;
 import com.erigir.lamark.LamarkBuilder;
-import com.erigir.lamark.LamarkBuilderSerializer;
+import com.erigir.lamark.config.*;
 import com.erigir.lamark.events.*;
 import com.erigir.lamark.selector.Selector;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.util.converter.NumberStringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,10 +45,6 @@ public class LamarkConfigPanel extends BorderPane {
      * Location of the default file
      */
     private static final String DEFAULT_CONFIG_LOCATION = "classpath:com/erigir/lamark/gui/default-lamark.json";
-
-    private LamarkAvailableClasses availableClasses = loadAvailableClasses();
-
-    private LamarkBuilder builder=null;
 
     // These hold the selections as well as the custom properties
     private LamarkComponentConfigPanel<Supplier> supplierConfigPane=new LamarkComponentConfigPanel();
@@ -144,7 +143,7 @@ public class LamarkConfigPanel extends BorderPane {
     /**
      * Edit box holding population size *
      */
-    private Spinner<Integer>  populationSize = new Spinner<Integer>();
+    private TextField  populationSize = new TextField();
     /**
      * Edit box holding crossover probability *
      */
@@ -221,6 +220,79 @@ public class LamarkConfigPanel extends BorderPane {
         */
     }
 
+    public void loadFromConfiguration(LamarkConfiguration configuration)
+    {
+        LOG.info("Loading from configuration {}",configuration);
+
+        Platform.runLater(()-> {
+                    // Init the drop boxes
+                    supplierConfigPane.loadDefault("Supplier", configuration.getComponents().getSupplier());
+                    crossoverConfigPane.loadDefault("Crossover", configuration.getComponents().getCrossover());
+                    fitnessConfigPane.loadDefault("Fitness", configuration.getComponents().getFitnessFunction());
+                    mutatorConfigPane.loadDefault("Mutator", configuration.getComponents().getMutator());
+                    selectorConfigPane.loadDefault("Selector", configuration.getComponents().getSelector());
+
+                    LamarkParameters p = configuration.getParameters();
+                    upperElitism.getValueFactory().setValue((int) (p.getUpperElitismPercentage() * 100));
+                    lowerElitism.getValueFactory().setValue((int) (p.getLowerElitismPercentage() * 100));
+                    maximumPopulations.setText(ein(p.getMaxGenerations()));
+                    populationSize.setText(String.valueOf(p.getPopulationSize()));
+                    crossoverProbability.getValueFactory().setValue((int) (p.getCrossoverProbability() * 100));
+                    mutationProbability.getValueFactory().setValue((int) (p.getMutationProbability() * 100));
+                    targetScore.setText(ein(p.getTargetScore()));
+                    randomSeed.setText(ein(p.getRandomSeed()));
+                });
+
+        /*
+        preloads = new ArrayList<String>(lc.getPreCreatedIndividuals());
+
+        customListener = new ArrayList<String>();
+        for (Class c : lc.getCustomListeners()) {
+            customListener.add(c.getName());
+        }
+        TODO: Reimpl
+        */
+    }
+
+    public LamarkConfiguration convertToConfiguration()
+    {
+        LamarkParameters parameters = new LamarkParameters();
+        LamarkComponents components = new LamarkComponents();
+        LamarkConfiguration rval = new LamarkConfiguration();
+
+        rval.setComponents(components);
+        rval.setParameters(parameters);
+
+        components.setSupplier(supplierConfigPane.toComponentDetails());
+        components.setCrossover(crossoverConfigPane.toComponentDetails());
+        components.setMutator(mutatorConfigPane.toComponentDetails());
+        components.setFitnessFunction(fitnessConfigPane.toComponentDetails());
+        components.setSelector(selectorConfigPane.toComponentDetails());
+
+        parameters.setInitialValues(new LinkedList<String>(preloads));
+        parameters.setUpperElitismPercentage(upperElitism.getValue()/100.0);
+        parameters.setLowerElitismPercentage(lowerElitism.getValue()/100.0);
+        parameters.setMaxGenerations(nsLong(maximumPopulations.getText()));
+        parameters.setPopulationSize(Integer.parseInt(populationSize.getText()));
+        parameters.setCrossoverProbability(crossoverProbability.getValue()/100.0);
+        parameters.setMutationProbability(mutationProbability.getValue()/100.0);
+        parameters.setTargetScore(nsDouble(targetScore.getText()));
+
+        /*
+        for (String s : customListener) {
+            Class c = LamarkAvailableClasses.safeLoadClass(s);
+            if (c != null) {
+                p.getCustomListeners().add(c);
+            }
+        }
+        TODO: listeners get added to the lamark instance?
+        */
+
+        return rval;
+    }
+
+
+
     public void reset() {
         loadFromLocation(DEFAULT_CONFIG_LOCATION);
     }
@@ -258,32 +330,39 @@ public class LamarkConfigPanel extends BorderPane {
 
     public void loadFromLocation(String location) {
         try {
-            String json = null;
+            InputStream is = null;
 
             if (location != null) {
                 if (location.startsWith("classpath:")) {
                     // Load as a resource - can only be a json file (no jars on classpath)
                     String readLoc = location.substring("classpath:".length());
-                    InputStream ios = Thread.currentThread().getContextClassLoader().getResourceAsStream(readLoc);
-                    json = readStreamToString(ios);
+                    is = Thread.currentThread().getContextClassLoader().getResourceAsStream(readLoc);
                 } else {
                     // Load as a url
                     URL u = safeURL(location);
                     if (location.endsWith(".json")) {
                         // Just need to read the json
-                        json = readStreamToString(u.openStream());
+                        is = u.openStream();
                     } else {
                         // Need to massage the classpath and load default
                         URLClassLoader newClassLoader = new URLClassLoader(new URL[]{u}, Thread.currentThread().getContextClassLoader());
-                        json = readStreamToString(newClassLoader.getResourceAsStream("/lamark.json"));
+                        is = newClassLoader.getResourceAsStream("/lamark.json");
                     }
                 }
 
-                if (json != null) {
-                    builder = LamarkBuilderSerializer.deserialize(json);
-                    availableClasses.addBuilderClasses(builder);
-                    fillPanelValues();
-                    // TODO: set the classes to be the same
+                if (is!=null)
+                {
+                    String jsonData = readStreamToString(is);
+                    MultiLamarkConfiguration mlc = LamarkSerializer.readConfiguration(jsonData);
+                    if (mlc.getConfigurations().size()==1)
+                    {
+                        loadFromConfiguration(mlc.getConfigurations().values().iterator().next());
+                    }
+                    else
+                    {
+                        // TODO: impl
+                        LOG.warn("Cant process multi yet");
+                    }
                 } else {
                     throw new IllegalStateException("Failed to load configuration JSON file");
                 }
@@ -308,6 +387,10 @@ public class LamarkConfigPanel extends BorderPane {
      * @return Pane containing the first row.
      */
     private GridPane panel1() {
+
+        populationSize.setTextFormatter(new TextFormatter<>(new NumberStringConverter()));
+        targetScore.setTextFormatter(new TextFormatter<>(new NumberStringConverter()));
+
         GridPane rval = new GridPane();
         GridPane.setConstraints(populationSizeLabel,0,0);
         GridPane.setConstraints(crossoverProbabilityLabel,1,0);
@@ -445,46 +528,6 @@ public class LamarkConfigPanel extends BorderPane {
     }
 
     /**
-     * Sets all values in the panel from the AvailableClasses and Builder objects
-     */
-    public void fillPanelValues() {
-
-        // Init the drop boxes
-        supplierConfigPane.load("Supplier", new Properties(), availableClasses.toClasses(availableClasses.getSupplierClassNames()), builder.getSupplier().getClass());
-        crossoverConfigPane.load("Crossover", new Properties(), availableClasses.toClasses(availableClasses.getCrossoverClassNames()), builder.getCrossover().getClass());
-        fitnessConfigPane.load("Fitness", new Properties(), availableClasses.toClasses(availableClasses.getFitnessFunctionClassNames()), builder.getFitnessFunction().getClass());
-        mutatorConfigPane.load("Mutator", new Properties(), availableClasses.toClasses(availableClasses.getMutatorClassNames()), builder.getMutator().getClass());
-        selectorConfigPane.load("Selector", new Properties(), availableClasses.toClasses(availableClasses.getSelectorClassNames()), builder.getSelector().getClass());
-
-        upperElitism.getValueFactory().setValue((int)(builder.getUpperElitismPercentage()*100));
-        lowerElitism.getValueFactory().setValue((int)(builder.getLowerElitismPercentage()*100));
-        maximumPopulations.setText(ein(builder.getMaxGenerations()));
-        populationSize.getEditor().setText(ein(builder.getPopulationSize()));
-        crossoverProbability.getValueFactory().setValue((int)(builder.getCrossoverProbability()*100));
-        mutationProbability.getValueFactory().setValue((int)(builder.getMutationProbability()*100));
-        targetScore.setText(ein(builder.getTargetScore()));
-        /*
-        randomSeed.setText(ein(builder.getRandomSeed()));
-
-        supplierProperties = mapToProperties(lc.getSupplierConfiguration());
-        crossoverProperties = mapToProperties(lc.getCrossoverConfiguration());
-        fitnessProperties = mapToProperties(lc.getFitnessFunctionConfiguration());
-        mutatorProperties = mapToProperties(lc.getMutatorConfiguration());
-        selectorProperties = mapToProperties(lc.getSelectorConfiguration());
-
-        preloads = new ArrayList<String>(lc.getPreCreatedIndividuals());
-
-        customListener = new ArrayList<String>();
-        for (Class c : lc.getCustomListeners()) {
-            customListener.add(c.getName());
-        }
-        TODO: Reimpl
-        */
-
-
-    }
-
-    /**
      * Determines whether to output an event.
      * Note - in real life, you'd just listen to the correct events, but in here we allow filtering for easy output, plus
      * this allows it to be modified in real time (otherwise it'd be created just before the run)
@@ -506,10 +549,6 @@ public class LamarkConfigPanel extends BorderPane {
     private boolean checkEventFilterMatch(CheckBox box, Class eventClass, Object event)
     {
         return box.isSelected() && event!=null && event.getClass().equals(eventClass);
-    }
-
-    public String toGUIConfigString() {
-        return LamarkBuilderSerializer.serialize(builder);
     }
 
     private Double nsDouble(String value) {
@@ -536,34 +575,9 @@ public class LamarkConfigPanel extends BorderPane {
      * @return Properties object matching the panel.
      */
     public LamarkBuilder toBuilder() {
-        LamarkBuilder p = new LamarkBuilder();
-        p.withSupplier(supplierConfigPane.createConfiguredInstance());
-        p.withCrossover(crossoverConfigPane.createConfiguredInstance());
-        p.withMutator(mutatorConfigPane.createConfiguredInstance());
-        p.withFitnessFunction(fitnessConfigPane.createConfiguredInstance());
-        p.withSelector(selectorConfigPane.createConfiguredInstance());
+        LamarkBuilder builder = new LamarkBuilder();
+        return convertToConfiguration().applyToBuilder(builder);
 
-        p.withInitialValues(new LinkedList<String>(preloads));
-
-        p.withUpperElitism(upperElitism.getValue()/100.0);
-        p.withLowerElitism(lowerElitism.getValue()/100.0);
-        p.withMaxGenerations(nsLong(maximumPopulations.getText()));
-        p.withPopulationSize(populationSize.getValue());
-        p.withCrossoverProbability(crossoverProbability.getValue()/100.0);
-        p.withMutationProbability(mutationProbability.getValue()/100.0);
-        p.withTargetScore(nsDouble(targetScore.getText()));
-
-        /*
-        for (String s : customListener) {
-            Class c = LamarkAvailableClasses.safeLoadClass(s);
-            if (c != null) {
-                p.getCustomListeners().add(c);
-            }
-        }
-        TODO: listeners get added to the lamark instance?
-        */
-
-        return p;
     }
 
     /**
@@ -575,44 +589,5 @@ public class LamarkConfigPanel extends BorderPane {
         return customListener;
     }
 
-    private LamarkAvailableClasses loadAvailableClasses()
-    {
-        LamarkAvailableClasses rval = loadAvailableClasses(System.getProperty("availableClassesConfig"));
-        if (rval==null)
-        {
-            rval = loadAvailableClasses("/override-available-classes.json");
-        }
-        if (rval==null)
-        {
-            rval = loadAvailableClasses("default-available-classes.json");
-        }
-        if (rval==null)
-        {
-            throw new IllegalStateException("Couldn't find any available classes file");
-        }
-        return rval;
-    }
 
-    private LamarkAvailableClasses loadAvailableClasses(String path)
-    {
-        LamarkAvailableClasses rval = null;
-        if (path!=null) {
-            try {
-                InputStream is = getClass().getResourceAsStream(path);
-                if (is!=null)
-                {
-                    rval = LamarkBuilderSerializer.createMapper().readValue(is, LamarkAvailableClasses.class);
-                }
-            }
-            catch (IOException ioe)
-            {
-                LOG.trace("Couldnt find : {}",path);
-            }
-        }
-        return rval;
-    }
-
-    public LamarkBuilder getBuilder() {
-        return builder;
-    }
 }

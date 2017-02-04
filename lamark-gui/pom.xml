@@ -37,6 +37,12 @@
     <!-- Jackson comes in for serialization/de-serialization -->
     <dependencies>
 
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>com.erigir</groupId>
