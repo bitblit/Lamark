@@ -33,4 +33,8 @@ public class InnerMutator<T> implements Function<Individual<T>, Individual<T>>
         }
         return value;
     }
+
+    Function<T, T> getMutator() {
+        return mutator;
+    }
 }

@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Line2D;
+import java.util.Map;
 
 
 /**
@@ -55,12 +56,14 @@ public class CAGraphicalListener implements GUIEventListener {
         if ((je instanceof BetterIndividualFoundEvent) && null != parentStage) {
             verifyFrame();
             BetterIndividualFoundEvent bif = (BetterIndividualFoundEvent) je;
+            Map<String,Object> context = je.getLamark().getContext();
+
             displayPanel.div = bif.getNewBest();
-            displayPanel.NUMBER_OF_CA_COLS = (Integer) displayPanel.div.getAttribute("NUMBER_OF_CA_COLS");
-            displayPanel.NUMBER_OF_CA_ROWS = (Integer) displayPanel.div.getAttribute("NUMBER_OF_CA_ROWS");
-            displayPanel.tableWidth = (Integer) displayPanel.div.getAttribute("TABLE_WIDTH");
-            displayPanel.tableHeight = (Integer) displayPanel.div.getAttribute("TABLE_HEIGHT");
-            displayPanel.automata = (CellularAutomata[]) displayPanel.div.getAttribute("CADATA");
+            displayPanel.NUMBER_OF_CA_COLS = (Integer) context.get("NUMBER_OF_CA_COLS");
+            displayPanel.NUMBER_OF_CA_ROWS = (Integer) context.get("NUMBER_OF_CA_ROWS");
+            displayPanel.tableWidth = (Integer) context.get("TABLE_WIDTH");
+            displayPanel.tableHeight = (Integer) context.get("TABLE_HEIGHT");
+            // TODO: context isnt individual specific displayPanel.automata = (CellularAutomata[]) context.get("CADATA");
 
             Dimension preferred = new Dimension(displayPanel.preferredWidth(), displayPanel.preferredHeight() + 32);
             displayFrame.setSize(preferred);

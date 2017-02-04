@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Map;
 
 /**
  * A graphic listener that shows the length of a given schedule in comparison to the worst one found.
@@ -52,12 +53,14 @@ public class ScheduleGraphicalListener implements GUIEventListener {
             LOG.trace("Frame is {}" , parentStage);
             verifyFrame();
             BetterIndividualFoundEvent bif = (BetterIndividualFoundEvent) je;
+            Map<String,Object> context = je.getLamark().getContext();
+
             displayPanel.div = bif.getNewBest();
-            displayPanel.worstFound = (Integer) displayPanel.div.getAttribute("WORST");
-            displayPanel.schedule = (DynamicScheduler) displayPanel.div.getAttribute("SCHEDULE");
-            displayPanel.totalWidth = (Integer) displayPanel.div.getAttribute("TOTALWIDTH");
-            displayPanel.permTime = (int[]) displayPanel.div.getAttribute("PERMTIME");
-            displayPanel.permWeight = (int[]) displayPanel.div.getAttribute("PERMWEIGHT");
+            displayPanel.worstFound = (Integer) context.get("WORST");
+            displayPanel.schedule = (DynamicScheduler) context.get("SCHEDULE");
+            displayPanel.totalWidth = (Integer) context.get("TOTALWIDTH");
+            displayPanel.permTime = (int[]) context.get("PERMTIME");
+            displayPanel.permWeight = (int[]) context.get("PERMWEIGHT");
             displayPanel.repaint();
         }
     }

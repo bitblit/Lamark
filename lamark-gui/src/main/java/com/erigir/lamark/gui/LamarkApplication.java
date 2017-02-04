@@ -187,7 +187,7 @@ public class LamarkApplication extends Application {
         String initialLocation = (lastFile == null) ? null : lastFile.toURI().toString();
         String initialSelection = null; // TODO: implement
 
-        gui = new LamarkGui(initialLocation, initialSelection);
+        gui = new LamarkGui(initialLocation, initialSelection, primaryStage);
         layout.setCenter(gui);
 
         primaryStage.setScene(new Scene(layout));

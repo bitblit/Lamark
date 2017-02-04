@@ -3,6 +3,7 @@
  */
 package com.erigir.lamark.example.schedule;
 
+import com.erigir.lamark.ContextAware;
 import com.erigir.lamark.SelfValidating;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
 /**
@@ -21,7 +23,7 @@ import java.util.function.ToDoubleFunction;
  * @author cweiss
  * @since 04/2005
  */
-public class ScheduleFitness implements ToDoubleFunction<List<Integer>>,SelfValidating {
+public class ScheduleFitness implements ToDoubleFunction<List<Integer>>,SelfValidating,ContextAware {
     private static final Logger LOG = LoggerFactory.getLogger(ScheduleFitness.class);
     /**
      * Holds the worst time found so we can track improvement.  Really should be done by a listeners *
@@ -39,6 +41,15 @@ public class ScheduleFitness implements ToDoubleFunction<List<Integer>>,SelfVali
      * Cache holding of all job times summed *
      */
     int totalWeightedTime;
+    /**
+     * Reference to the context for performance
+     */
+    Map<String,Object> context;
+
+    @Override
+    public void setContext(Map<String, Object> context) {
+        this.context = context;
+    }
 
     /**
      * Defaults the times and weights to the ones specified by assignment
@@ -162,7 +173,9 @@ public class ScheduleFitness implements ToDoubleFunction<List<Integer>>,SelfVali
         int totalWidth = totalWeightedTime + (5 * ds.splitPoints().length);
         int[] permTime = asPermutation(times, (Integer[]) testList.toArray(new Integer[0]));
         int[] permWeight = asPermutation(weights, (Integer[]) testList.toArray(new Integer[0]));
-        /*i.setAttribute("SCHEDULE", ds);
+        /*
+        TODO: need to track
+        i.setAttribute("SCHEDULE", ds);
         i.setAttribute("WORST", worstFound);
         i.setAttribute("TOTALWIDTH", totalWidth);
         i.setAttribute("PERMTIME", permTime);

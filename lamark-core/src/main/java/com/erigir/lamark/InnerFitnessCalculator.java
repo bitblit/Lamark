@@ -20,4 +20,8 @@ public class InnerFitnessCalculator<T> implements Function<Individual<T>, Indivi
         value.setFitness(fitness);
         return value;
     }
+
+    ToDoubleFunction<T> getCalculator() {
+        return calculator;
+    }
 }

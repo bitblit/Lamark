@@ -1,8 +1,7 @@
 package com.erigir.lamark.config;
 
-import com.erigir.lamark.Lamark;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +26,7 @@ public class LamarkComponentDetails {
         return rval;
     }
 
+    @JsonIgnore
     public Class getDefault()
     {
         return classes.get(0);
@@ -34,10 +34,15 @@ public class LamarkComponentDetails {
 
     public Object createConfiguredObject(int idx)
     {
+        LOG.debug("Creating object of type {}",classes.get(idx));
+        return createConfiguredObject(classes.get(idx), config);
+    }
+
+    public static Object createConfiguredObject(Class clazz, Map<String,String> config)
+    {
         try
         {
-            LOG.debug("Creating object of type {}",classes.get(idx));
-            Object rval = classes.get(idx).newInstance();
+            Object rval = clazz.newInstance();
 
             if (config!=null)
             {

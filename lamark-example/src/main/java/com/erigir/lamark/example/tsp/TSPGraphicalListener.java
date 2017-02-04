@@ -14,6 +14,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A listener that redraws the supplied TSP when a new best individual is found.
@@ -54,11 +55,13 @@ public class TSPGraphicalListener implements GUIEventListener {
     public void handleEvent(LamarkEvent je) {
         if ((je instanceof BetterIndividualFoundEvent) && (parentStage != null)) {
             current = ((BetterIndividualFoundEvent) je).getNewBest();
+            Map<String,Object> context = je.getLamark().getContext();
+
             verifyFrame();
             List<?> perm = (List<?>) current.getGenome();
             Integer[] permI = perm.toArray(new Integer[0]);
 
-            List<?> tempPoints = (List<?>) current.getAttribute("POINTS");
+            List<?> tempPoints = (List<?>) context.get("POINTS");
             // Recasting hack
             List<MyPoint> points = new ArrayList<MyPoint>(tempPoints.size());
             for (Object o : tempPoints) {
@@ -66,11 +69,11 @@ public class TSPGraphicalListener implements GUIEventListener {
             }
 
             displayPanel.points = points;
-            displayPanel.bestKnown = ((Integer) current.getAttribute("BESTKNOWN"));
-            displayPanel.minX = (Double) current.getAttribute("MINX");
-            displayPanel.minY = (Double) current.getAttribute("MINY");
-            displayPanel.maxX = (Double) current.getAttribute("MAXX");
-            displayPanel.maxY = (Double) current.getAttribute("MAXY");
+            displayPanel.bestKnown = ((Integer) context.get("BESTKNOWN"));
+            displayPanel.minX = (Double) context.get("MINX");
+            displayPanel.minY = (Double) context.get("MINY");
+            displayPanel.maxX = (Double) context.get("MAXX");
+            displayPanel.maxY = (Double) context.get("MAXY");
             displayPanel.permDistance = current.getFitness();
             displayPanel.perm = permI;
             displayPanel.repaint();

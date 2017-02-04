@@ -1,7 +1,5 @@
 package com.erigir.lamark.gui;
 
-import com.erigir.lamark.Lamark;
-import com.erigir.lamark.LamarkBuilder;
 import com.erigir.lamark.config.*;
 import com.erigir.lamark.events.*;
 import com.erigir.lamark.selector.Selector;
@@ -42,6 +40,11 @@ public class LamarkConfigPanel extends BorderPane {
      */
     private static final Logger LOG = LoggerFactory.getLogger(LamarkConfigPanel.class.getName());
     /**
+     * Holds onto the original classloader
+     */
+    private ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+
+    /**
      * Location of the default file
      */
     private static final String DEFAULT_CONFIG_LOCATION = "classpath:com/erigir/lamark/gui/default-lamark.json";
@@ -58,18 +61,15 @@ public class LamarkConfigPanel extends BorderPane {
      */
     private List<String> preloads = new ArrayList<String>();
     /**
-     * List of custom listeners to instantiate *
+     * List of custom listeners to instantiate - at the moment this isn't editable, its just
+     * used to hold onto anything that comes in from the config file
      */
-    private List<String> customListener = new ArrayList<String>();
+    private List<LamarkCustomListener> customListenerHolder = new ArrayList<LamarkCustomListener>();
 
     /**
      * Button/Label for preloads *
      */
     private Button preloadButton = new Button("Preloads...");
-    /**
-     * Button/Label for custom listeners *
-     */
-    private Button customListenerButton = new Button("Custom Listeners...");
     /**
      * Label for upper elitism control *
      */
@@ -192,7 +192,6 @@ public class LamarkConfigPanel extends BorderPane {
         mutatorLabel.setEnabled(enable);
         selectorLabel.setEnabled(enable);
         preloadButton.setEnabled(enable);
-        customListenerButton.setEnabled(enable);
 
         lBetterIndividualFound.setEnabled(enable);
         lException.setEnabled(enable);
@@ -241,15 +240,12 @@ public class LamarkConfigPanel extends BorderPane {
                     mutationProbability.getValueFactory().setValue((int) (p.getMutationProbability() * 100));
                     targetScore.setText(ein(p.getTargetScore()));
                     randomSeed.setText(ein(p.getRandomSeed()));
+                    customListenerHolder = configuration.getCustomListeners();
                 });
 
         /*
         preloads = new ArrayList<String>(lc.getPreCreatedIndividuals());
 
-        customListener = new ArrayList<String>();
-        for (Class c : lc.getCustomListeners()) {
-            customListener.add(c.getName());
-        }
         TODO: Reimpl
         */
     }
@@ -262,6 +258,7 @@ public class LamarkConfigPanel extends BorderPane {
 
         rval.setComponents(components);
         rval.setParameters(parameters);
+        rval.setCustomListeners(customListenerHolder);
 
         components.setSupplier(supplierConfigPane.toComponentDetails());
         components.setCrossover(crossoverConfigPane.toComponentDetails());
@@ -278,22 +275,14 @@ public class LamarkConfigPanel extends BorderPane {
         parameters.setMutationProbability(mutationProbability.getValue()/100.0);
         parameters.setTargetScore(nsDouble(targetScore.getText()));
 
-        /*
-        for (String s : customListener) {
-            Class c = LamarkAvailableClasses.safeLoadClass(s);
-            if (c != null) {
-                p.getCustomListeners().add(c);
-            }
-        }
-        TODO: listeners get added to the lamark instance?
-        */
-
         return rval;
     }
 
 
 
     public void reset() {
+        // Clear any custom classloader
+        Thread.currentThread().setContextClassLoader(originalClassLoader);
         loadFromLocation(DEFAULT_CONFIG_LOCATION);
     }
 
@@ -345,8 +334,9 @@ public class LamarkConfigPanel extends BorderPane {
                         is = u.openStream();
                     } else {
                         // Need to massage the classpath and load default
-                        URLClassLoader newClassLoader = new URLClassLoader(new URL[]{u}, Thread.currentThread().getContextClassLoader());
-                        is = newClassLoader.getResourceAsStream("/lamark.json");
+                        URLClassLoader newClassLoader = new URLClassLoader(new URL[]{u}, originalClassLoader);
+                        Thread.currentThread().setContextClassLoader(newClassLoader);
+                        is = Thread.currentThread().getContextClassLoader().getResourceAsStream("lamark.json");
                     }
                 }
 
@@ -360,8 +350,18 @@ public class LamarkConfigPanel extends BorderPane {
                     }
                     else
                     {
-                        // TODO: impl
-                        LOG.warn("Cant process multi yet");
+                        // Select which one we want to use
+                        List<String> choices = new ArrayList<>(mlc.getConfigurations().keySet());
+
+                        ChoiceDialog<String> dialog = new ChoiceDialog<>(choices.get(0), choices);
+                        dialog.setTitle("Select Configuration");
+                        dialog.setHeaderText("This file contains multiple configurations, please choose one");
+                        dialog.setContentText("Configuration:");
+
+                        Optional<String> result = dialog.showAndWait();
+                        if (result.isPresent()){
+                            loadFromConfiguration(mlc.getConfigurations().get(result.get()));
+                        }
                     }
                 } else {
                     throw new IllegalStateException("Failed to load configuration JSON file");
@@ -397,8 +397,7 @@ public class LamarkConfigPanel extends BorderPane {
         GridPane.setConstraints(mutationProbabilityLabel,2,0);
         GridPane.setConstraints(maximumPopulationsLabel,3,0);
         GridPane.setConstraints(targetScoreLabel,4,0);
-        GridPane.setConstraints(customListenerButton,5,0);
-        
+
         GridPane.setConstraints(populationSize,0,1);
         GridPane.setConstraints(crossoverProbability,1,1);
         GridPane.setConstraints(mutationProbability,2,1);
@@ -411,7 +410,7 @@ public class LamarkConfigPanel extends BorderPane {
         ,mutationProbabilityLabel
         ,maximumPopulationsLabel
         ,targetScoreLabel
-        ,customListenerButton
+
 
         ,populationSize
         ,crossoverProbability
@@ -420,13 +419,6 @@ public class LamarkConfigPanel extends BorderPane {
         ,targetScore
         ,preloadButton);
 
-        
-        customListenerButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                customListener = editStringList(customListener, customListenerButton.getText());
-            }
-        });
 
         preloadButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -569,25 +561,6 @@ public class LamarkConfigPanel extends BorderPane {
         return (s == null) ? "" : String.valueOf(s);
     }
 
-    /**
-     * Creates a properties object matching the state of the panel.
-     *
-     * @return Properties object matching the panel.
-     */
-    public LamarkBuilder toBuilder() {
-        LamarkBuilder builder = new LamarkBuilder();
-        return convertToConfiguration().applyToBuilder(builder);
-
-    }
-
-    /**
-     * Accessor method.
-     *
-     * @return List containing the property
-     */
-    public List<String> getCustomListener() {
-        return customListener;
-    }
 
 
 }

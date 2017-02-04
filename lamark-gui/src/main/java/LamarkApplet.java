@@ -3,6 +3,7 @@ import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 import javax.swing.*;
 
@@ -21,11 +22,12 @@ import javax.swing.*;
 public class LamarkApplet extends JApplet {
     private Scene scene;
     private Group root;
+    private Stage mainStage;
 
     /**
      * Wrapped gui object *
      */
-    private LamarkGui gui = new LamarkGui(getParameter("initialLocation"), getParameter("initialSelection"));
+    private LamarkGui gui;
 
     @Override
     public final void init() { // This method is invoked when applet is loaded
@@ -53,6 +55,8 @@ public class LamarkApplet extends JApplet {
     private void initFX(JFXPanel fxPanel) { // This method is invoked on JavaFX thread
         root = new Group();
         scene = new Scene(root);
+        mainStage = new Stage();
+        gui = new LamarkGui(getParameter("initialLocation"), getParameter("initialSelection"),mainStage);
         root.getChildren().add(gui);
         fxPanel.setScene(scene);
     }

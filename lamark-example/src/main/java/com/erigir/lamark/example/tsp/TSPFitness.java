@@ -7,11 +7,9 @@ import com.erigir.lamark.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.naming.Context;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.function.ToDoubleFunction;
 
 /**
@@ -25,8 +23,11 @@ import java.util.function.ToDoubleFunction;
  * @author cweiss
  * @since 04/2005
  */
-public class TSPFitness  implements ToDoubleFunction<List<Integer>>, SelfValidating {
+public class TSPFitness  implements ToDoubleFunction<List<Integer>>, SelfValidating, ContextAware {
     private static final Logger LOG = LoggerFactory.getLogger(TSPFitness.class);
+
+    private Map<String,Object> context;
+
     /**
      * String handle to the original tsp file read *
      */
@@ -56,6 +57,19 @@ public class TSPFitness  implements ToDoubleFunction<List<Integer>>, SelfValidat
      */
     private double maxY = Double.MIN_VALUE;
 
+    @Override
+    public void setContext(Map<String, Object> context) {
+        this.context = context;
+
+        context.put("POINTS", points);
+        context.put("MINX", minX);
+        context.put("MINY", minY);
+        context.put("MAXX", maxX);
+        context.put("MAXY", maxY);
+        context.put("BESTKNOWN", getBestKnown());
+
+    }
+
     /**
      * Accessor method.
      *
@@ -65,7 +79,6 @@ public class TSPFitness  implements ToDoubleFunction<List<Integer>>, SelfValidat
         return bestKnown;
     }
 
-
     /**
      * Mutator method
      *
@@ -73,6 +86,9 @@ public class TSPFitness  implements ToDoubleFunction<List<Integer>>, SelfValidat
      */
     public void setBestKnown(Integer bestKnown) {
         this.bestKnown = bestKnown;
+    }
+    public void setBestKnown(String bestKnown) {
+        this.bestKnown = Integer.parseInt(bestKnown);
     }
 
     /**
@@ -246,18 +262,9 @@ public class TSPFitness  implements ToDoubleFunction<List<Integer>>, SelfValidat
         return rval;
     }
 
-    // TODO: Minimum best
-
     @Override
     public double applyAsDouble(List<Integer> l) {
         Integer[] arr = l.toArray(new Integer[0]);
-        /*
-        i.setAttribute("POINTS", points);
-        i.setAttribute("MINX", minX);
-        i.setAttribute("MINY", minY);
-        i.setAttribute("MAXX", maxX);
-        i.setAttribute("MAXY", maxY);
-        i.setAttribute("BESTKNOWN", getBestKnown()); */
         return permutationDistance(arr);
     }
 

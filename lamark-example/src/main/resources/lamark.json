@@ -1,168 +1,392 @@
 {
-    "Cellular Automata": {
-        "numberOfWorkerThreads": 4,
-        "crossoverProbability": 1,
-        "populationSize": 500,
-        "selectorClass": "com.erigir.lamark.selector.RouletteWheel",
-        "upperElitism": 0.1,
-        "fitnessFunctionClass": "com.erigir.lamark.example.cellular.CAMajorityFitness",
-        "supplierClass": "com.erigir.lamark.supplier.BinaryStringSupplier",
-        "randomSeed": 1,
-        "mutatorClass": "com.erigir.lamark.mutator.StringSimpleMutator",
-        "mutationProbability": 0,
-        "crossoverClass": "com.erigir.lamark.crossover.StringSinglePoint",
-        "lowerElitism": 0.1,
-        "fitnessFunctionConfiguration": {
-            "tableHeight": 100,
-            "tableWidth": 100,
-            "radius": 3
-        },
-        "supplierConfiguration": {
-            "size": 128
-        },
-        "customListeners": [
-            "com.erigir.lamark.example.cellular.CAGraphicalListener"
-        ]
-    },
-    "Scheduling": {
-        "numberOfWorkerThreads": 2,
-        "crossoverProbability": 1,
-        "populationSize": 50,
-        "selectorClass": "com.erigir.lamark.selector.RouletteWheel",
-        "upperElitism": 0.1,
-        "fitnessFunctionClass": "com.erigir.lamark.example.schedule.ScheduleFitness",
-        "supplierClass": "com.erigir.lamark.supplier.IntegerListPermutationSupplier",
-        "randomSeed": 1,
-        "mutatorClass": "com.erigir.lamark.mutator.ListSimpleMutator",
-        "mutationProbability": 0,
-        "crossoverClass": "com.erigir.lamark.crossover.IntegerPermutationFill",
-        "lowerElitism": 0.1,
-        "fitnessFunctionConfiguration": {
-        },
-        "supplierConfiguration": {
-            "size": 30
-        },
-        "customListeners": [
-            "com.erigir.lamark.example.schedule.ScheduleGraphicalListener"
-        ]
-    },
-    "Integer Sorting": {
-        "numberOfWorkerThreads": 2,
-        "crossoverProbability": 1,
-        "populationSize": 10,
-        "selectorClass": "com.erigir.lamark.selector.RouletteWheel",
-        "upperElitism": 0.1,
-        "fitnessFunctionClass": "com.erigir.lamark.example.simple.IntegerSort",
-        "supplierClass": "com.erigir.lamark.supplier.IntegerListPermutationSupplier",
-        "randomSeed": 1,
-        "mutatorClass": "com.erigir.lamark.mutator.ListSimpleMutator",
-        "mutationProbability": 0,
-        "crossoverClass": "com.erigir.lamark.crossover.IntegerPermutationFill",
-        "lowerElitism": 0.1,
-        "fitnessFunctionConfiguration": {
-        },
-        "supplierConfiguration": {
-            "size": 30
-        },
-        "customListeners": [
-        ]
-    },
+  "notes": "The built in set of features for Lamark",
+  "configurations": {
     "Travelling Salesman : Berlin (52)": {
+      "parameters": {
         "numberOfWorkerThreads": 2,
         "crossoverProbability": 1,
         "populationSize": 25,
-        "selectorClass": "com.erigir.lamark.selector.RouletteWheel",
         "upperElitism": 0.1,
-        "fitnessFunctionClass": "com.erigir.lamark.example.tsp.TSPFitness",
-        "supplierClass": "com.erigir.lamark.supplier.IntegerListPermutationSupplier",
         "randomSeed": 1,
-        "mutatorClass": "com.erigir.lamark.mutator.List2ExchangeMutator",
         "mutationProbability": 0,
-        "crossoverClass": "com.erigir.lamark.crossover.IntegerPermutationFill",
         "lowerElitism": 0.1,
-        "fitnessFunctionConfiguration": {
+        "trackParentage": false,
+        "abortOnUniformPopulation": true,
+        "minimizeScore": false
+      },
+      "components": {
+        "selector": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.selector.RouletteWheelSelector"
+          ]
+        },
+        "fitnessFunction": {
+          "config": {
             "tspFile": "berlin52.tsp",
             "bestKnown": 7542
+          },
+          "classes": [
+            "com.erigir.lamark.example.tsp.TSPFitness"
+          ]
         },
-        "supplierConfiguration": {
+        "supplier": {
+          "config": {
             "size": 52
+          },
+          "classes": [
+            "com.erigir.lamark.supplier.IntegerListPermutationSupplier"
+          ]
         },
-        "customListeners": [
-            "com.erigir.lamark.example.tsp.TSPGraphicalListener"
-        ]
+        "mutator": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.mutator.List2ExchangeMutator"
+          ]
+        },
+        "crossover": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.crossover.IntegerPermutationFill"
+          ]
+        }
+      },
+      "customListeners": [
+        {
+          "listenerClass" : "com.erigir.lamark.example.tsp.TSPGraphicalListener",
+          "config" : {}
+        }
+      ]
     },
     "Travelling Salesman : Biergarten (127)": {
+      "parameters": {
         "numberOfWorkerThreads": 2,
         "crossoverProbability": 1,
         "populationSize": 50,
-        "selectorClass": "com.erigir.lamark.selector.RouletteWheel",
         "upperElitism": 0.1,
-        "fitnessFunctionClass": "com.erigir.lamark.example.tsp.TSPFitness",
-        "supplierClass": "com.erigir.lamark.supplier.IntegerListPermutationSupplier",
         "randomSeed": 1,
-        "mutatorClass": "com.erigir.lamark.mutator.List2ExchangeMutator",
         "mutationProbability": 0,
-        "crossoverClass": "com.erigir.lamark.crossover.IntegerPermutationFill",
         "lowerElitism": 0.1,
-        "fitnessFunctionConfiguration": {
+        "trackParentage": false,
+        "abortOnUniformPopulation": true,
+        "minimizeScore": false
+      },
+      "components": {
+        "selector": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.selector.RouletteWheelSelector"
+          ]
+        },
+        "fitnessFunction": {
+          "config": {
             "tspFile": "bier127.tsp",
             "bestKnown": 118282
+          },
+          "classes": [
+            "com.erigir.lamark.example.tsp.TSPFitness"
+          ]
         },
-        "supplierConfiguration": {
+        "supplier": {
+          "config": {
             "size": 127
+          },
+          "classes": [
+            "com.erigir.lamark.supplier.IntegerListPermutationSupplier"
+          ]
         },
-        "customListeners": [
-            "com.erigir.lamark.example.tsp.TSPGraphicalListener"
-        ]
+        "mutator": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.mutator.List2ExchangeMutator"
+          ]
+        },
+        "crossover": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.crossover.IntegerPermutationFill"
+          ]
+        }
+      },
+      "customListeners": [
+        {
+          "listenerClass" : "com.erigir.lamark.example.tsp.TSPGraphicalListener",
+          "config" : {}
+        }
+      ]
     },
     "Travelling Salesman : Germany (15112)": {
+      "parameters": {
         "numberOfWorkerThreads": 2,
         "crossoverProbability": 1,
         "populationSize": 50,
-        "selectorClass": "com.erigir.lamark.selector.RouletteWheel",
         "upperElitism": 0.1,
-        "fitnessFunctionClass": "com.erigir.lamark.example.tsp.TSPFitness",
-        "supplierClass": "com.erigir.lamark.supplier.IntegerListPermutationSupplier",
         "randomSeed": 1,
-        "mutatorClass": "com.erigir.lamark.mutator.List2ExchangeMutator",
         "mutationProbability": 0,
-        "crossoverClass": "com.erigir.lamark.crossover.IntegerPermutationFill",
         "lowerElitism": 0.1,
-        "fitnessFunctionConfiguration": {
+        "trackParentage": false,
+        "abortOnUniformPopulation": true,
+        "minimizeScore": false
+      },
+      "components": {
+        "selector": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.selector.RouletteWheelSelector"
+          ]
+        },
+        "fitnessFunction": {
+          "config": {
             "tspFile": "d15112.tsp",
             "bestKnown": 1573084
+          },
+          "classes": [
+            "com.erigir.lamark.example.tsp.TSPFitness"
+          ]
         },
-        "supplierConfiguration": {
+        "supplier": {
+          "config": {
             "size": 15112
+          },
+          "classes": [
+            "com.erigir.lamark.supplier.IntegerListPermutationSupplier"
+          ]
         },
-        "customListeners": [
-            "com.erigir.lamark.example.tsp.TSPGraphicalListener"
-        ]
+        "mutator": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.mutator.List2ExchangeMutator"
+          ]
+        },
+        "crossover": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.crossover.IntegerPermutationFill"
+          ]
+        }
+      },
+      "customListeners": [
+        {
+          "listenerClass" : "com.erigir.lamark.example.tsp.TSPGraphicalListener",
+          "config" : {}
+        }
+      ]
     },
     "Travelling Salesman : Ulysses (16)": {
+      "parameters": {
         "numberOfWorkerThreads": 2,
         "crossoverProbability": 1,
         "populationSize": 50,
-        "selectorClass": "com.erigir.lamark.selector.RouletteWheel",
         "upperElitism": 0.1,
-        "fitnessFunctionClass": "com.erigir.lamark.example.tsp.TSPFitness",
-        "supplierClass": "com.erigir.lamark.supplier.IntegerListPermutationSupplier",
         "randomSeed": 1,
-        "mutatorClass": "com.erigir.lamark.mutator.List2ExchangeMutator",
         "mutationProbability": 0,
-        "crossoverClass": "com.erigir.lamark.crossover.IntegerPermutationFill",
         "lowerElitism": 0.1,
-        "fitnessFunctionConfiguration": {
+        "trackParentage": false,
+        "abortOnUniformPopulation": true,
+        "minimizeScore": false
+      },
+      "components": {
+        "selector": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.selector.RouletteWheelSelector"
+          ]
+        },
+        "fitnessFunction": {
+          "config": {
             "tspFile": "ulysses16.tsp",
             "bestKnown": 6859
+          },
+          "classes": [
+            "com.erigir.lamark.example.tsp.TSPFitness"
+          ]
         },
-        "supplierConfiguration": {
+        "supplier": {
+          "config": {
             "size": 16
+          },
+          "classes": [
+            "com.erigir.lamark.supplier.IntegerListPermutationSupplier"
+          ]
         },
-        "customListeners": [
-            "com.erigir.lamark.example.tsp.TSPGraphicalListener"
-        ]
+        "mutator": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.mutator.List2ExchangeMutator"
+          ]
+        },
+        "crossover": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.crossover.IntegerPermutationFill"
+          ]
+        }
+      },
+      "customListeners": [
+        {
+          "listenerClass" : "com.erigir.lamark.example.tsp.TSPGraphicalListener",
+          "config" : {}
+        }
+      ]
+    },
+    "Cellular Automata": {
+      "parameters": {
+        "numberOfWorkerThreads": 4,
+        "crossoverProbability": 1,
+        "populationSize": 500,
+        "upperElitism": 0.1,
+        "randomSeed": 1,
+        "mutationProbability": 0,
+        "lowerElitism": 0.1
+      },
+      "components": {
+        "selector": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.selector.RouletteWheelSelector"
+          ]
+        },
+        "fitnessFunction": {
+          "config": {
+            "tableHeight": 100,
+            "tableWidth": 100,
+            "radius": 3
+          },
+          "classes": [
+            "com.erigir.lamark.example.cellular.CAMajorityFitness"
+          ]
+        },
+        "supplier": {
+          "config": {
+            "size": 128
+          },
+          "classes": [
+            "com.erigir.lamark.supplier.BinaryStringSupplier"
+          ]
+        },
+        "mutator": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.mutator.StringSimpleMutator"
+          ]
+        },
+        "crossover": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.crossover.StringSinglePoint"
+          ]
+        }
+      },
+      "customListeners": [
+        {
+          "listenerClass" : "com.erigir.lamark.example.cellular.CAGraphicalListener",
+          "config" : {}
+        }
+      ]
+    },
+    "Scheduling": {
+      "parameters": {
+        "numberOfWorkerThreads": 2,
+        "crossoverProbability": 1,
+        "populationSize": 50,
+        "upperElitism": 0.1,
+        "randomSeed": 1,
+        "mutationProbability": 0,
+        "lowerElitism": 0.1
+      },
+      "components": {
+        "selector": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.selector.RouletteWheelSelector"
+          ]
+        },
+        "fitnessFunction": {
+          "config": {
+          },
+          "classes": [
+            "com.erigir.lamark.example.schedule.ScheduleFitness"
+          ]
+        },
+        "supplier": {
+          "config": {
+            "size": 30
+          },
+          "classes": [
+            "com.erigir.lamark.supplier.IntegerListPermutationSupplier"
+          ]
+        },
+        "mutator": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.mutator.ListSimpleMutator"
+          ]
+        },
+        "crossover": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.crossover.IntegerPermutationFill"
+          ]
+        }
+      },
+      "customListeners": [
+        {
+          "listenerClass" : "com.erigir.lamark.example.schedule.ScheduleGraphicalListener",
+          "config" : {}
+        }
+      ]
+    },
+    "Integer Sorting": {
+      "parameters": {
+        "numberOfWorkerThreads": 2,
+        "crossoverProbability": 1,
+        "populationSize": 10,
+        "upperElitism": 0.1,
+        "randomSeed": 1,
+        "mutationProbability": 0,
+        "lowerElitism": 0.1,
+        "trackParentage": false,
+        "abortOnUniformPopulation": true,
+        "minimizeScore": false
+      },
+      "components": {
+        "selector": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.selector.RouletteWheelSelector"
+          ]
+        },
+        "fitnessFunction": {
+          "config": {
+          },
+          "classes": [
+            "com.erigir.lamark.example.simple.IntegerSort"
+          ]
+        },
+        "supplier": {
+          "config": {
+            "size": 30
+          },
+          "classes": [
+            "com.erigir.lamark.supplier.IntegerListPermutationSupplier"
+          ]
+        },
+        "mutator": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.mutator.ListSimpleMutator"
+          ]
+        },
+        "crossover": {
+          "config": {},
+          "classes": [
+            "com.erigir.lamark.crossover.IntegerPermutationFill"
+          ]
+        }
+      },
+      "customListeners": [
+      ]
     }
-
+  }
 }
 

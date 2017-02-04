@@ -6,6 +6,8 @@ package com.erigir.lamark.gui;
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.LamarkBuilder;
 import com.erigir.lamark.LamarkUtil;
+import com.erigir.lamark.config.LamarkConfiguration;
+import com.erigir.lamark.config.LamarkCustomListener;
 import com.erigir.lamark.config.LamarkSerializer;
 import com.erigir.lamark.events.*;
 import com.sun.javafx.scene.control.behavior.TextAreaBehavior;
@@ -16,16 +18,14 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URLClassLoader;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
@@ -50,6 +50,10 @@ public class LamarkGui extends BorderPane {
      */
     public static final String OPEN_REMOTE = "Open URL...";
     private static final Logger LOG = LoggerFactory.getLogger(LamarkGui.class);
+    /**
+     * Handle to the parent stage
+     */
+    private Stage parentStage;
     /**
      * Handle to the central panel *
      */
@@ -123,7 +127,8 @@ public class LamarkGui extends BorderPane {
      * @param initialLocation  String containing the initial location to load
      * @param initialSelection String containing the initial item to select
      */
-    public LamarkGui(String initialLocation, String initialSelection) {
+    public LamarkGui(String initialLocation, String initialSelection, final Stage parentStage) {
+        this.parentStage = Objects.requireNonNull(parentStage);
         configPanel = new LamarkConfigPanel(initialLocation);
         mainPanel = buildMainPanel();
 
@@ -136,12 +141,25 @@ public class LamarkGui extends BorderPane {
                     output.setText("Starting new Lamark instance...\n\n");
 
                     // First, generate a new currentRunner
-                    LamarkBuilder builder = configPanel.toBuilder();
+                    LamarkConfiguration configuration = configPanel.convertToConfiguration();
+                    LamarkBuilder builder = new LamarkBuilder();
+                    configuration.applyToBuilder(builder);
                     currentRunner = builder.build();
 
                     // Add this as a generic listener for timers
                     currentRunner.addListener(new OutputListener(output));
                     currentRunner.addListener(new ButtonUpdateListener());
+
+                    // Add any custom listeners
+                    for (LamarkCustomListener l:configuration.getCustomListeners())
+                    {
+                        LamarkEventListener listener = l.createConfiguredObject();
+                        if (GUIEventListener.class.isAssignableFrom(listener.getClass()))
+                        {
+                            ((GUIEventListener)listener).setParentStage(parentStage);
+                        }
+                        currentRunner.addListener(listener);
+                    }
 
                     output.setText("");
                     start.setDisable(true);

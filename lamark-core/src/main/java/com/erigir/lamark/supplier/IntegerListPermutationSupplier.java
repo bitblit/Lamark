@@ -33,6 +33,11 @@ public class IntegerListPermutationSupplier extends AbstractLamarkComponent impl
         this.size = size;
     }
 
+    public IntegerListPermutationSupplier() {
+        super();
+    }
+
+
     /**
      * Accessor method
      *
@@ -60,4 +65,10 @@ public class IntegerListPermutationSupplier extends AbstractLamarkComponent impl
         return rval;
     }
 
+    public void setSize(Integer size) {
+        this.size = size;
+    }
+    public void setSize(String size) {
+        this.size = Integer.parseInt(size);
+    }
 }

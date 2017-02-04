@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -25,6 +26,9 @@ public class Lamark<T> implements Callable<T> {
     private Long currentGeneration = 0L;
     private Long started;
     private Long ended;
+
+    // Context is a general holding place for objects that are shared by various
+    private Map<String,Object> context = new ConcurrentHashMap<>();
 
     // Helper functions for wrapping and stripping Individual wrappers from genomes
     private Wrapper<T> wrapper = new Wrapper<>();
@@ -138,10 +142,25 @@ public class Lamark<T> implements Callable<T> {
         call();
     }
 
+    /**
+     * For any component that implements context awareness, give them a handle
+     */
+    private void addContextReferences()
+    {
+        for (Object o:Arrays.asList(supplier, fitnessFunction.getCalculator(), crossover.getCrossover(), mutator.getMutator(),formatter,selector))
+        {
+            if (ContextAware.class.isAssignableFrom(o.getClass()))
+            {
+                LOG.info("ContextAware : {}",o);
+                ((ContextAware)o).setContext(context);
+            }
+        }
+    }
 
     public T call()
     {
         LOG.info("About to start the Lamark process");
+        addContextReferences();
         try {
             started = System.currentTimeMillis();
 
@@ -266,4 +285,7 @@ public class Lamark<T> implements Callable<T> {
         return bestSoFar;
     }
 
+    public Map<String, Object> getContext() {
+        return context;
+    }
 }

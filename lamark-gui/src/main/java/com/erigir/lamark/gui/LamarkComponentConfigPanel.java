@@ -33,6 +33,19 @@ public class LamarkComponentConfigPanel<T> extends VBox {
     public LamarkComponentConfigPanel()
     {
         super();
+        comboBox = new ComboBox();
+        comboBox.setConverter(ClassComboboxStringConverter.INSTANCE);
+
+        editPropertiesButton = new Button("Configuration...");
+        editPropertiesButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                new Alert(Alert.AlertType.INFORMATION,"Edit propss").show();
+            }
+        });
+
+        getChildren().addAll(comboBox, editPropertiesButton);
+
     }
 
     public LamarkComponentDetails toComponentDetails()
@@ -67,20 +80,11 @@ public class LamarkComponentConfigPanel<T> extends VBox {
         }
 
         // Now initialize
-        comboBox = new ComboBox();
+        comboBox.getItems().retainAll(Collections.emptyList());
         comboBox.getItems().addAll(availableClasses);
         comboBox.getSelectionModel().select(this.defaultSelection);
-        comboBox.setConverter(ClassComboboxStringConverter.INSTANCE);
 
-        editPropertiesButton = new Button(title+" Configuration...");
-        editPropertiesButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                new Alert(Alert.AlertType.INFORMATION,"Edit propss").show();
-            }
-        });
-
-        getChildren().addAll(comboBox, editPropertiesButton);
+        editPropertiesButton.setText( title+" Configuration...");
     }
 
     /**

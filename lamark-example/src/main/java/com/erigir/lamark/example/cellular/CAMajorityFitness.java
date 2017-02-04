@@ -6,6 +6,7 @@ package com.erigir.lamark.example.cellular;
 import com.erigir.lamark.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.function.ToDoubleFunction;
 
@@ -16,7 +17,8 @@ import java.util.function.ToDoubleFunction;
  * @author cweiss
  * @since 03/2007
  */
-public class CAMajorityFitness implements ToDoubleFunction<String>, SelfValidating {
+public class CAMajorityFitness implements ToDoubleFunction<String>, SelfValidating, ContextAware {
+
     /**
      * Number of tables used to test the CA rule *
      */
@@ -63,6 +65,11 @@ public class CAMajorityFitness implements ToDoubleFunction<String>, SelfValidati
      */
     private static String[] firstRows;
     /**
+     * Handle to the context for performance
+     */
+    private Map<String,Object> context;
+
+    /**
      * Length of the string holding a rule set *
      */
     public int stringLength;
@@ -82,6 +89,16 @@ public class CAMajorityFitness implements ToDoubleFunction<String>, SelfValidati
      * Radius of a given rule set *
      */
     private Integer radius;
+
+    @Override
+    public void setContext(Map<String, Object> context) {
+        this.context = context;
+
+        context.put("NUMBER_OF_CA_COLS", NUMBER_OF_CA_COLS);
+        context.put("NUMBER_OF_CA_ROWS", NUMBER_OF_CA_ROWS);
+        context.put("TABLE_WIDTH", tableWidth);
+        context.put("TABLE_HEIGHT", tableHeight);
+    }
 
     /**
      * Fills a boolean array with a normal distribution of values
@@ -208,12 +225,8 @@ public class CAMajorityFitness implements ToDoubleFunction<String>, SelfValidati
             }
         }
 
-        /* Save the ca's in case we need to draw this guy
-        div.setAttribute("CADATA", automata);
-        div.setAttribute("NUMBER_OF_CA_COLS", NUMBER_OF_CA_COLS);
-        div.setAttribute("NUMBER_OF_CA_ROWS", NUMBER_OF_CA_ROWS);
-        div.setAttribute("TABLE_WIDTH", tableWidth);
-        div.setAttribute("TABLE_HEIGHT", tableHeight); */
+        /* Save the ca's in case we need to draw this guy */
+        // TODO: context isnt individual-specific context.put("CADATA", automata);
 
         return points;
     }

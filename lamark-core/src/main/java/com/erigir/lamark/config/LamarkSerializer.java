@@ -20,6 +20,7 @@ public class LamarkSerializer {
         ObjectMapper rval = new ObjectMapper();
         rval.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         rval.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
+        rval.configure(SerializationFeature.INDENT_OUTPUT, true);
         return rval;
     }
 
