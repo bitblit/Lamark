@@ -7,7 +7,6 @@ import com.erigir.lamark.gui.GUIEventListener;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
-import javafx.stage.PopupWindow;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,19 +38,12 @@ public class TSPGraphicalListener extends Stage implements GUIEventListener {
 
     private Canvas canvas;
 
-    private Stage parentStage;
-
     /**
      * Sets the owner of this popup to the passed stage and starts the display
      * @see com.erigir.lamark.gui.GUIEventListener#setParentStage(Stage)
      */
     public void setParentStage(Stage parentStage) {
-        //this.show(parentStage, 0,0);
-        this.parentStage = parentStage;
-    }
-
-    public TSPGraphicalListener() {
-        super();
+        initOwner(parentStage);
         canvas = new Canvas(400, 400);
         this.setScene(new Scene(new Group(canvas)));
         show();
@@ -63,9 +55,9 @@ public class TSPGraphicalListener extends Stage implements GUIEventListener {
      * @see com.erigir.lamark.events.LamarkEventListener#handleEvent(com.erigir.lamark.events.LamarkEvent)
      */
     public void handleEvent(LamarkEvent je) {
-        if (parentStage==null)
+        if (canvas==null)
         {
-            LOG.info("Not rendering - owner window not set yet");
+            LOG.info("Not rendering - not showing yet");
         }
         else
         {

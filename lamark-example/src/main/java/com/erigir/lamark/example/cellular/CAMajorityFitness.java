@@ -267,11 +267,15 @@ public class CAMajorityFitness implements ToDoubleFunction<String>, SelfValidati
 
     }
 
-    /**
-     * Accessor method
-     *
-     * @return Integer containing the value
-     */
+    public void setRadius(String radius) {
+        setRadius(Integer.parseInt(radius));
+    }
+
+        /**
+         * Accessor method
+         *
+         * @return Integer containing the value
+         */
     public Integer getTableHeight() {
         return tableHeight;
     }
@@ -283,6 +287,9 @@ public class CAMajorityFitness implements ToDoubleFunction<String>, SelfValidati
      */
     public void setTableHeight(Integer tableHeight) {
         this.tableHeight = tableHeight;
+    }
+    public void setTableHeight(String tableHeight) {
+        this.tableHeight = Integer.parseInt(tableHeight);
     }
 
     /**
@@ -308,6 +315,11 @@ public class CAMajorityFitness implements ToDoubleFunction<String>, SelfValidati
             firstRows[i] = booleanArrayToString(newFlatDistributionBooleanArray(tableWidth, pctTrue));
         }
     }
+
+    public void setTableWidth(String tableWidth) {
+        setTableWidth(Integer.parseInt(tableWidth));
+    }
+
 
 
 }
