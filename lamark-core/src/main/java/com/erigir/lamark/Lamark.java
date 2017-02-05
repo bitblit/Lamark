@@ -50,6 +50,7 @@ public class Lamark<T> implements Callable<T> {
     Boolean minimizeScore;
     Integer numberOfParents;
 
+    Double elitismPercentage;
 
     public void addListener(LamarkEventListener listener)
     {
@@ -161,6 +162,11 @@ public class Lamark<T> implements Callable<T> {
     {
         LOG.info("About to start the Lamark process");
         addContextReferences();
+
+        // The number of people to replace with the best of the previous generation
+        int eliteCount = (elitismPercentage ==null)?0:(int)Math.max(1,Math.floor(elitismPercentage *populationSize));
+        List<Individual<T>> elites = null;
+
         try {
             started = System.currentTimeMillis();
 
@@ -174,7 +180,7 @@ public class Lamark<T> implements Callable<T> {
             List<Individual<T>> curGen = null;
 
             try {
-                curGen = items.stream().map(wrapper).collect(Collectors.toList());
+                curGen = items.parallelStream().map(wrapper).collect(Collectors.toList());
             } catch (Exception e) {
                 publishEvent(new ExceptionEvent(this, e));
                 this.stop();
@@ -185,7 +191,7 @@ public class Lamark<T> implements Callable<T> {
                     // Start each generation with a list of individuals with no fitness value yet
 
                     // Calc the fit values and sort
-                    curGen = curGen.stream().map(fitnessFunction).sorted().collect(Collectors.toList());
+                    curGen = curGen.parallelStream().map(fitnessFunction).sorted().collect(Collectors.toList());
 
                     // If we've found a new best, update and report
                     if (minimizeScore) {
@@ -201,34 +207,56 @@ public class Lamark<T> implements Callable<T> {
                     }
 
                     // Calc total
-                    LOG.debug("Generation {}:{}", currentGeneration, curGen);
-                    LOG.debug("Stripped: {}", curGen.stream().map(stripper).collect(Collectors.toList()));
+                    if (LOG.isTraceEnabled())
+                    {
+                        LOG.trace("Generation {}:{}", currentGeneration, curGen);
+                        LOG.trace("Stripped: {}", curGen.stream().map(stripper).collect(Collectors.toList()));
 
-                    double totalFitness = curGen.stream().mapToDouble((p) -> p.getFitness()).sum();
-                    LOG.debug("Total fitness: {}", totalFitness);
+                        double totalFitness = curGen.stream().mapToDouble((p) -> p.getFitness()).sum();
+                        LOG.trace("Total fitness: {}", totalFitness);
+                    }
 
                     // Select for crossover (select a bunch at once, and then create parent lists from them
                     // Designed this way because the selectors typically do a bunch of calcs that can be reused
                     // over and over
-                    List<Individual<T>> selected = selector.select(curGen, random, numberOfParents * populationSize, minimizeScore);
+
+                    List<Individual<T>> selected = selector.select(curGen, random, numberOfParents * (populationSize-eliteCount), minimizeScore);
+
                     // Stats - increment all of their selected counters
-                    selected.stream().forEach((p) -> p.incrementSelected());
+                    selected.parallelStream().forEach((p) -> p.incrementSelected());
 
                     List<List<Individual<T>>> parents = new ArrayList<>(populationSize);
-                    for (int i = 0; i < populationSize; i++) {
+                    for (int i = 0; i < (populationSize-eliteCount); i++) {
                         parents.add(selected.subList(i * numberOfParents, (i + 1) * numberOfParents));
                     }
-                    publishEvent(new PopulationCompleteEvent(this, curGen, currentGeneration));
 
                     // At the end of each cycle check exit conditions
                     updateIfShouldKeepRunning(curGen);
                     // --------------------
                     // Next generation starts here
-                    // TODO: Upper/lower elitism
+                    // Collect indiviuals for elitism
+                    if (eliteCount>0)
+                    {
+                        // Pick out the elites before we change the curGen pointer
+                        elites = (minimizeScore)?curGen.subList(0,eliteCount):curGen.subList(populationSize-eliteCount, populationSize);
+                    }
 
-                    currentGeneration++;
                     // Apply crossover and mutation
-                    curGen = parents.stream().map(crossover).map(mutator).collect(Collectors.toList());
+                    curGen = parents.parallelStream().map(crossover).map(mutator).collect(Collectors.toList());
+                    // Add the elites back in
+                    curGen.addAll(elites);
+
+                    publishEvent(new PopulationCompleteEvent(this, curGen, currentGeneration));
+                    currentGeneration++;
+
+                    if ((currentGeneration%1000)==0)
+                    {
+                        long time = System.currentTimeMillis()-started;
+                        double gps = currentGeneration/(time/1000);
+                        LOG.debug("Current GPS : {}",gps);
+                    }
+
+
                 } catch (Exception e) {
                     LOG.warn("Error", e);
                     publishEvent(new ExceptionEvent(this, e));

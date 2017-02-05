@@ -71,13 +71,9 @@ public class LamarkConfigPanel extends BorderPane {
      */
     private Button preloadButton = new Button("Preloads...");
     /**
-     * Label for upper elitism control *
+     * Label for elitism control *
      */
-    private Label upperElitismLabel = new Label("Upper Elitism (%)");
-    /**
-     * Label for lower elitism control *
-     */
-    private Label lowerElitismLabel = new Label("Lower Elitism (%)");
+    private Label elitismLabel = new Label("Elitism (%)");
     /**
      * Label for max pop control *
      */
@@ -102,6 +98,11 @@ public class LamarkConfigPanel extends BorderPane {
      * Label for random seed control *
      */
     private Label randomSeedLabel = new Label("Random Seed");
+
+    /**
+     * Score should be minimized instead of maximized
+     */
+    private CheckBox minimizeScore = new CheckBox("Minimize Score");
 
     /**
      * Better individual listener enabler *
@@ -131,7 +132,7 @@ public class LamarkConfigPanel extends BorderPane {
     /**
      * Edit box holding upper elitism *
      */
-    private Spinner<Integer> upperElitism = new Spinner<Integer>(0,100,10);
+    private Spinner<Integer> elitism = new Spinner<Integer>(0,100,10);
     /**
      * Edit box holding lower elitism *
      */
@@ -208,7 +209,7 @@ public class LamarkConfigPanel extends BorderPane {
         fitness.setEnabled(enable);
         mutator.setEnabled(enable);
         selector.setEnabled(enable);
-        upperElitism.setEnabled(enable);
+        elitism.setEnabled(enable);
         lowerElitism.setEnabled(enable);
         maximumPopulations.setEnabled(enable);
         populationSize.setEnabled(enable);
@@ -232,8 +233,7 @@ public class LamarkConfigPanel extends BorderPane {
                     selectorConfigPane.loadDefault("Selector", configuration.getComponents().getSelector());
 
                     LamarkParameters p = configuration.getParameters();
-                    upperElitism.getValueFactory().setValue((int) (p.getUpperElitismPercentage() * 100));
-                    lowerElitism.getValueFactory().setValue((int) (p.getLowerElitismPercentage() * 100));
+                    elitism.getValueFactory().setValue((int) (p.getElitismPercentage() * 100));
                     maximumPopulations.setText(ein(p.getMaxGenerations()));
                     populationSize.setText(String.valueOf(p.getPopulationSize()));
                     crossoverProbability.getValueFactory().setValue((int) (p.getCrossoverProbability() * 100));
@@ -241,6 +241,7 @@ public class LamarkConfigPanel extends BorderPane {
                     targetScore.setText(ein(p.getTargetScore()));
                     randomSeed.setText(ein(p.getRandomSeed()));
                     customListenerHolder = configuration.getCustomListeners();
+                    minimizeScore.setSelected(p.getMinimizeScore());
                 });
 
         /*
@@ -267,13 +268,13 @@ public class LamarkConfigPanel extends BorderPane {
         components.setSelector(selectorConfigPane.toComponentDetails());
 
         parameters.setInitialValues(new LinkedList<String>(preloads));
-        parameters.setUpperElitismPercentage(upperElitism.getValue()/100.0);
-        parameters.setLowerElitismPercentage(lowerElitism.getValue()/100.0);
+        parameters.setElitismPercentage(elitism.getValue()/100.0);
         parameters.setMaxGenerations(nsLong(maximumPopulations.getText()));
         parameters.setPopulationSize(Integer.parseInt(populationSize.getText()));
         parameters.setCrossoverProbability(crossoverProbability.getValue()/100.0);
         parameters.setMutationProbability(mutationProbability.getValue()/100.0);
         parameters.setTargetScore(nsDouble(targetScore.getText()));
+        parameters.setMinimizeScore(minimizeScore.isSelected());
 
         return rval;
     }
@@ -397,6 +398,7 @@ public class LamarkConfigPanel extends BorderPane {
         GridPane.setConstraints(mutationProbabilityLabel,2,0);
         GridPane.setConstraints(maximumPopulationsLabel,3,0);
         GridPane.setConstraints(targetScoreLabel,4,0);
+        GridPane.setConstraints(minimizeScore,5,0);
 
         GridPane.setConstraints(populationSize,0,1);
         GridPane.setConstraints(crossoverProbability,1,1);
@@ -404,6 +406,7 @@ public class LamarkConfigPanel extends BorderPane {
         GridPane.setConstraints(maximumPopulations,3,1);
         GridPane.setConstraints(targetScore,4,1);
         GridPane.setConstraints(preloadButton,5,1);
+
 
         rval.getChildren().addAll(populationSizeLabel
         ,crossoverProbabilityLabel
@@ -417,7 +420,8 @@ public class LamarkConfigPanel extends BorderPane {
         ,mutationProbability
         ,maximumPopulations
         ,targetScore
-        ,preloadButton);
+        ,preloadButton
+        ,minimizeScore);
 
 
         preloadButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -440,14 +444,12 @@ public class LamarkConfigPanel extends BorderPane {
         BorderPane rval = new BorderPane();
 
         GridPane north = new GridPane();
-        GridPane.setConstraints(upperElitismLabel,0,0);
-        GridPane.setConstraints(lowerElitismLabel,1,0);
-        GridPane.setConstraints(randomSeedLabel,2,0);
-        GridPane.setConstraints(upperElitism,0,1);
-        GridPane.setConstraints(lowerElitism,1,1);
-        GridPane.setConstraints(randomSeed,2,1);
-        north.getChildren().addAll(upperElitismLabel,lowerElitismLabel,randomSeedLabel,
-                upperElitism,lowerElitism,randomSeed);
+        GridPane.setConstraints(elitismLabel,0,0);
+        GridPane.setConstraints(randomSeedLabel,1,0);
+        GridPane.setConstraints(elitism,0,1);
+        GridPane.setConstraints(randomSeed,1,1);
+        north.getChildren().addAll(elitismLabel,randomSeedLabel,
+                elitism,randomSeed);
 
         HBox south = new HBox();
         south.setSpacing(5.0);

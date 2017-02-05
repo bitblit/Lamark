@@ -17,8 +17,7 @@ public class LamarkParameters {
     private Integer numberOfParents = 2;
     private Long maxGenerations = null;
     private List<String> initialValues = Collections.emptyList();
-    private Double upperElitismPercentage=.05;
-    private Double lowerElitismPercentage=.05;
+    private Double elitismPercentage =.05;
     private Double targetScore=null;
     private Boolean trackParentage=false;
     private Boolean abortOnUniformPopulation=true;
@@ -33,8 +32,7 @@ public class LamarkParameters {
         builder.withNumberOfParents(numberOfParents);
         builder.withMaxGenerations(maxGenerations);
         //private List<String> initialValues = Collections.emptyList();
-        builder.withUpperElitism(upperElitismPercentage);
-        builder.withLowerElitism(lowerElitismPercentage);
+        builder.withElitism(elitismPercentage);
         builder.withTargetScore(targetScore);
         builder.withTrackParentage(trackParentage);
         builder.withAbortOnUniformPopulation(abortOnUniformPopulation);

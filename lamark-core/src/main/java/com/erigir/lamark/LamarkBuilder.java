@@ -32,9 +32,7 @@ public class LamarkBuilder<T> {
 
     private List<T> initialValues;
 
-    // TODO: Implement the stuff below
-    private Double upperElitismPercentage;
-    private Double lowerElitismPercentage;
+    private Double elitismPercentage;
     private Double targetScore;
 
     private boolean trackParentage;
@@ -72,6 +70,7 @@ public class LamarkBuilder<T> {
         rval.targetScore = targetScore;
         rval.minimizeScore = minimizeScore;
         rval.numberOfParents = numberOfParents;
+        rval.elitismPercentage = elitismPercentage;
 
         // Perform any self vai
         for (Object o: Arrays.asList(supplier, fitnessFunction, crossover,mutator, rval.selector))
@@ -152,13 +151,12 @@ public class LamarkBuilder<T> {
         return this;
     }
 
-    public LamarkBuilder withUpperElitism(final Double upperElitism) {
-        this.upperElitismPercentage = upperElitism;
-        return this;
-    }
-
-    public LamarkBuilder withLowerElitism(final Double lowerElitism) {
-        this.lowerElitismPercentage = lowerElitism;
+    public LamarkBuilder withElitism(final Double elitism) {
+        if (elitism>=1)
+        {
+            throw new IllegalArgumentException("Elitism must be strictly less than one");
+        }
+        this.elitismPercentage = elitism;
         return this;
     }
 
@@ -239,12 +237,8 @@ public class LamarkBuilder<T> {
         return numberOfParents;
     }
 
-    public Double getUpperElitismPercentage() {
-        return upperElitismPercentage;
-    }
-
-    public Double getLowerElitismPercentage() {
-        return lowerElitismPercentage;
+    public Double getElitismPercentage() {
+        return elitismPercentage;
     }
 
     public Double getTargetScore() {

@@ -3,16 +3,14 @@
   "configurations": {
     "Travelling Salesman : Berlin (52)": {
       "parameters": {
-        "numberOfWorkerThreads": 2,
-        "crossoverProbability": 1,
-        "populationSize": 25,
-        "upperElitism": 0.1,
+        "crossoverProbability": 1.0,
+        "mutationProbability": 0.05,
+        "populationSize": 900,
+        "elitismPercentage": 0.1,
         "randomSeed": 1,
-        "mutationProbability": 0,
-        "lowerElitism": 0.1,
         "trackParentage": false,
         "abortOnUniformPopulation": true,
-        "minimizeScore": false
+        "minimizeScore": true
       },
       "components": {
         "selector": {
@@ -60,16 +58,14 @@
     },
     "Travelling Salesman : Biergarten (127)": {
       "parameters": {
-        "numberOfWorkerThreads": 2,
-        "crossoverProbability": 1,
+        "crossoverProbability": 1.0,
+        "mutationProbability": 0.01,
         "populationSize": 50,
-        "upperElitism": 0.1,
+        "elitismPercentage": 0.1,
         "randomSeed": 1,
-        "mutationProbability": 0,
-        "lowerElitism": 0.1,
         "trackParentage": false,
         "abortOnUniformPopulation": true,
-        "minimizeScore": false
+        "minimizeScore": true
       },
       "components": {
         "selector": {
@@ -117,16 +113,14 @@
     },
     "Travelling Salesman : Germany (15112)": {
       "parameters": {
-        "numberOfWorkerThreads": 2,
-        "crossoverProbability": 1,
+        "crossoverProbability": 1.0,
+        "mutationProbability": 0.01,
         "populationSize": 50,
-        "upperElitism": 0.1,
+        "elitismPercentage": 0.1,
         "randomSeed": 1,
-        "mutationProbability": 0,
-        "lowerElitism": 0.1,
         "trackParentage": false,
         "abortOnUniformPopulation": true,
-        "minimizeScore": false
+        "minimizeScore": true
       },
       "components": {
         "selector": {
@@ -174,16 +168,14 @@
     },
     "Travelling Salesman : Ulysses (16)": {
       "parameters": {
-        "numberOfWorkerThreads": 2,
-        "crossoverProbability": 1,
+        "crossoverProbability": 1.0,
+        "mutationProbability": 0.01,
         "populationSize": 50,
-        "upperElitism": 0.1,
+        "elitismPercentage": 0.1,
         "randomSeed": 1,
-        "mutationProbability": 0,
-        "lowerElitism": 0.1,
         "trackParentage": false,
         "abortOnUniformPopulation": true,
-        "minimizeScore": false
+        "minimizeScore": true
       },
       "components": {
         "selector": {
@@ -231,13 +223,11 @@
     },
     "Cellular Automata": {
       "parameters": {
-        "numberOfWorkerThreads": 4,
-        "crossoverProbability": 1,
+        "crossoverProbability": 1.0,
+        "mutationProbability": 0.01,
         "populationSize": 500,
-        "upperElitism": 0.1,
-        "randomSeed": 1,
-        "mutationProbability": 0,
-        "lowerElitism": 0.1
+        "elitismPercentage": 0.1,
+        "randomSeed": 1
       },
       "components": {
         "selector": {
@@ -286,13 +276,14 @@
     },
     "Scheduling": {
       "parameters": {
-        "numberOfWorkerThreads": 2,
-        "crossoverProbability": 1,
+        "crossoverProbability": 1.0,
+        "mutationProbability": 0.01,
         "populationSize": 50,
-        "upperElitism": 0.1,
+        "elitismPercentage": 0.1,
         "randomSeed": 1,
-        "mutationProbability": 0,
-        "lowerElitism": 0.1
+        "trackParentage": false,
+        "abortOnUniformPopulation": true,
+        "minimizeScore": true
       },
       "components": {
         "selector": {
@@ -338,16 +329,14 @@
     },
     "Integer Sorting": {
       "parameters": {
-        "numberOfWorkerThreads": 2,
-        "crossoverProbability": 1,
+        "crossoverProbability": 1.0,
+        "mutationProbability": 0.01,
         "populationSize": 10,
-        "upperElitism": 0.1,
+        "elitismPercentage": 0.1,
         "randomSeed": 1,
-        "mutationProbability": 0,
-        "lowerElitism": 0.1,
         "trackParentage": false,
         "abortOnUniformPopulation": true,
-        "minimizeScore": false
+        "minimizeScore": true
       },
       "components": {
         "selector": {
