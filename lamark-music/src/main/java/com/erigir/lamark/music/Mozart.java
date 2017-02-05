@@ -2,8 +2,10 @@ package com.erigir.lamark.music;
 
 import com.erigir.lamark.Lamark;
 import com.erigir.lamark.LamarkBuilder;
-import com.erigir.lamark.LamarkBuilderSerializer;
 import com.erigir.lamark.LamarkUtil;
+import com.erigir.lamark.config.LamarkConfiguration;
+import com.erigir.lamark.config.LamarkSerializer;
+import com.erigir.lamark.config.MultiLamarkConfiguration;
 import com.erigir.lamark.events.*;
 import com.erigir.lamark.music.phrase.PhrasePool;
 import jm.music.data.Score;
@@ -161,8 +163,11 @@ public class Mozart implements ActionListener, LamarkEventListener, Runnable {
 
     public Lamark mozartInstance(String keyS, String timeSigS, boolean fullRange, int barCount) {
         try {
+            MultiLamarkConfiguration multiConfig = LamarkSerializer.readConfiguration(getClass().getResourceAsStream("/mozart.json"));
+            LamarkConfiguration config = multiConfig.getConfigurations().values().iterator().next();
+            LamarkBuilder<Score> builder = new LamarkBuilder<>();
+            config.applyToBuilder(builder);
 
-            LamarkBuilder<Score> builder = LamarkBuilderSerializer.deserialize(getClass().getResourceAsStream("/mozart.json"));
             MozartSupplier supplier = (MozartSupplier) builder.getSupplier();
 
             if (!keyS.equals("ANY")) {

@@ -17,7 +17,7 @@ import java.util.function.ToDoubleFunction;
  * @author cweiss
  * @since 03/2007
  */
-public class CAMajorityFitness implements ToDoubleFunction<String>, SelfValidating, ContextAware {
+public class CAMajorityFitness implements ToDoubleFunction<Individual<String>>, SelfValidating, ContextAware {
 
     /**
      * Number of tables used to test the CA rule *
@@ -200,20 +200,20 @@ public class CAMajorityFitness implements ToDoubleFunction<String>, SelfValidati
     /**
      * Calculated preferred height of a table
      *
-     * @return int containign the value
+     * @return int containing the value
      */
     public int preferredHeight() {
         return (NUMBER_OF_CA_COLS * tableWidth) + NUMBER_OF_CA_COLS - 1;
     }
 
     @Override
-    public double applyAsDouble(String div) {
+    public double applyAsDouble(Individual<String> div) {
         CellularAutomata[] automata = new CellularAutomata[NUMBER_OF_TABLES];
 
         // For each table, see if it came out right
         int points = 0;
         for (int i = 0; i < NUMBER_OF_TABLES; i++) {
-            automata[i] = new CellularAutomata(div,
+            automata[i] = new CellularAutomata(div.getGenome(),
                     firstRows[i], tableHeight, radius);
             boolean majorityOne = automata[i].tableStartsMajorityTrue();
             if (majorityOne) {
@@ -226,7 +226,7 @@ public class CAMajorityFitness implements ToDoubleFunction<String>, SelfValidati
         }
 
         /* Save the ca's in case we need to draw this guy */
-        // TODO: context isnt individual-specific context.put("CADATA", automata);
+        div.setAttribute("CADATA", automata);
 
         return points;
     }

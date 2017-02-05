@@ -16,7 +16,8 @@ public class InnerFitnessCalculator<T> implements Function<Individual<T>, Indivi
 
     @Override
     public Individual<T> apply(Individual<T> value) {
-        double fitness = calculator.applyAsDouble(value.getGenome());
+        Object toCalculate = (IndividualAwareFitnessFunction.class.isAssignableFrom(calculator.getClass()))?value:value.getGenome();
+        double fitness = calculator.applyAsDouble((T)toCalculate);
         value.setFitness(fitness);
         return value;
     }
