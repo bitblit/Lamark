@@ -4,6 +4,7 @@ import com.erigir.lamark.Individual;
 import com.erigir.lamark.events.BetterIndividualFoundEvent;
 import com.erigir.lamark.events.LamarkEvent;
 import com.erigir.lamark.gui.GUIEventListener;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +34,10 @@ public class ScheduleGraphicalListener implements GUIEventListener {
      */
     private SchedulePanel displayPanel;
 
+    @Override
+    public void setParentStage(Stage parent) {
+        // TODO: Implement
+    }
 
     /**
      * @see com.erigir.lamark.gui.GUIEventListener#setParentComponent(java.awt.Component)

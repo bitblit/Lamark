@@ -4,6 +4,7 @@ import com.erigir.lamark.Individual;
 import com.erigir.lamark.events.BetterIndividualFoundEvent;
 import com.erigir.lamark.events.LamarkEvent;
 import com.erigir.lamark.gui.GUIEventListener;
+import javafx.stage.Stage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -44,6 +45,10 @@ public class CAGraphicalListener implements GUIEventListener {
         parentComponent = pComponent;
     }
 
+    @Override
+    public void setParentStage(Stage parent) {
+        // TODO: Implement
+    }
 
     /**
      * Updates the CA on a new better solution found.

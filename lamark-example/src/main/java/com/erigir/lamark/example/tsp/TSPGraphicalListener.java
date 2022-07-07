@@ -5,6 +5,7 @@ import com.erigir.lamark.LamarkUtil;
 import com.erigir.lamark.events.BetterIndividualFoundEvent;
 import com.erigir.lamark.events.LamarkEvent;
 import com.erigir.lamark.gui.GUIEventListener;
+import javafx.stage.Stage;
 
 import javax.swing.*;
 import java.awt.*;
@@ -38,6 +39,10 @@ public class TSPGraphicalListener implements GUIEventListener {
      */
     private Individual current;
 
+    @Override
+    public void setParentStage(Stage parent) {
+        // TODO: Implement
+    }
 
     /**
      * @see com.erigir.lamark.gui.GUIEventListener#setParentComponent(java.awt.Component)

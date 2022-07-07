@@ -4,6 +4,7 @@ import com.erigir.lamark.Individual;
 import com.erigir.lamark.events.BetterIndividualFoundEvent;
 import com.erigir.lamark.events.LamarkEvent;
 import com.erigir.lamark.gui.GUIEventListener;
+import javafx.stage.Stage;
 import jm.gui.cpn.Notate;
 import jm.music.data.Note;
 import jm.music.data.Part;
@@ -20,6 +21,12 @@ public class DrawScoreListener implements GUIEventListener {
     public DrawScoreListener() {
         //scoreFrame = new Notate((Score)null,50,50);
     }
+
+    @Override
+    public void setParentStage(Stage parent) {
+        // TODO: Implement
+    }
+
 
 
     public void handleEvent(LamarkEvent arg0) {
