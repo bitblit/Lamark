@@ -32,6 +32,10 @@
         <maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
         <mytime>${maven.build.timestamp}</mytime>
 
+        <maven.compiler.source>14</maven.compiler.source>
+        <maven.compiler.target>14</maven.compiler.target>
+
+
         <maven.compiler.release>18</maven.compiler.release>
     </properties>
 
@@ -57,11 +61,10 @@
  -->
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.12.0</version>
             </plugin>
 
             <plugin>
